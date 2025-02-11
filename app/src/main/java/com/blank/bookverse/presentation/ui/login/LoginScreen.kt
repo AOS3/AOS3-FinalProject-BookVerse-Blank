@@ -60,6 +60,7 @@ fun LoginScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Main Logo
                 Image(
                     painter = painterResource(id = R.drawable.ic_main_logo),
                     contentDescription = "앱 로고",
@@ -77,6 +78,7 @@ fun LoginScreen(
                         fontSize = 13.sp
                     )
 
+                    // ID
                     BookVerseTextField(
                         textFieldValue = loginViewModel.userId,
                         onValueChange = { value ->
@@ -86,7 +88,7 @@ fun LoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White) // 배경 색상
+                            .background(Color.White)
                             .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)) ,
                         trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.TEXT
                     )
@@ -99,6 +101,7 @@ fun LoginScreen(
                         modifier = Modifier.padding(top = 12.dp)
                     )
 
+                    // PW
                     BookVerseTextField(
                         textFieldValue = loginViewModel.userPw,
                         onValueChange = { value -> loginViewModel.onUserPwChanged(value) },
@@ -115,6 +118,7 @@ fun LoginScreen(
                         trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD
                     )
 
+                    // Login
                     BookVerseButton(
                         text = "로그인 하기",
                         onClick = {
@@ -137,6 +141,7 @@ fun LoginScreen(
                             fontSize = 13.sp
                         )
 
+                        // Register
                         Text(
                             text = "회원가입",
                             fontWeight = FontWeight.Bold,
@@ -145,7 +150,7 @@ fun LoginScreen(
                                 .padding(start = 5.dp)
                                 .clickable(
                                     interactionSource = null,
-                                    indication = null, // 클릭 시 ripple 효과 제거
+                                    indication = null,
                                     onClick = {
                                         Timber.e("회원가입 처리")
                                     }
@@ -153,6 +158,7 @@ fun LoginScreen(
                         )
                         Spacer(modifier = Modifier.weight(1f))
 
+                        // Find Id/Pw
                         Text(
                             text = "아이디/비밀번호 찾기",
                             fontWeight = FontWeight.Bold,
@@ -172,6 +178,8 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .padding(top = 70.dp)
                     ) {
+
+                        // Kakao Login
                         Image(
                             painter = painterResource(id = R.drawable.ic_kakao_login),
                             contentDescription = null,
@@ -194,6 +202,8 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .padding(top = 10.dp)
                     ) {
+
+                        // Google Login
                         Image(
                             painter = painterResource(id = R.drawable.ic_google_login),
                             contentDescription = null,
