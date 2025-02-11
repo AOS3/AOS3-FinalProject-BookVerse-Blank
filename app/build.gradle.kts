@@ -110,6 +110,9 @@ dependencies {
     //Accompanist
     implementation(libs.accompanist.permissions)
 
+    // Timber
+    implementation(libs.timber)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
