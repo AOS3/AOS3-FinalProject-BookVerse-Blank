@@ -1,4 +1,4 @@
-package com.blank.bookverse.ui.theme
+package com.blank.bookverse.presentation.theme
 
 import android.app.Activity
 import android.os.Build

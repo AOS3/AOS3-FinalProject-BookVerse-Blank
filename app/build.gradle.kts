@@ -1,12 +1,20 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+}
+
+val properties = Properties().apply {
+    load(project.rootProject.file("local.properties").inputStream())
 }
 
 android {
     namespace = "com.blank.bookverse"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.blank.bookverse"
@@ -16,6 +24,22 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders += mapOf(
+            "KAKAO_NATIVE_APP_KEY" to properties.getProperty("KAKAO_NATIVE_APP_KEY"),
+            "GOOGLE_CLIENT_ID" to properties.getProperty("GOOGLE_CLIENT_ID"),
+        )
+
+        buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            "\"${properties.getProperty("KAKAO_NATIVE_APP_KEY")}\""
+        )
+        buildConfigField(
+            "String",
+            "GOOGLE_CLIENT_ID",
+            "\"${properties.getProperty("GOOGLE_CLIENT_ID")}\""
+        )
     }
 
     buildTypes {
@@ -36,10 +60,56 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Hilt
+    implementation(libs.hilt.core)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    kspAndroidTest(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+
+    // Retrofit + OkHttp
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
+    // Sandwich
+    implementation(libs.sandwich)
+    implementation(libs.sandwich.retrofit)
+
+    // Landscapist
+    implementation(libs.landscapist.coil)
+
+    // KakaoTalk
+    implementation(libs.v2.all)
+
+    // Paging3
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
+
+    // Coil
+    implementation(libs.coil.compose)
+
+    //Accompanist
+    implementation(libs.accompanist.permissions)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,4 +1,4 @@
-package com.blank.bookverse.ui.theme
+package com.blank.bookverse.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
