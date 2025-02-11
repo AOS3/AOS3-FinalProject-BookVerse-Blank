@@ -1,4 +1,5 @@
-package com.aladin.navcontrollertest
+package com.blank.bookverse.presentation.navigation
+
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar

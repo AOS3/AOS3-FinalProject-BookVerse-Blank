@@ -2,10 +2,9 @@ package com.blank.bookverse.presentation.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.aladin.navcontrollertest.BottomNavItem
+import com.blank.bookverse.presentation.navigation.BottomNavItem
 
 // currentBackStackEntryAsState()를 사용하여 현재 활성화된 화면(Route)을 반환
 // 함수 내부에서 자동으로 변경 감지
