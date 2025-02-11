@@ -8,6 +8,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.blank.bookverse.presentation.ui.login.LoginScreen
+import com.blank.bookverse.presentation.ui.splash.SplashScreen
+import com.blank.bookverse.presentation.ui.login.LoginScreen
+import com.blank.bookverse.presentation.ui.splash.SplashScreen
 import com.blank.bookverse.presentation.ui.book_detail.BookDetailScreen
 import com.blank.bookverse.presentation.ui.home.HomeScreen
 import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
@@ -16,7 +20,7 @@ import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavItem.Home.route,
+        startDestination = BottomNavItem.Splash.route,
         modifier = modifier
     ) {
 //        // 홈 화면
@@ -27,7 +31,6 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
 //        composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
 //        // 테스트 화면
 //        composable(MainNavItem.Test.route) { TestScreen(navController) }
-
         composable(route = MainNavItem.MoreQuote.route) {
             MoreQuoteScreen(navController = navController)
         }
@@ -35,5 +38,9 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(route = MainNavItem.BookDetail.route) {
             BookDetailScreen(navController = navController)
         }
+        // 스플래쉬 화면
+        composable(MainNavItem.Splash.route) { SplashScreen(navController) }
+        // 로그인
+        composable(MainNavItem.Login.route) { LoginScreen(navController) }
     }
 }
