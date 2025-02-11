@@ -13,5 +13,6 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: 
 }
 
 sealed class MainNavItem(val route: String, val label: String) {
-    data object Test : MainNavItem("test", "테스트")
+    data object Splash : MainNavItem("splash", "스플래쉬")
+    data object Login : MainNavItem("login", "로그인")
 }
