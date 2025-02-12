@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.HomeQuote
 import com.blank.bookverse.data.RecommendationContent
-import com.blank.bookverse.data.Storage
 import com.blank.bookverse.data.repository.HomeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val homeRepository: HomeRepository,
-): ViewModel() {
+) : ViewModel() {
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
 
@@ -60,6 +59,10 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
+    fun navigateToBookDetail(bookTitle: String) = viewModelScope.launch {
+        _homeEffect.emit(HomeEffect.NavigateToBookDetail(bookTitle))
+    }
 }
 
 data class HomeUiState(
@@ -74,5 +77,5 @@ data class HomeUiState(
 )
 
 sealed class HomeEffect {
-    data class NavigateToBookDetail(val id: String): HomeEffect()
+    data class NavigateToBookDetail(val id: String) : HomeEffect()
 }

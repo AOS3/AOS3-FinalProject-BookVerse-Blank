@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.blank.bookverse.presentation.ui.book_detail.BookDetailScreen
 import com.blank.bookverse.presentation.ui.home.HomeScreen
 import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
 
@@ -29,6 +30,10 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
 
         composable(route = MainNavItem.MoreQuote.route) {
             MoreQuoteScreen(navController = navController)
+        }
+
+        composable(route = MainNavItem.BookDetail.route) {
+            BookDetailScreen(navController = navController)
         }
     }
 }

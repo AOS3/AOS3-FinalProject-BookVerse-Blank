@@ -3,6 +3,7 @@ package com.blank.bookverse.presentation.ui.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,11 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -59,7 +60,9 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         viewModel.homeEffect.collectLatest { effect ->
             when (effect) {
-                is HomeEffect.NavigateToBookDetail -> {}
+                is HomeEffect.NavigateToBookDetail -> {
+                    navController.navigate(MainNavItem.BookDetail.route)
+                }
             }
         }
     }
@@ -70,6 +73,7 @@ fun HomeScreen(
         onNavigateToMore = {
             navController.navigate(MainNavItem.MoreQuote.route)
         },
+        onNavigateToDetail = viewModel::navigateToBookDetail
     )
 }
 
@@ -78,6 +82,7 @@ fun HomeContent(
     uiState: HomeUiState,
     modifier: Modifier = Modifier,
     onNavigateToMore: () -> Unit,
+    onNavigateToDetail: (String) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -122,6 +127,7 @@ fun HomeContent(
                         ) { quote ->
                             HomeQuoteItem(
                                 quote = quote,
+                                onNavigateToDetail = { onNavigateToDetail(quote.bookTitle) }
                             )
                         }
                         if (uiState.isMore) {
@@ -132,14 +138,9 @@ fun HomeContent(
                                         .padding(end = 16.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    FilledTonalButton(
-                                        onClick = onNavigateToMore
-                                    ) {
-                                        Text(
-                                            text = "더보기",
-                                            style = MaterialTheme.typography.labelLarge
-                                        )
-                                    }
+                                    MoreButton(
+                                        onNavigateToMore = { onNavigateToMore() }
+                                    )
                                 }
                             }
                         }
@@ -157,7 +158,10 @@ fun RecommendationCard(uiState: HomeUiState) {
             .fillMaxWidth()
             .padding(16.dp),
     ) {
-        HorizontalDivider()
+        HorizontalDivider(
+            thickness = 0.7.dp,
+            color = Color.LightGray,
+        )
         Text(
             text = uiState.recommendationContent.quote,
             modifier = Modifier
@@ -179,24 +183,27 @@ fun RecommendationCard(uiState: HomeUiState) {
                 fontWeight = FontWeight.Light,
             )
         )
-        HorizontalDivider()
+        HorizontalDivider(
+            thickness = 0.7.dp,
+            color = Color.LightGray,
+        )
     }
 }
 
 @Composable
 fun HomeQuoteItem(
     quote: HomeQuote,
+    onNavigateToDetail: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp)
     ) {
         CoilImage(
             imageModel = { quote.bookCover },
             modifier = Modifier
-                .fillMaxWidth()
+                .width(280.dp)
                 .height(420.dp)
                 .shadow(
                     elevation = 3.dp,
@@ -205,7 +212,8 @@ fun HomeQuoteItem(
                 )
                 .clip(RoundedCornerShape(16.dp))
                 .border(0.1.dp, Color.LightGray, RoundedCornerShape(16.dp))
-                .background(Color.LightGray),
+                .background(Color.LightGray)
+                .clickable { onNavigateToDetail() },
             imageOptions = ImageOptions(
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.Center
@@ -214,7 +222,7 @@ fun HomeQuoteItem(
         Spacer(modifier = Modifier.height(8.dp))
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(280.dp)
                 .padding(horizontal = 4.dp)
         ) {
             Text(
@@ -237,19 +245,20 @@ fun HomeQuoteItem(
 
 @Composable
 fun MoreButton(
-    modifier: Modifier = Modifier
+    onNavigateToMore: () -> Unit = {},
 ) {
     Box {
         Image(
             painter = painterResource(R.drawable.ic_more),
             contentDescription = null,
             modifier = Modifier
-                .padding(16.dp)
+                .clip(RoundedCornerShape(percent = 50))
                 .background(
                     color = Color.White,
-                    shape = RoundedCornerShape(36.dp),
                 )
-                .border(0.5.dp, Color.LightGray, RoundedCornerShape(36.dp))
+                .border(0.5.dp, Color.LightGray, RoundedCornerShape(percent = 50))
+                .clickable { onNavigateToMore() }
+                .padding(12.dp)
         )
     }
 }
@@ -273,4 +282,10 @@ fun HomeQuoteItemPreview() {
             bookCover = "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788937454677.jpg"
         ),
     )
+}
+
+@Preview
+@Composable
+fun MoreButtonPreview() {
+    MoreButton()
 }
