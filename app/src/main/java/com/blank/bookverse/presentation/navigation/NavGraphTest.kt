@@ -7,8 +7,12 @@ import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.blank.bookverse.presentation.ui.AccountSetting.AccountSettingsScreen
 import androidx.navigation.compose.rememberNavController
 import com.blank.bookverse.presentation.ui.MyPage.MyPageScreen
+import com.blank.bookverse.presentation.ui.Profile.ProfileScreen
+import com.blank.bookverse.presentation.ui.Terms.TermsScreen
+
 
 @Composable
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -25,14 +29,14 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         // composable(BottomNavItem.Favorite.route) { ProfileScreen(navController) }
         // 마이페이지 화면
         composable(BottomNavItem.MyPage.route) { MyPageScreen(navController) }
-//        // 홈 화면
-        composable(BottomNavItem.Home.route) { HomeScreen(navController) }
-//        // 검색 화면
-//        composable(BottomNavItem.Search.route) { SearchScreen(navController) }
-//        // 프로필 화면
-//        composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
-//        // 테스트 화면
-//        composable(MainNavItem.Test.route) { TestScreen(navController) }
+
+        // 프로필 설정 화면
+        composable(MyPageNavItem.Profile.route) { ProfileScreen(navController) }
+        // 계정 설정 화면
+        composable(MyPageNavItem.AccountSetting.route) { AccountSettingsScreen(navController) }
+        // 이용약관 화면
+        composable(MyPageNavItem.Terms.route) { TermsScreen(navController) }
+
         composable(route = MainNavItem.MoreQuote.route) {
             MoreQuoteScreen(navController = navController)
         }
