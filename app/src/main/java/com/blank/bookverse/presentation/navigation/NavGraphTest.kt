@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.blank.bookverse.presentation.ui.login.LoginScreen
+import com.blank.bookverse.presentation.ui.register.RegisterScreen
 import com.blank.bookverse.presentation.ui.splash.SplashScreen
 import com.blank.bookverse.presentation.ui.login.LoginScreen
 import com.blank.bookverse.presentation.ui.splash.SplashScreen
@@ -42,5 +43,7 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(MainNavItem.Splash.route) { SplashScreen(navController) }
         // 로그인
         composable(MainNavItem.Login.route) { LoginScreen(navController) }
+        // 회원가입
+        composable(MainNavItem.Register.route) { RegisterScreen(navController) }
     }
 }
