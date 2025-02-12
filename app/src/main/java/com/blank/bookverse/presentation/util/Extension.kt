@@ -32,7 +32,7 @@ fun NavController.shouldShowBottomBar(): Boolean {
     // 현재 route 반환
     val currentRoute = currentBackStackEntryAsState().value?.destination?.route
     return when (currentRoute) {
-        BottomNavItem.Home.route, BottomNavItem.Search.route, BottomNavItem.Profile.route -> true
+        BottomNavItem.Home.route, BottomNavItem.Write.route, BottomNavItem.Favorite.route, BottomNavItem.MyPage.route -> true
         else -> false
     }
 }
