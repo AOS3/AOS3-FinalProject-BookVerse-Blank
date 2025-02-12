@@ -99,7 +99,9 @@ fun HomeContent(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         text = "내 글귀",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                        )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     LazyRow(
@@ -134,7 +136,9 @@ fun RecommendationCard(uiState: HomeUiState) {
                 .align(CenterHorizontally)
                 .padding(vertical = 10.dp),
             textAlign = TextAlign.Center,
-            fontSize = 16.sp
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Light,
+            )
         )
 
         Text(
@@ -143,7 +147,9 @@ fun RecommendationCard(uiState: HomeUiState) {
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Light,
+            )
         )
         HorizontalDivider()
     }
