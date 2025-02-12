@@ -14,6 +14,6 @@ class HomeRepository @Inject constructor() {
     }
 
     fun getHomeQuoteList(): List<HomeQuote> {
-        return Storage.homeDummy
+        return Storage.homeDummy.subList(0, 7)
     }
 }

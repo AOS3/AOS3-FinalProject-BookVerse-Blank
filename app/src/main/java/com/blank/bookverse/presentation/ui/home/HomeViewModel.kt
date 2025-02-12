@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(
         }.onSuccess {
             _homeUiState.value = _homeUiState.value.copy(
                 recommendationContent = it,
-                isLoading = false
+                isLoading = false,
             )
         }.onFailure {
             _homeUiState.value = _homeUiState.value.copy(
@@ -51,7 +51,8 @@ class HomeViewModel @Inject constructor(
         }.onSuccess { quotes ->
             _homeUiState.value = _homeUiState.value.copy(
                 homeQuoteList = quotes,
-                isLoading = false
+                isLoading = false,
+                isMore = quotes.size >= 7
             )
         }.onFailure {
             _homeUiState.value = _homeUiState.value.copy(
@@ -68,7 +69,8 @@ data class HomeUiState(
             bookTitle = "북버스"
         ),
     val homeQuoteList: List<HomeQuote> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val isMore: Boolean = false,
 )
 
 sealed class HomeEffect {

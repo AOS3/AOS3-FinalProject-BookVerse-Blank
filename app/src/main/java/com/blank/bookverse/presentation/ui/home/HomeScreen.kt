@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,8 +40,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.blank.bookverse.R
 import com.blank.bookverse.data.HomeQuote
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.flow.collectLatest
@@ -61,7 +66,10 @@ fun HomeScreen(
 
     HomeContent(
         uiState = uiState,
-        modifier = modifier
+        modifier = modifier,
+        onNavigateToMore = {
+            navController.navigate(MainNavItem.MoreQuote.route)
+        },
     )
 }
 
@@ -69,6 +77,7 @@ fun HomeScreen(
 fun HomeContent(
     uiState: HomeUiState,
     modifier: Modifier = Modifier,
+    onNavigateToMore: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -114,6 +123,25 @@ fun HomeContent(
                             HomeQuoteItem(
                                 quote = quote,
                             )
+                        }
+                        if (uiState.isMore) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .height(420.dp)
+                                        .padding(end = 16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    FilledTonalButton(
+                                        onClick = onNavigateToMore
+                                    ) {
+                                        Text(
+                                            text = "더보기",
+                                            style = MaterialTheme.typography.labelLarge
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -207,11 +235,31 @@ fun HomeQuoteItem(
     }
 }
 
+@Composable
+fun MoreButton(
+    modifier: Modifier = Modifier
+) {
+    Box {
+        Image(
+            painter = painterResource(R.drawable.ic_more),
+            contentDescription = null,
+            modifier = Modifier
+                .padding(16.dp)
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(36.dp),
+                )
+                .border(0.5.dp, Color.LightGray, RoundedCornerShape(36.dp))
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     HomeContent(
         uiState = HomeUiState(),
+        onNavigateToMore = { },
     )
 }
 

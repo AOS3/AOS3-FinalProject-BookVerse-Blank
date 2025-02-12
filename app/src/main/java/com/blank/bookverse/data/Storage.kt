@@ -18,7 +18,37 @@ object Storage {
             quoteCount = 5,
             bookCover = "https://image.yes24.com/goods/116586303/XL"
         ),
-    )
+        HomeQuote(
+            bookTitle = "어린왕자",
+            quoteCount = 12,
+            bookCover = "https://bir.co.kr/wp-content/uploads/bookcover/4919013-large.jpg"
+        ),
+        HomeQuote(
+            bookTitle = "채식주의자",
+            quoteCount = 12,
+            bookCover = "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788936434595.jpg"
+        ),
+        HomeQuote(
+            bookTitle = "사서함 110호의 우편물",
+            quoteCount = 12,
+            bookCover = "https://image.yes24.com/Goods/110832417/XL"
+        ),
+        HomeQuote(
+            bookTitle = "꽃을 보듯 너를 본다",
+            quoteCount = 12,
+            bookCover = "https://www.kgnews.co.kr/data/photos/20221148/art_16697600745037_706a6e.jpg"
+        ),
+        HomeQuote(
+            bookTitle = "천개의 파랑",
+            quoteCount = 12,
+            bookCover = "https://www.kgnews.co.kr/data/photos/https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791190090544.jpg"
+        ),
+        HomeQuote(
+            bookTitle = "언어의 온도",
+            quoteCount = 12,
+            bookCover = "https://image.aladin.co.kr/product/8895/77/cover500/k582535393_2.jpg"
+        ),
+        )
 
     val recommendationDummy = listOf(
         RecommendationContent(
