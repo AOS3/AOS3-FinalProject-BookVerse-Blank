@@ -3,16 +3,12 @@ package com.blank.bookverse.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.blank.bookverse.presentation.ui.book_detail.BookDetailScreen
-import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
-import com.blank.bookverse.presentation.ui.home.HomeScreen
-import com.blank.bookverse.presentation.ui.login.LoginScreen
-import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
-import com.blank.bookverse.presentation.ui.register.RegisterScreen
-import com.blank.bookverse.presentation.ui.splash.SplashScreen
+import androidx.navigation.compose.rememberNavController
+import com.blank.bookverse.presentation.ui.MyPage.MyPageScreen
 
 @Composable
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -21,6 +17,14 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         startDestination = MainNavItem.Splash.route,
         modifier = modifier
     ) {
+        // 홈 화면
+        // composable(BottomNavItem.Home.route) { HomeScreen(navController) }
+        // 검색 화면
+        // composable(BottomNavItem.Write.route) { SearchScreen(navController) }
+        // 작성 화면
+        // composable(BottomNavItem.Favorite.route) { ProfileScreen(navController) }
+        // 마이페이지 화면
+        composable(BottomNavItem.MyPage.route) { MyPageScreen(navController) }
 //        // 홈 화면
         composable(BottomNavItem.Home.route) { HomeScreen(navController) }
 //        // 검색 화면
