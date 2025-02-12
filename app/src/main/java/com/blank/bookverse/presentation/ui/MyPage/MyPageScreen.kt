@@ -53,7 +53,7 @@ fun MyPageScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // 설정 메뉴 리스트
-            SettingsMenu()
+            SettingsMenu(navController)
         }
     }
 }
@@ -139,14 +139,14 @@ fun ReadingInfoCard() {
 }
 
 @Composable
-fun SettingsMenu() {
+fun SettingsMenu(navController: NavController) {
     val menuItems = listOf(
         Pair(Icons.Default.Person, "프로필 설정"),
         Pair(Icons.Default.Settings, "계정 설정"),
         Pair(Icons.Default.Edit, "폰트 설정"),
         Pair(Icons.Default.Email, "소개하기"),
         Pair(Icons.Default.ExitToApp, "로그아웃"),
-        Pair(Icons.Default.Info, "이용 약관")
+        Pair(Icons.Default.Info, "이용약관")
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -154,7 +154,17 @@ fun SettingsMenu() {
             ListItem(
                 leadingContent = { Icon(icon, contentDescription = null) },
                 headlineContent = { Text(text) },
-                modifier = Modifier.clickable { /* TODO: 클릭 이벤트 */ }
+                modifier = Modifier.clickable {
+                    if (text == "프로필 설정") {
+                        navController.navigate("profileScreen")
+                    }
+                    if (text == "계정 설정"){
+                        navController.navigate("accountScreen")
+                    }
+                    if(text == "이용약관") {
+                        navController.navigate("termsScreen")
+                    }
+                }
             )
         }
     }

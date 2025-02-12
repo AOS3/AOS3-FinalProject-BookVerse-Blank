@@ -1,6 +1,8 @@
 package com.blank.bookverse.presentation.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -13,6 +15,10 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: 
     data object MyPage : BottomNavItem("myPage", Icons.Filled.Person, "마이페이지")
 }
 
+sealed class MyPageNavItem(val route: String, val label: String) {
+    data object Profile : MyPageNavItem("profile", "프로필 설정")
+    data object AccountSetting : MyPageNavItem("accountSetting", "계정 설정")
+    data object Terms : MyPageNavItem("terms", "이용약관")
 sealed class MainNavItem(val route: String, val label: String) {
     data object Splash : MainNavItem("splash", "스플래쉬")
     data object Login : MainNavItem("login", "로그인")
