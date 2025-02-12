@@ -4,7 +4,6 @@ package com.blank.bookverse.presentation.navigation
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -25,7 +24,6 @@ fun BottomNavigationBar(navController: NavHostController) {
     // 현재 네비게이션 백스택에서 최상단(현재화면) 화면의 route를 가져옴
     val currentRoute = navController.currentRoute()
 
-    HorizontalDivider()
     NavigationBar(
         modifier = Modifier
             .navigationBarsPadding(),
