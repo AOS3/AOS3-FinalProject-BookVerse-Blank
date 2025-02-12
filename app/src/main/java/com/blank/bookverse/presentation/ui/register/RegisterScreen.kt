@@ -115,7 +115,9 @@ fun RegisterScreen(
                     .fillMaxWidth()
                     .height(60.dp)
             ) {
-
+                val regexList: List<Pair<String, Regex>> = listOf(
+                    Pair(registerUserIdState.value, "^[a-zA-Z0-9]{6,16}$".toRegex())
+                )
                 // ID
                 Box(
                     modifier = Modifier
