@@ -35,10 +35,6 @@ class RegisterViewModel @Inject constructor(
     private val _registerUserNickName = MutableStateFlow("")
     val registerUserNickName = _registerUserNickName.asStateFlow()
 
-    // BottomSheet visible
-    private val _isBottomSheetVisible = MutableStateFlow(false)
-    val isBottomSheetVisible = _isBottomSheetVisible.asStateFlow()
-
     // 회원가입 아이디 필드값 변경
     fun onUserIdChanged(value: String) {
         _registerUserId.value = value
@@ -67,10 +63,5 @@ class RegisterViewModel @Inject constructor(
     // 회원가입 닉네임 확인 필드값 변경
     fun onUserNickNameChanged(value: String) {
         _registerUserNickName.value = value
-    }
-
-    // BottomSheet show
-    fun changeRegisterBottomSheetState(state:Boolean) {
-        _isBottomSheetVisible.value = state
     }
 }

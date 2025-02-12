@@ -189,7 +189,7 @@ fun LoginScreen(
                                     interactionSource = null,
                                     indication = null,
                                     onClick = {
-                                        Timber.e("아이디/비밀번호 찾기 처리")
+                                        navController.navigate("findAccount")
                                     }
                                 )
                         )
