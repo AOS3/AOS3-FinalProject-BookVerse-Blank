@@ -1,4 +1,53 @@
 package com.blank.bookverse.data
 
 object Storage {
+
+    val homeDummy = listOf(
+        HomeQuote(
+            bookTitle = "광인",
+            quoteCount = 3,
+            bookCover = "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788937454677.jpg"
+        ),
+        HomeQuote(
+            bookTitle = "사랑 이후의 사랑",
+            quoteCount = 1,
+            bookCover = "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791189885915.jpg"
+        ),
+        HomeQuote(
+            bookTitle = "급류",
+            quoteCount = 5,
+            bookCover = "https://image.yes24.com/goods/116586303/XL"
+        ),
+    )
+
+    val recommendationDummy = listOf(
+        RecommendationContent(
+            quote = "세상에서 가장 어려운 일은 사람이 사람의마음을 얻는 일이란다.",
+            bookTitle = "어린왕자"
+        ),
+        RecommendationContent(
+            quote = "사막이 아름다운 것은 어딘가에 우물을 숨기고 있기 때문이야.",
+            bookTitle = "어린왕자"
+        ),
+        RecommendationContent(
+            quote = "어른들은 누구나 처음에는 어린이였다. 하지만 그것을 기억하는 어른은 별로 없다.",
+            bookTitle = "어린왕자"
+        ),
+        RecommendationContent(
+            quote = "삶이 있는 한 희망은 있다.",
+            bookTitle = "공중그네"
+        ),
+    )
 }
+
+data class HomeQuote(
+    val bookTitle: String,
+    val quoteCount: Int,
+    val bookCover: String,
+    val isBookmark: Boolean = false,
+)
+
+data class RecommendationContent(
+    val quote: String,
+    val bookTitle: String
+)
