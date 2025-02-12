@@ -3,7 +3,9 @@ package com.blank.bookverse.presentation.navigation
 
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -13,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -26,13 +29,19 @@ fun BottomNavigationBar(navController: NavHostController) {
 
     NavigationBar(
         modifier = Modifier
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .height(64.dp),
         containerColor = Color.White,
     ) {
         items.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
+                label = {
+                    Text(
+                        text = item.label,
+                        modifier = Modifier.offset(y = (-8).dp)
+                    )
+                },
                 // 현재 활성화된 currentRoute가 item.route와 동일하면 선택된 상태로 둠
                 selected = currentRoute == item.route,
                 // 클릭 시 해당 화면으로 이동(중복 클릭 방지)
