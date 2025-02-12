@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +49,17 @@ fun LoginScreen(
     navController: NavHostController,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
+    // ViewModel에서 관리하는 값을 MutableState로 변환하여 Composable에서 사용
+    val userIdState = remember { mutableStateOf(loginViewModel.userId.value) }
+    val userPwState = remember { mutableStateOf(loginViewModel.userPw.value) }
+
+    // 화면이 사라질때
+    DisposableEffect(Unit) {
+        onDispose {
+            loginViewModel.resetLoginState()
+        }
+    }
+
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -60,6 +77,7 @@ fun LoginScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 // Main Logo
                 Image(
                     painter = painterResource(id = R.drawable.ic_main_logo),
@@ -80,16 +98,16 @@ fun LoginScreen(
 
                     // ID
                     BookVerseTextField(
-                        textFieldValue = loginViewModel.userId,
-                        onValueChange = { value ->
-                            loginViewModel.onUserIdChanged(value)
-                        },
+
+                        textFieldValue = userIdState,
+                        onValueChange = loginViewModel::onUserIdChanged,
                         placeHolder = "아이디를 입력해주세요.",
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(60.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
-                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)) ,
+                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
                         trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.TEXT
                     )
 
@@ -103,11 +121,12 @@ fun LoginScreen(
 
                     // PW
                     BookVerseTextField(
-                        textFieldValue = loginViewModel.userPw,
-                        onValueChange = { value -> loginViewModel.onUserPwChanged(value) },
+                        textFieldValue = userPwState,
+                        onValueChange = loginViewModel::onUserPwChanged,
                         placeHolder = "비밀번호를 입력해주세요.",
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(60.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(
                                 Color.White,
@@ -127,7 +146,9 @@ fun LoginScreen(
                         backgroundColor = Color.Black,
                         textColor = Color.White,
                         modifier = Modifier
+                            .height(60.dp)
                             .fillMaxWidth()
+                            .fillMaxHeight()
                             .padding(top = 12.dp),
                         textStyle = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold)
                     )
@@ -152,7 +173,7 @@ fun LoginScreen(
                                     interactionSource = null,
                                     indication = null,
                                     onClick = {
-                                        Timber.e("회원가입 처리")
+                                        navController.navigate("register")
                                     }
                                 )
                         )
@@ -186,6 +207,7 @@ fun LoginScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(60.dp)
+                                .fillMaxHeight()
                                 .clickable(
                                     interactionSource = null,
                                     indication = null,
@@ -209,7 +231,8 @@ fun LoginScreen(
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp)
+                                .fillMaxHeight()
+                                .height(60.dp)
                                 .clickable(
                                     interactionSource = null,
                                     indication = null,
