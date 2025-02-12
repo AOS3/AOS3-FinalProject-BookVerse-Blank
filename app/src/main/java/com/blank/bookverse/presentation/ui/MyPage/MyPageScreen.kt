@@ -156,13 +156,13 @@ fun SettingsMenu(navController: NavController) {
                 headlineContent = { Text(text) },
                 modifier = Modifier.clickable {
                     if (text == "프로필 설정") {
-                        navController.navigate("profileScreen")
+                        navController.navigate("profile")
                     }
                     if (text == "계정 설정"){
-                        navController.navigate("accountScreen")
+                        navController.navigate("account_setting")
                     }
                     if(text == "이용약관") {
-                        navController.navigate("termsScreen")
+                        navController.navigate("terms")
                     }
                 }
             )

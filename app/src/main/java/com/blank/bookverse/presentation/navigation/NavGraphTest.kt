@@ -12,13 +12,19 @@ import androidx.navigation.compose.rememberNavController
 import com.blank.bookverse.presentation.ui.MyPage.MyPageScreen
 import com.blank.bookverse.presentation.ui.Profile.ProfileScreen
 import com.blank.bookverse.presentation.ui.Terms.TermsScreen
+import com.blank.bookverse.presentation.ui.book_detail.BookDetailScreen
+import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
+import com.blank.bookverse.presentation.ui.login.LoginScreen
+import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
+import com.blank.bookverse.presentation.ui.register.RegisterScreen
+import com.blank.bookverse.presentation.ui.splash.SplashScreen
 
 
 @Composable
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = MainNavItem.Splash.route,
+        startDestination = BottomNavItem.MyPage.route,
         modifier = modifier
     ) {
         // 홈 화면
