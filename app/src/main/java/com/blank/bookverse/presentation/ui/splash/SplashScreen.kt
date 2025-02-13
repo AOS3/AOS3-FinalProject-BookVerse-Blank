@@ -26,7 +26,11 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         delay(3000)
         navController.navigate("login") {
-            popUpTo("splash") { inclusive = true } // 스택에서 제거
+            // 백스택에서 모든 화면을 제거하고 "로그인"으로 이동
+            popUpTo(navController.graph.startDestinationId) {
+                inclusive = true // startDestinationId까지 포함하여 백스택을 제거
+            }
+            launchSingleTop = true // 새로운 화면이 기존 화면을 대체
         }
     }
     Box(

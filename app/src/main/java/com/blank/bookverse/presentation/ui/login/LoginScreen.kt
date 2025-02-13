@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.blank.bookverse.R
+import com.blank.bookverse.presentation.common.BackPressExitHandler
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldEndIconMode
@@ -47,6 +48,9 @@ fun LoginScreen(
     navController: NavHostController,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
+    // 뒤로가기 핸들러 처리
+    BackPressExitHandler()
+
     // ViewModel에서 관리하는 값을 MutableState로 변환하여 Composable에서 사용
     val userIdState = remember { mutableStateOf(loginViewModel.userId.value) }
     val userPwState = remember { mutableStateOf(loginViewModel.userPw.value) }
