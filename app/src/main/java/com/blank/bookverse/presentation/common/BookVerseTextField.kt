@@ -188,17 +188,17 @@ fun BookVerseTextField(
                             }
                         ) {
                             if(isShowingPasswordFlag){
-//                                Icon(
-//                                    painter = painterResource(id = R.drawable.ic_pw_eye_on),
-//                                    contentDescription = null,
-//                                    modifier = Modifier.size(25.dp)
-//                                )
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_pw_eye_on),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(25.dp)
+                                )
                             } else {
-//                                Icon(
-//                                    painter = painterResource(id = R.drawable.ic_pw_eye_off),
-//                                    contentDescription = null,
-//                                    modifier = Modifier.size(25.dp)
-//                                )
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_pw_eye_off),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(25.dp)
+                                )
                             }
                         }
                     }

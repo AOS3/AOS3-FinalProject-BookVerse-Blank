@@ -50,6 +50,8 @@ import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldEndIconMode
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldInputType
+import com.kakao.sdk.common.util.Utility
+import timber.log.Timber
 
 @Composable
 fun RegisterScreen(

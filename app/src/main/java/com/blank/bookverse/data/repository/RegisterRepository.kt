@@ -1,6 +1,7 @@
 package com.blank.bookverse.data.repository
 
 import com.blank.bookverse.data.model.RegisterModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -12,37 +13,47 @@ import javax.inject.Singleton
 
 @Singleton
 class RegisterRepository @Inject constructor(
-    private val firebaseFireStore: FirebaseFirestore
+    private val firebaseFireStore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth
 ) {
     // 유저 정보 추가
     fun createUserData(registerModel: RegisterModel): Flow<Result<Unit>> = flow {
         val result = runCatching {
-            val userRef = firebaseFireStore.collection("Member").add(registerModel).await()
+            // firebaseAuth를 사용해 회원가입 진행
+            val authResult = firebaseAuth.createUserWithEmailAndPassword(
+                // 이메일 처리를 위해 @bookverse.com 사용
+                "${registerModel.memberId}@bookverse.com",
+                registerModel.memberPassword
+            ).await()
 
-            // Firestore에 데이터 추가 작업을 한번에 처리
-            // 추가된 문서 ID는 userRef.id로 이미 반환
-            val updatedRegisterModel = registerModel.copy(memberDocId = userRef.id)
+            // 회원가입 성공 시 Firebase에서 반환한 UID 가져오기
+            val uid = authResult.user?.uid ?: throw Exception("회원가입 실패: UID 없음")
 
-            // Firestore에 ID 포함된 RegisterModel을 한번에 저장
+            // 기존 RegisterModel에 UID를 추가하여 새로운 데이터 모델 생성
+            val updatedRegisterModel = registerModel.copy(memberDocId = uid)
+
+            // Firestore에 회원 정보를 저장
             firebaseFireStore.collection("Member")
-                .document(updatedRegisterModel.memberDocId)
+                .document(uid)
                 .set(updatedRegisterModel)
-                .await() // 비동기 작업 완료 대기
-        }.map { Unit } // 성공 시 Unit 반환
+                .await()
+        }.map { Unit }
 
-        emit(result) // flow로 결과 방출
-    }.flowOn(Dispatchers.IO) // 백그라운드 스레드에서 실행
+        emit(result)
+    }.flowOn(Dispatchers.IO)
 
 
     // 아이디 중복 확인
     fun checkUserIdDuplicate(userId: String): Flow<Result<Boolean>> = flow {
         val result = runCatching {
+            // fireStore에서 기존 memberId 조회
             val querySnapShot = firebaseFireStore.collection("Member")
                 .whereEqualTo("memberId", userId)
                 .get()
                 .await()
 
-            querySnapShot.isEmpty // 문서가 없으면 true
+            // 문서가 없으면 true
+            querySnapShot.isEmpty
         }
         emit(result)
     }.flowOn(Dispatchers.IO)

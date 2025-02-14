@@ -11,26 +11,39 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.blank.bookverse.R
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 @Composable
 fun SplashScreen(
     navController: NavHostController,
     splashViewModel: SplashViewModel = hiltViewModel()
 ) {
+
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
-        delay(3000)
-        navController.navigate("login") {
-            // 백스택에서 모든 화면을 제거하고 "로그인"으로 이동
-            popUpTo(navController.graph.startDestinationId) {
-                inclusive = true // startDestinationId까지 포함하여 백스택을 제거
+        if(splashViewModel.autoLoginProcess(context)) {
+            navController.navigate("home") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                launchSingleTop = true
             }
-            launchSingleTop = true // 새로운 화면이 기존 화면을 대체
+        }else {
+            delay(2000)
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
         }
     }
     Box(
