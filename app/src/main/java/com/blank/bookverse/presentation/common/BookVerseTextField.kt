@@ -1,6 +1,10 @@
 package com.blank.bookverse.presentation.common
 
+import android.R.attr.inputType
+import android.R.attr.paddingTop
+import android.R.attr.singleLine
 import android.util.Log
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +14,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -21,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -28,9 +35,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -74,8 +83,10 @@ fun BookVerseTextField(
     isError:MutableState<Boolean>? = null,
     //IntRangeError
     textRange: TextRange? = null,
-    //textRegex 텍스트 검사
-    regexList: List<Pair<String, Regex>>? = null,
+    // text 일치
+    checkList: List<Pair<String, *>>? = null,
+    // 텍스트 필드 비활성화
+    isEnabled : Boolean = true,
     gridRow: Int = 3,
     // 키보드 옵션 및 동작 추가 (기본값 제공)
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Default),
@@ -84,6 +95,11 @@ fun BookVerseTextField(
     onTrailingIconClick: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
     onValueChange: (String) -> Unit = {},
+    focusedBorderColor: Color = Color.Black,
+    unfocusedBorderColor: Color = Color.Gray,
+    focusedContainerColor: Color = Color.White,
+    unfocusedContainerColor: Color = Color.White,
+    cursorColor: Color = Color.DarkGray
 ) {
     val gridRow by remember { mutableStateOf(gridRow) }
     // 비밀번호가 보이는지...
@@ -96,9 +112,12 @@ fun BookVerseTextField(
     if(focusRequest != null){
         Modifier.focusRequester(focusRequest.value)
     }
+
     Column {
+
         OutlinedTextField(
-            modifier = defaultModifier,
+            enabled = isEnabled,
+            modifier = defaultModifier.fillMaxWidth(),
             value = textFieldValue.value,
             label = null,
             placeholder = {
@@ -134,6 +153,7 @@ fun BookVerseTextField(
 
                 // 필터링된 값을 콜백으로 전달
                 onValueChange(regexText)
+
             },
             leadingIcon = if(leadingIcon != null) {
                 {
@@ -174,17 +194,17 @@ fun BookVerseTextField(
                             }
                         ) {
                             if(isShowingPasswordFlag){
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_pw_eye_on),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(25.dp)
-                                )
+//                                Icon(
+//                                    painter = painterResource(id = R.drawable.ic_pw_eye_on),
+//                                    contentDescription = null,
+//                                    modifier = Modifier.size(25.dp)
+//                                )
                             } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_pw_eye_off),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(25.dp)
-                                )
+//                                Icon(
+//                                    painter = painterResource(id = R.drawable.ic_pw_eye_off),
+//                                    contentDescription = null,
+//                                    modifier = Modifier.size(25.dp)
+//                                )
                             }
                         }
                     }
@@ -213,21 +233,20 @@ fun BookVerseTextField(
                 KeyboardOptions.Default
             },
             colors =  OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Black,
-                unfocusedBorderColor = Color.Gray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                cursorColor = Color.DarkGray
+                focusedBorderColor = focusedBorderColor,
+                unfocusedBorderColor = unfocusedBorderColor,
+                focusedContainerColor = focusedContainerColor,
+                unfocusedContainerColor = unfocusedContainerColor,
+                cursorColor = cursorColor
 
             ),
             interactionSource = interactionSource,
-
 
         )
 
         // isError Boolean 값이 널이 아니고
         if (isError != null)
-            ErrorText(gridRow = gridRow,textFieldValue,isError, textRange,regexList)
+            ErrorText(gridRow = gridRow,textFieldValue,isError, textRange,checkList)
     }
 
 }
@@ -254,26 +273,41 @@ fun ErrorText(
     textValue: MutableState<String>,
     error: MutableState<Boolean>,
     textRange: TextRange?,
-    regexList: List<Pair<String, Regex>>?
+    regexList: List<Pair<String, *>>?
 ){
-    val defaultRegexList = if (regexList != null) regexList else listOf<Pair<String, Regex>>()
+    val defaultRegexList = if (regexList != null) regexList else listOf<Pair<String, *>>()
     val inEach = (defaultRegexList.size + if (textRange != null)1 else 0)
     var textLengthValue by rememberSaveable { mutableStateOf(false) }
     // 이후에 넣어야 값이 반영
     textLengthValue = if (textRange != null) textValue.value.length in textRange else true
 
     var regex: Boolean by rememberSaveable { mutableStateOf(
-        defaultRegexList.fold(false){ result,it ->
-            if(!textValue.value.contains(it.second))
+        false
+    ) }
+    regex = if (defaultRegexList.isNotEmpty()){
+        defaultRegexList.fold(false) { result, it ->
+        if (it.second is Regex) {
+            if (textValue.value.contains(it.second as Regex)) {
                 true
-            else {
+            } else {
                 return@fold false
             }
+        } else if (it.second is String) {
+            if (textValue.value == it.second as String) {
+                true
+            } else {
+                return@fold false
+            }
+        } else {
+            return@fold false
         }
-    ) }
-    Log.d("st","${textValue.value.length} $regex")
+    }
 
-    error.value = textLengthValue && regex
+    } else {
+        true
+    }
+
+    error.value = textLengthValue && regex && textValue.value.isNotBlank()
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -288,7 +322,7 @@ fun ErrorText(
                 TextLength(textValue,textRange)
             else{
 
-                ErrorComposable(textValue,defaultRegexList[repeat].first,defaultRegexList[repeat].second)
+                ErrorComposable(textValue,defaultRegexList[repeat])
                 repeat++
             }
 
@@ -348,27 +382,48 @@ fun TextLength(
 @Composable
 fun ErrorComposable(
     textValue: MutableState<String>,
-    regexText: String,
-    it: Regex
+    regex: Pair<String, *>
 ){
+    val contain = if (regex.second is Regex) {
+        if(textValue.value.contains(regex.second as Regex)) {
+            Log.d("st","itt")
+            true
+        }
+        else {
+            Log.d("st","itf")
+            false
+        }
+    }else if(regex.second is String){
+        if(textValue.value == regex.second as String) {
+            Log.d("st","itt")
+            true
+        }
+        else {
+            Log.d("st","itf")
+            false
+        }
+    } else{
+        false
+    }
+    val blank = textValue.value.isBlank()
     Row(
         modifier = Modifier.padding(end = 4.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Check,
             tint = when {
-                textValue.value.isBlank() -> Color.LightGray
-                !textValue.value.contains(it) -> Color(0xFF0DB00C)
+                blank -> Color.LightGray
+                contain -> Color(0xFF0DB00C)
                 else -> Color(0xFFB00E0E)
             },
             contentDescription = "Check",
             modifier = Modifier.size(20.dp)
         )
         Text(
-            text = regexText,
+            text = regex.first,
             color = when {
-                textValue.value.isBlank() -> Color.LightGray
-                !textValue.value.contains(it) -> Color(0xFF0DB00C)
+                blank -> Color.LightGray
+                contain -> Color(0xFF0DB00C)
                 else -> Color(0xFFB00E0E)
             },
             fontSize = 14.sp
