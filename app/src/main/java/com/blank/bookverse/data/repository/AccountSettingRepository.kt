@@ -1,8 +1,8 @@
 package com.blank.bookverse.data.repository
 
+import android.content.Context
 import android.util.Log
 import com.blank.bookverse.data.model.MemberModel
-import com.google.api.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class AccountSettingRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firebaseStore: FirebaseFirestore,
-    // @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context
 ) {
 
     // 비밀번호 업데이트 함수
