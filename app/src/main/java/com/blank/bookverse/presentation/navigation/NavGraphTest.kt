@@ -4,8 +4,10 @@ package com.blank.bookverse.presentation.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.blank.bookverse.presentation.ui.AccountSetting.AccountSettingsScreen
 import com.blank.bookverse.presentation.ui.MyPage.MyPageScreen
 import com.blank.bookverse.presentation.ui.Profile.ProfileScreen
@@ -45,7 +47,15 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
             MoreQuoteScreen(navController = navController)
         }
 
-        composable(route = MainNavItem.BookDetail.route) {
+        composable(
+            route = MainNavItem.BookDetail.route,
+            arguments = listOf(
+                navArgument("title") {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) {
             BookDetailScreen(navController = navController)
         }
         // 스플래쉬 화면

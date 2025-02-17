@@ -18,7 +18,9 @@ sealed class MainNavItem(val route: String, val label: String) {
     data object Login : MainNavItem("login", "로그인")
     data object Register : MainNavItem("register", "회원가입")
     data object FindAccount : MainNavItem("findAccount", "아이디/비밀번호 찾기")
-    data object BookDetail : MainNavItem("book_detail", "책 상세")
+    data object BookDetail : MainNavItem("book_detail/title", "책 상세") {
+        fun createRoute(title: String) = "book_detail/$title"
+    }
     data object MoreQuote : MainNavItem("more_quote", "더보기")
 }
 

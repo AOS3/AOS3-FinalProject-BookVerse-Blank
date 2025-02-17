@@ -18,12 +18,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
@@ -33,7 +36,9 @@ import com.skydoves.landscapist.coil.CoilImage
 fun BookDetailScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
+    viewModel: BookDetailViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.bookDetailUiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -51,6 +56,7 @@ fun BookDetailScreen(
         }
     ) { paddingValues ->
         BookDetailContent(
+            uiState = uiState,
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -60,6 +66,7 @@ fun BookDetailScreen(
 
 @Composable
 fun BookDetailContent(
+    uiState: BookDetailUiState,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -76,7 +83,7 @@ fun BookDetailContent(
                     .padding(horizontal = 42.dp)
                     .fillMaxWidth()
                     .height(520.dp),
-                imageModel = { "https://image.aladin.co.kr/product/8895/77/cover500/k582535393_2.jpg" },
+                imageModel = { uiState.quote?.bookCover },
             )
 
             HorizontalDivider()
@@ -92,7 +99,7 @@ fun BookDetailContent(
                     modifier = Modifier
                         .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
                         .alignByBaseline(),
-                    text = "광인",
+                    text = "${uiState.quote?.bookTitle}",
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                     )
@@ -102,7 +109,7 @@ fun BookDetailContent(
                     modifier = Modifier
                         .padding(end = 12.dp)
                         .alignByBaseline(),
-                    text = "남긴 글귀 3개",
+                    text = "남긴 글귀 ${uiState.quote?.quoteCount}개",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -127,5 +134,7 @@ fun BookDetailContent(
 @Preview(showBackground = true)
 @Composable
 fun BookDetailScreenPreview() {
-    BookDetailContent()
+    BookDetailContent(
+        uiState = BookDetailUiState()
+    )
 }
