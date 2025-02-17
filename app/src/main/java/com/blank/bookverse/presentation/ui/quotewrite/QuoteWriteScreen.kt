@@ -155,27 +155,24 @@ fun QuoteWriteScreen(
                 ) {
 
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically)
+                {
                     LazyRow(
                         modifier = Modifier
                             .padding(top = 5.dp, bottom = 5.dp)
                             .fillMaxWidth(0.85f),
                         contentPadding = PaddingValues(start = 10.dp, end = 10.dp)
                     ) {
-                        items(
-                            count = viewModel.thinkList.size
-                        )
+                        items(count = viewModel.thinkList.size)
                         {it->
                             ChipCard(
                                 viewModel.thinkList[it],
                                 clear = {
                                     viewModel.thinkListRemoveAt(it)
-                               }
-                           )
+                                }
+                            )
                             Spacer(Modifier.width(10.dp))
-                      }
+                        }
                     }
 
                     IconButton(
