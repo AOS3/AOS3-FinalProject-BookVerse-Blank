@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.HomeQuote
 import com.blank.bookverse.data.repository.BookDetailRepository
+import com.blank.bookverse.presentation.model.QuoteUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,20 +29,31 @@ class BookDetailViewModel @Inject constructor(
 
     init {
         getBookInfo(title)
+        getQuoteList()
     }
 
     // 책 정보 불러오기
-    fun getBookInfo(bookTitle: String) = viewModelScope.launch {
+    private fun getBookInfo(bookTitle: String) = viewModelScope.launch {
         runCatching {
             _bookDetailUiState.value = BookDetailUiState(isLoading = true)
             repository.getBookInfo(bookTitle)
         }.onSuccess {
             _bookDetailUiState.value = BookDetailUiState(
+                isLoading = false,
                 quote = it
             )
-            _bookDetailUiState.value = BookDetailUiState(isLoading = false)
         }.onFailure {
             _bookDetailUiState.value = BookDetailUiState(isLoading = false)
+        }
+    }
+
+    private fun getQuoteList() = viewModelScope.launch {
+        runCatching {
+            repository.getQuoteList(title)
+        }.onSuccess { quoteList ->
+            _bookDetailUiState.value = _bookDetailUiState.value.copy(
+                quoteList = quoteList.map { QuoteUiModel.from(it) }
+            )
         }
     }
 
@@ -50,6 +62,7 @@ class BookDetailViewModel @Inject constructor(
 data class BookDetailUiState(
     val isLoading: Boolean = false,
     val quote: HomeQuote? = null,
+    val quoteList: List<QuoteUiModel> = emptyList(),
 )
 
 sealed class BookDetailEffect {
