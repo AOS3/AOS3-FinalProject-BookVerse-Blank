@@ -20,7 +20,7 @@ import com.blank.bookverse.presentation.ui.splash.SplashScreen
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = MainNavItem.QuoteWrite.route,
+        startDestination = MainNavItem.Splash.route,
         modifier = modifier
     ) {
 //        // 홈 화면
