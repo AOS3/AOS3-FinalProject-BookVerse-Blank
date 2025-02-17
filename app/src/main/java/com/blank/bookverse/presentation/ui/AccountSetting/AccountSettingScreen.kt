@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -316,7 +318,7 @@ fun AccountSettingsScreen(
             )
 
             // 탈퇴 다이얼로그
-            if (showDeleteDialog.value) {
+            /*if (showDeleteDialog.value) {
                 BookVerseCustomDialog(
                     onDismiss = { showDeleteDialog.value = false },
                     title = "탈퇴",
@@ -328,7 +330,24 @@ fun AccountSettingsScreen(
                         // 탈퇴 후 네비게이션 처리 등 추가 작업
                     }
                 )
-            }
+            }*/
+
+            BookVerseCustomDialog(
+                showDialogState = showDeleteDialog,  // 다이얼로그의 상태를 관리하는 MutableState
+                confirmButtonTitle = "확인",  // 확인 버튼 텍스트
+                confirmButtonOnClick = {
+                    // 확인 버튼 클릭 시 실행될 함수
+                    // showDialog.value = false
+                },
+                dismissButtonTitle = "취소",  // 취소 버튼 텍스트
+                dismissButtonOnClick = {
+                    // 취소 버튼 클릭 시 실행될 함수
+                    // showDialog.value = false
+                },
+                icon = Icons.Default.Warning,  // 다이얼로그에 표시할 아이콘
+                title = "탈퇴",  // 다이얼로그의 제목
+                text = "탈퇴하시겠습니까? 그동안 저장했던 글귀들은 복구할 수 없습니다.",  // 다이얼로그의 본문 텍스트
+            )
         }
     }
 }

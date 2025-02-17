@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -76,8 +77,25 @@ fun MyPageScreen(
         }
     }
 
+    BookVerseCustomDialog(
+        showDialogState = showLogoutDialog,  // 다이얼로그의 상태를 관리하는 MutableState
+        confirmButtonTitle = "확인",  // 확인 버튼 텍스트
+        confirmButtonOnClick = {
+            // 확인 버튼 클릭 시 실행될 함수
+            // showDialog.value = false
+        },
+        dismissButtonTitle = "취소",  // 취소 버튼 텍스트
+        dismissButtonOnClick = {
+            // 취소 버튼 클릭 시 실행될 함수
+            // showDialog.value = false
+        },
+        icon = Icons.Default.Warning,  // 다이얼로그에 표시할 아이콘
+        title = "로그아웃",  // 다이얼로그의 제목
+        text = "로그아웃 하시겠습니까?",  // 다이얼로그의 본문 텍스트
+    )
+
     // 로그아웃 다이얼로그
-    if (showLogoutDialog.value) {
+    /*if (showLogoutDialog.value) {
         BookVerseCustomDialog(
             title = "로그아웃",
             message = "로그아웃 하시겠습니까?",
@@ -94,7 +112,7 @@ fun MyPageScreen(
             positiveText = "예",
             negativeText = "아니오"
         )
-    }
+    }*/
 }
 
 @Composable
