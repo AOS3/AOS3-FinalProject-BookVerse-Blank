@@ -2,6 +2,7 @@
 agp = "8.7.3"
 firebaseFirestore = "25.1.2"
 firebaseBom = "33.9.0"
+firebaseFunctionsKtx = "21.1.0"
 firebaseStorage = "21.0.1"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -40,6 +41,7 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-functions-ktx = { module = "com.google.firebase:firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-storage = { module = "com.google.firebase:firebase-storage", version.ref = "firebaseStorage" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

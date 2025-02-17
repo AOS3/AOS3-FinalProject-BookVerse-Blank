@@ -59,7 +59,7 @@ import timber.log.Timber
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    loginViewModel: LoginViewModel = hiltViewModel()
+    loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
     // 뒤로가기 핸들러 처리
     BackPressExitHandler()
@@ -109,9 +109,8 @@ fun LoginScreen(
         loginState.let { result ->
             when(result) {
                 is LoginViewModel.LoginState.Success -> {
-                    loginViewModel.saveUserInfo(context,userIdState.value,userPwState.value)
                     navController.navigate("home") {
-                        popUpTo(navController.graph.startDestinationId) {
+                        popUpTo("login") {
                             inclusive = true
                         }
                         launchSingleTop = true
@@ -276,15 +275,7 @@ fun LoginScreen(
                                     interactionSource = null,
                                     indication = null,
                                     onClick = {
-                                        Timber.e("카카오 로그인 처리")
-                                        loginViewModel.kakaoLogin(
-                                            context,
-                                            onSuccess = {
-                                                Timber.e("$it")
-                                                loginViewModel.fetchKakaoUserInfo()
-                                            },
-                                            onFailure = {}
-                                        )
+                                        loginViewModel.kakaoLogin()
                                     }
                                 ),
                             contentScale = ContentScale.FillWidth
