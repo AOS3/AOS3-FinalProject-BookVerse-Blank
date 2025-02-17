@@ -70,6 +70,8 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.auth.ktx)
     ksp(libs.androidx.room.compiler)
 
     // Hilt
