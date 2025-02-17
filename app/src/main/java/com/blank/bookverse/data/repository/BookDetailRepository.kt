@@ -16,6 +16,6 @@ class BookDetailRepository @Inject constructor() {
     }
 
     fun getQuoteList(title: String): List<Quote> {
-        return Storage.quoteDummy.filter { it.bookTitle == title }
+        return Storage.quoteDummy.filter { it.bookTitle == title }.sortedByDescending { it.timestamp }
     }
 }
