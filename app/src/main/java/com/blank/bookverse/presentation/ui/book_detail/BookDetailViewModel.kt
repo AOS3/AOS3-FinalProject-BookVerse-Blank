@@ -57,6 +57,11 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
+
+    fun navigateToQuoteDetail(quoteContent: String) = viewModelScope.launch {
+        _bookDetailEffect.emit(BookDetailEffect.NavigateToQuoteDetail(quoteContent))
+    }
+
 }
 
 data class BookDetailUiState(
@@ -66,5 +71,5 @@ data class BookDetailUiState(
 )
 
 sealed class BookDetailEffect {
-    object NavigateToQuoteDetail: BookDetailEffect()
+    data class NavigateToQuoteDetail(val quoteContent: String): BookDetailEffect()
 }

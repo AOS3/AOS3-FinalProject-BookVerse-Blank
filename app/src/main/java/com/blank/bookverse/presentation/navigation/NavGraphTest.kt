@@ -17,6 +17,7 @@ import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
 import com.blank.bookverse.presentation.ui.home.HomeScreen
 import com.blank.bookverse.presentation.ui.login.LoginScreen
 import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
+import com.blank.bookverse.presentation.ui.quote_detail.QuoteDetailScreen
 import com.blank.bookverse.presentation.ui.register.RegisterScreen
 import com.blank.bookverse.presentation.ui.splash.SplashScreen
 
@@ -50,7 +51,7 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(
             route = MainNavItem.BookDetail.route,
             arguments = listOf(
-                navArgument("title") {
+                navArgument(MainNavItem.BookDetail.TITLE_ARG) {
                     type = NavType.StringType
                     nullable = false
                 }
@@ -58,6 +59,20 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         ) {
             BookDetailScreen(navController = navController)
         }
+
+
+        composable(
+            route = MainNavItem.QuoteDetail.route,
+            arguments = listOf(
+                navArgument(MainNavItem.QuoteDetail.QUOTE_CONTENT_ARG) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) {
+            QuoteDetailScreen(navController = navController)
+        }
+
         // 스플래쉬 화면
         composable(MainNavItem.Splash.route) { SplashScreen(navController) }
         // 로그인

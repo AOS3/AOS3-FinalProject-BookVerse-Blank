@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.book_detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +36,7 @@ import androidx.navigation.NavController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.model.QuoteUiModel
+import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
@@ -43,6 +46,16 @@ fun BookDetailScreen(
     viewModel: BookDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.bookDetailUiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.bookDetailEffect.collect { effect ->
+            when (effect) {
+                is BookDetailEffect.NavigateToQuoteDetail -> {
+                    navController.navigate(MainNavItem.QuoteDetail.createRoute(effect.quoteContent))
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -63,7 +76,8 @@ fun BookDetailScreen(
             uiState = uiState,
             modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            onNavigateToQuoteDetail = viewModel::navigateToQuoteDetail
         )
     }
 }
@@ -72,6 +86,7 @@ fun BookDetailScreen(
 fun BookDetailContent(
     uiState: BookDetailUiState,
     modifier: Modifier = Modifier,
+    onNavigateToQuoteDetail: (String) -> Unit = {},
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -126,7 +141,9 @@ fun BookDetailContent(
             ) { quote ->
                 BookDetailQuoteItem(
                     quote = quote,
-                    modifier = Modifier.padding(horizontal = 42.dp)
+                    modifier = Modifier.padding(horizontal = 42.dp),
+                    onNavigateToQuoteDetail = onNavigateToQuoteDetail
+
                 )
             }
         }
@@ -149,9 +166,14 @@ fun BookDetailContent(
 fun BookDetailQuoteItem(
     quote: QuoteUiModel,
     modifier: Modifier = Modifier,
+    onNavigateToQuoteDetail: (String) -> Unit = {},
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                onNavigateToQuoteDetail(quote.quoteContent)
+            }
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(
