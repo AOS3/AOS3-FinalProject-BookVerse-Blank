@@ -11,22 +11,39 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.blank.bookverse.R
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 @Composable
 fun SplashScreen(
     navController: NavHostController,
     splashViewModel: SplashViewModel = hiltViewModel()
 ) {
+
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
-        delay(3000)
-        navController.navigate("login") {
-            popUpTo("splash") { inclusive = true } // 스택에서 제거
+        if(splashViewModel.autoLoginProcess(context)) {
+            navController.navigate("home") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        }else {
+            delay(2000)
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
         }
     }
     Box(

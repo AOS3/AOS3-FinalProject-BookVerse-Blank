@@ -24,6 +24,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -119,6 +120,16 @@ fun FindIdScreen(
     navController: NavHostController,
     findAccountViewModel: FindAccountViewModel = hiltViewModel()
 ) {
+
+    findAccountViewModel.sendVerificationCode("01064941298")
+
+    // 화면이 사라질때
+    DisposableEffect(Unit) {
+        onDispose {
+            findAccountViewModel.resetTextState()
+        }
+    }
+
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -275,6 +286,12 @@ fun FindPwScreen(
     navController: NavHostController,
     findAccountViewModel: FindAccountViewModel = hiltViewModel()
 ) {
+    // 화면이 사라질때
+    DisposableEffect(Unit) {
+        onDispose {
+            findAccountViewModel.resetTextState()
+        }
+    }
 
     Column(
         modifier = Modifier

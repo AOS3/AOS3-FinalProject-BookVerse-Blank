@@ -74,8 +74,10 @@ fun BookVerseTextField(
     isError:MutableState<Boolean>? = null,
     //IntRangeError
     textRange: TextRange? = null,
-    //textRegex 텍스트 검사
-    regexList: List<Pair<String, Regex>>? = null,
+    // text 일치
+    checkList: List<Pair<String, *>>? = null,
+    // 텍스트 필드 비활성화
+    isEnabled : Boolean = true,
     gridRow: Int = 3,
     // 키보드 옵션 및 동작 추가 (기본값 제공)
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Default),
@@ -84,6 +86,11 @@ fun BookVerseTextField(
     onTrailingIconClick: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
     onValueChange: (String) -> Unit = {},
+    focusedBorderColor: Color = Color.Black,
+    unfocusedBorderColor: Color = Color.Gray,
+    focusedContainerColor: Color = Color.White,
+    unfocusedContainerColor: Color = Color.White,
+    cursorColor: Color = Color.DarkGray
 ) {
     val gridRow by remember { mutableStateOf(gridRow) }
     // 비밀번호가 보이는지...
@@ -91,14 +98,20 @@ fun BookVerseTextField(
         mutableStateOf(false)
     }
 
+    val errorBoolean = rememberSaveable { MutableList(
+        if (checkList != null)checkList.size
+        else 0
+    ){false} }
+
     // Modify 생성
     var defaultModifier = modifier.padding(top = paddingTop)
     if(focusRequest != null){
         Modifier.focusRequester(focusRequest.value)
     }
-    Column {
+    Column{
         OutlinedTextField(
-            modifier = defaultModifier,
+            enabled = isEnabled,
+            modifier = defaultModifier.fillMaxWidth(),
             value = textFieldValue.value,
             label = null,
             placeholder = {
@@ -134,6 +147,7 @@ fun BookVerseTextField(
 
                 // 필터링된 값을 콜백으로 전달
                 onValueChange(regexText)
+
             },
             leadingIcon = if(leadingIcon != null) {
                 {
@@ -213,20 +227,21 @@ fun BookVerseTextField(
                 KeyboardOptions.Default
             },
             colors =  OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Black,
-                unfocusedBorderColor = Color.Gray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                cursorColor = Color.DarkGray
+                focusedBorderColor = focusedBorderColor,
+                unfocusedBorderColor = unfocusedBorderColor,
+                focusedContainerColor = focusedContainerColor,
+                unfocusedContainerColor = unfocusedContainerColor,
+                cursorColor = cursorColor
 
             ),
             interactionSource = interactionSource,
 
 
-        )
+            )
 
-        if (isError != null && regexList != null && regexList.isNotEmpty())
-            ErrorText(gridRow = gridRow,textFieldValue,isError, textRange,regexList)
+        // isError Boolean 값이 널이 아니고
+        if (isError != null)
+            ErrorText(gridRow = gridRow,textFieldValue,isError, textRange,checkList)
     }
 
 }
@@ -243,6 +258,9 @@ enum class LikeLionOutlinedTextFieldInputType{
     NUMBER,
 }
 
+/*
+* 에러 텍스트 통합 레이아웃
+* */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ErrorText(
@@ -250,24 +268,37 @@ fun ErrorText(
     textValue: MutableState<String>,
     error: MutableState<Boolean>,
     textRange: TextRange?,
-    regexList: List<Pair<String, Regex>>
+    regexList: List<Pair<String, *>>?
 ){
-    val inEach = (regexList.size + if (textRange != null)1 else 0)
+    val defaultRegexList = if (regexList != null) regexList else listOf<Pair<String, *>>()
+    val inEach = (defaultRegexList.size + if (textRange != null)1 else 0)
     var textLengthValue by rememberSaveable { mutableStateOf(false) }
     // 이후에 넣어야 값이 반영
     textLengthValue = if (textRange != null) textValue.value.length in textRange else true
 
     var regex: Boolean by rememberSaveable { mutableStateOf(
-        regexList.fold(false){ result,it ->
-            if(!textValue.value.contains(it.second))
+        false
+    ) }
+    regex = defaultRegexList.fold(false){ result,it ->
+        if (it.second is Regex) {
+            if(textValue.value.contains(it.second as Regex)) {
                 true
+            }
             else {
                 return@fold false
             }
+        }else if(it.second is String){
+            if(textValue.value == it.second as String) {
+                true
+            }
+            else {
+                return@fold false
+            }
+        } else{
+            return@fold false
         }
-    ) }
-    Log.d("st","${textValue.value.length} $regex")
 
+    }
     error.value = textLengthValue && regex
     FlowRow(
         modifier = Modifier
@@ -283,7 +314,7 @@ fun ErrorText(
                 TextLength(textValue,textRange)
             else{
 
-                ErrorComposable(textValue,regexList[repeat].first,regexList[repeat].second)
+                ErrorComposable(textValue,defaultRegexList[repeat])
                 repeat++
             }
 
@@ -294,6 +325,9 @@ fun ErrorText(
     }
 }
 
+/*
+* 길이 관련 에러 텍스트
+* */
 @Composable
 fun TextLength(
     textValue: MutableState<String>,
@@ -334,30 +368,54 @@ fun TextLength(
     }
 }
 
+/*
+* 추가할 에러 텍스트
+* */
 @Composable
 fun ErrorComposable(
     textValue: MutableState<String>,
-    regexText: String,
-    it: Regex
+    regex: Pair<String, *>
 ){
+    val contain = if (regex.second is Regex) {
+        if(textValue.value.contains(regex.second as Regex)) {
+            Log.d("st","itt")
+            true
+        }
+        else {
+            Log.d("st","itf")
+            false
+        }
+    }else if(regex.second is String){
+        if(textValue.value == regex.second as String) {
+            Log.d("st","itt")
+            true
+        }
+        else {
+            Log.d("st","itf")
+            false
+        }
+    } else{
+        false
+    }
+    val blank = textValue.value.isBlank()
     Row(
         modifier = Modifier.padding(end = 4.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Check,
             tint = when {
-                textValue.value.isBlank() -> Color.LightGray
-                !textValue.value.contains(it) -> Color(0xFF0DB00C)
+                blank -> Color.LightGray
+                contain -> Color(0xFF0DB00C)
                 else -> Color(0xFFB00E0E)
             },
             contentDescription = "Check",
             modifier = Modifier.size(20.dp)
         )
         Text(
-            text = regexText,
+            text = regex.first,
             color = when {
-                textValue.value.isBlank() -> Color.LightGray
-                !textValue.value.contains(it) -> Color(0xFF0DB00C)
+                blank -> Color.LightGray
+                contain -> Color(0xFF0DB00C)
                 else -> Color(0xFFB00E0E)
             },
             fontSize = 14.sp

@@ -1,15 +1,33 @@
 package com.blank.bookverse.presentation.ui.findAccount
 
+import android.app.Activity
+import android.content.Context
+import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.blank.bookverse.data.repository.FindAccountRepository
+import com.blank.bookverse.presentation.ui.MainActivity
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class FindAccountViewModel @Inject constructor(
-
+    private val findAccountRepository: FindAccountRepository,
+    private val firebaseAuth: FirebaseAuth,
+    @ApplicationContext private val context: Context
 ):ViewModel() {
     // 탭 타이틀
     val tabTitles = listOf("아이디 찾기", "비밀번호 찾기")
@@ -46,6 +64,45 @@ class FindAccountViewModel @Inject constructor(
     // 비밀번호 찾기 인증번호 관리
     private val _findPwUserCertificationNumber = MutableStateFlow("")
     val findPwUserCertificationNumber = _findPwUserCertificationNumber.asStateFlow()
+
+
+    private val _verificationId = MutableStateFlow<String?>(null)
+    val verificationId: StateFlow<String?> = _verificationId
+
+    fun sendVerificationCode(phoneNumber: String) {
+
+        viewModelScope.launch {
+            val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                override fun onVerificationCompleted(credential: PhoneAuthCredential) { }
+                override fun onVerificationFailed(e: FirebaseException) {
+                }
+                override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    //this@MainActivity.verificationId = verificationId
+                }
+            }
+
+            val optionsCompat =  PhoneAuthOptions.newBuilder(firebaseAuth)
+                .setPhoneNumber("+821012345678")
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setCallbacks(callbacks)
+                .setActivity(context as MainActivity)
+                .build()
+            PhoneAuthProvider.verifyPhoneNumber(optionsCompat)
+            firebaseAuth.setLanguageCode("kr")
+        }
+    }
+
+
+    // 값 reset
+    fun resetTextState() {
+        _findIdUserName.value = ""
+        _findIdUserPhoneNumber.value = ""
+        _findIdUserCertificationNumber.value = ""
+
+        _findPwUserId.value = ""
+        _findPwUserPhoneNumber.value = ""
+        _findPwUserCertificationNumber.value = ""
+    }
 
     // 아이디 찾기 이름 필드값 변경
     fun findIdOnUserNameChanged(value: String) {
