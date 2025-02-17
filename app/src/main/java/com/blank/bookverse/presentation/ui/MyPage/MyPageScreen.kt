@@ -86,7 +86,7 @@ fun MyPageScreen(
                 // 예시로 로그아웃 후 앱을 종료하거나 메인 화면으로 돌아갈 수 있습니다.
                 showLogoutDialog.value = false
                 // 로그아웃 처리 후, 홈 화면으로 돌아가기
-                navController.navigate("login") // 또는 홈 화면으로 변경
+                navController.navigate("login") // 또는 홈 화면으로 변경 //
             },
             onCancel = {
                 showLogoutDialog.value = false
