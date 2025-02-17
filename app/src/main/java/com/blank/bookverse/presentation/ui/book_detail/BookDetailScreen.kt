@@ -141,10 +141,12 @@ fun BookDetailContent(
             ) { quote ->
                 BookDetailQuoteItem(
                     quote = quote,
-                    modifier = Modifier.padding(horizontal = 42.dp),
                     onNavigateToQuoteDetail = onNavigateToQuoteDetail
-
                 )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(22.dp))
             }
         }
 
@@ -169,7 +171,7 @@ fun BookDetailQuoteItem(
     onNavigateToQuoteDetail: (String) -> Unit = {},
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 onNavigateToQuoteDetail(quote.quoteContent)
@@ -183,6 +185,7 @@ fun BookDetailQuoteItem(
                 .fillMaxWidth()
                 .align(Alignment.CenterHorizontally)
                 .padding(horizontal = 16.dp)
+                .padding(horizontal = 42.dp)
         )
 
         Spacer(modifier = Modifier.height(22.dp))
