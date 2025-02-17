@@ -8,11 +8,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AccountSettingRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firebaseStore: FirebaseFirestore,
-    @ApplicationContext private val context: Context
+    // @ApplicationContext private val context: Context
 ) {
 
     // 비밀번호 업데이트 함수
