@@ -20,7 +20,7 @@ import com.blank.bookverse.presentation.ui.splash.SplashScreen
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = MainNavItem.Splash.route,
+        startDestination = "quoteWrite",
         modifier = modifier
     ) {
 //        // 홈 화면
@@ -47,6 +47,6 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         // 아이디/비밀번호 찾기
         composable(MainNavItem.FindAccount.route) { FindAccountScreen(navController) }
         // 아이디/비밀번호 찾기
-        composable("quoteWrite") { QuoteWriteScreen(navController) }
+        composable(MainNavItem.QuoteWrite.route) { QuoteWriteScreen(navController) }
     }
 }
