@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.quotewrite
 
+import android.R.attr.key
 import android.R.attr.onClick
 import android.R.attr.text
 import androidx.compose.ui.platform.LocalDensity
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -68,6 +70,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -97,7 +100,6 @@ fun QuoteWriteScreen(
     // 전체 화면 높이
     val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
     val screenWidth = with(density) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
-    val boolean = mutableStateOf(true)
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
@@ -162,10 +164,18 @@ fun QuoteWriteScreen(
                             .fillMaxWidth(0.85f),
                         contentPadding = PaddingValues(start = 10.dp, end = 10.dp)
                     ) {
-                        items(viewModel.thinkList.size){it->
-                            ChipCard(viewModel.thinkList[it])
+                        items(
+                            count = viewModel.thinkList.size
+                        )
+                        {it->
+                            ChipCard(
+                                viewModel.thinkList[it],
+                                clear = {
+                                    viewModel.thinkListRemoveAt(it)
+                               }
+                           )
                             Spacer(Modifier.width(10.dp))
-                        }
+                      }
                     }
 
                     IconButton(
@@ -322,7 +332,7 @@ fun QuoteWriteScreen(
                                 BookVerseButton(
                                     text = "추가",
                                     onClick = {
-
+                                        viewModel.thinkTextClearAdd(viewModel.thinkSingleText.value)
                                     },
                                     isEnable = viewModel.thinkAddEnabled.value,
                                     backgroundColor = Color.Black,
@@ -489,7 +499,8 @@ fun ClearTextIconButton(
 @ExperimentalLayoutApi
 @Composable
 fun GridView(
-    list: List<String>
+    list: List<String>,
+    viewModel: QuoteWriteViewModel = hiltViewModel()
 ){
     FlowRow(
         modifier = Modifier.padding(bottom = 5.dp),
@@ -502,7 +513,10 @@ fun GridView(
             ChipCard(
                 list[it],
                 0.5.dp,
-                false
+                onClickable = {
+                    viewModel.thinkListAdd(list[it])
+                },
+                clear = null
             )
         }
     }
@@ -512,7 +526,8 @@ fun GridView(
 fun ChipCard(
     think: String,
     elevation: Dp = 5.dp,
-    clear:Boolean = true
+    onClickable: (()-> Unit)? = null,
+    clear: (()-> Unit)? = null,
 ){
     Card (
         modifier = Modifier
@@ -527,7 +542,15 @@ fun ChipCard(
         )
     ){
         Row(
-            modifier = Modifier.padding(start = 5.dp, end = 2.dp),
+            modifier = if (onClickable == null)
+                Modifier.padding(start = 5.dp, end = 2.dp)
+                else {
+                Modifier
+                    .padding(start = 5.dp, end = 2.dp)
+                    .clickable(onClick = {
+                        onClickable()
+                    })
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
@@ -535,13 +558,13 @@ fun ChipCard(
             Text(modifier = Modifier.padding(end = 3.dp),
                 text = "#${think}"
             )
-            if (clear) {
+            if (clear != null) {
                 Card(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .clickable(
                             onClick = {
-
+                                clear()
                             }
                         ),
                     colors = CardDefaults.cardColors(
