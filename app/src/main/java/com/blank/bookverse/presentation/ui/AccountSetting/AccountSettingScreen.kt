@@ -14,41 +14,39 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseButton
-import com.blank.bookverse.presentation.common.BookVerseCustomDialog
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldEndIconMode
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldInputType
+import com.google.firebase.auth.FirebaseAuth
 import timber.log.Timber
 
 @SuppressLint("StateFlowValueCalledInComposition", "UnrememberedMutableState")
@@ -57,9 +55,56 @@ fun AccountSettingsScreen(
     navController: NavHostController,
     accountSettingViewModel: AccountSettingViewModel = hiltViewModel()
 ) {
+    // Firebase 인증 인스턴스
+    val auth = FirebaseAuth.getInstance()
+
+    // 로그인된 사용자 UID를 로그로 출력
+    val currentUserUid = auth.currentUser?.uid
+    Timber.e("Current User UID: $currentUserUid") // UID 출력
+
     // 다이얼로그 상태 관리
     val showDeleteDialog = remember { mutableStateOf(false) }
-    val isUserDeleted = accountSettingViewModel.isUserDeleted.collectAsState()
+    val passwordChangeStatus by accountSettingViewModel.passwordChangeStatus.collectAsState()
+    val passwordChangeEffectFlow by accountSettingViewModel.passwordChangeEffect.collectAsState(initial = null)
+
+    // context
+    val context = LocalContext.current
+
+    when (passwordChangeStatus) {
+        is AccountSettingViewModel.PasswordChangeState.Success -> {
+            // 성공 시 mypage로 이동
+            navController.navigate("mypage") {
+                // 백스택에서 모든 화면을 제거하고 "mypage"로 이동
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true // startDestinationId까지 포함하여 백스택을 제거
+                }
+                launchSingleTop = true // 새로운 화면이 기존 화면을 대체
+            }
+        }
+
+        is AccountSettingViewModel.PasswordChangeState.Error -> {
+            // 오류 시 처리할 코드 작성
+        }
+
+        else -> {
+            // Idle 상태는 기본 상태
+        }
+    }
+
+    // 상태 관리
+    val currentUserPwState = accountSettingViewModel.currentUserPw.collectAsState()
+    val newUserPwState = accountSettingViewModel.newUserPw.collectAsState()
+    val newUserPwCheckState = accountSettingViewModel.newUserPwCheck.collectAsState()
+
+    // 비밀번호 변경 버튼 활성화 여부
+    val isButtonEnabled =
+        currentUserPwState.value.isNotEmpty() &&
+                newUserPwState.value.isNotEmpty() &&
+                newUserPwCheckState.value.isNotEmpty() &&
+                newUserPwState.value == newUserPwCheckState.value
+
+    // 사용자 정보 (아이디, 전화번호)
+    val memberInfo by accountSettingViewModel.memberInfo.collectAsState()
 
     Scaffold(
         topBar = {
@@ -80,24 +125,6 @@ fun AccountSettingsScreen(
         },
         modifier = Modifier.background(Color.White)
     ) {
-        // 상태 관리
-        val currentUserPwState = accountSettingViewModel.currentUserPw.collectAsState()
-        val newUserPwState = accountSettingViewModel.newUserPw.collectAsState()
-        val newUserPwCheckState = accountSettingViewModel.newUserPwCheck.collectAsState()
-
-        val currentPwError = accountSettingViewModel.currentPwError.collectAsState()
-        val newPwError = accountSettingViewModel.newPwError.collectAsState()
-        val newPwCheckError = accountSettingViewModel.newPwCheckError.collectAsState()
-
-        // 비밀번호 변경 버튼 활성화 여부
-        val isButtonEnabled = currentPwError.value.isEmpty() &&
-                newPwError.value.isEmpty() &&
-                newPwCheckError.value.isEmpty() &&
-                currentUserPwState.value.isNotEmpty() &&
-                newUserPwState.value.isNotEmpty() &&
-                newUserPwCheckState.value.isNotEmpty() &&
-                newUserPwState.value == newUserPwCheckState.value
-
         Column(
             modifier = Modifier
                 .background(Color.White)
@@ -125,7 +152,7 @@ fun AccountSettingsScreen(
                     BookVerseTextField(
                         onValueChange = {}, // 값 변경 불가능
                         readOnly = true, // 아이디는 읽기 전용으로 설정
-                        textFieldValue = mutableStateOf("your_id_value"), // 실제 아이디 값을 넣어주세요.
+                        textFieldValue = mutableStateOf(memberInfo?.first ?: ""), // 실제 아이디 값을 넣어주세요.
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
@@ -157,7 +184,7 @@ fun AccountSettingsScreen(
                     BookVerseTextField(
                         onValueChange = {}, // 값 변경 불가능
                         readOnly = true, // 전화번호는 읽기 전용으로 설정
-                        textFieldValue = mutableStateOf("your_phone_number_value"), // 실제 전화번호 값을 넣어주세요.
+                        textFieldValue = mutableStateOf(memberInfo?.second ?: ""), // 실제 전화번호 값을 넣어주세요.
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
@@ -191,26 +218,22 @@ fun AccountSettingsScreen(
 
             BookVerseTextField(
                 textFieldValue = mutableStateOf(currentUserPwState.value),
-                onValueChange = { accountSettingViewModel.onCurrentUserPwChanged(it) },
-                placeHolder = "비밀번호를 입력해 주세요.",
+                onValueChange = { accountSettingViewModel.updatePasswordField(AccountSettingViewModel.PasswordField.CURRENT_PASSWORD, it) },
+                placeHolder = "현재 비밀번호를 입력해 주세요.",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+                    .background(
+                        Color.White,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 0.dp),
                 inputType = LikeLionOutlinedTextFieldInputType.PASSWORD,
-                trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD
-            )
-
-            if (currentPwError.value.isNotEmpty()) {
-                Text(
-                    text = currentPwError.value,
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD,
+                checkList = listOf(
+                    Pair("비밀번호 일치", currentUserPwState.value)
                 )
-            }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -220,31 +243,30 @@ fun AccountSettingsScreen(
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier
+                    .padding(top = 12.dp)
             )
 
             BookVerseTextField(
                 textFieldValue = mutableStateOf(newUserPwState.value),
-                onValueChange = { accountSettingViewModel.onNewUserPwChanged(it) },
+                onValueChange = { accountSettingViewModel.updatePasswordField(AccountSettingViewModel.PasswordField.NEW_PASSWORD, it) },
                 placeHolder = "새 비밀번호를 입력해 주세요.",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+                    .background(
+                        Color.White,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 0.dp),
                 inputType = LikeLionOutlinedTextFieldInputType.PASSWORD,
-                trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD
-            )
-
-            if (newPwError.value.isNotEmpty()) {
-                Text(
-                    text = newPwError.value,
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD,
+                isError = accountSettingViewModel.isUserNewPwError,
+                textRange = TextRange(8, 20),
+                checkList = listOf(
+                    Pair("영문 소문자 및 숫자", Regex("^[a-zA-Z0-9]+$"))
                 )
-            }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -259,7 +281,7 @@ fun AccountSettingsScreen(
 
             BookVerseTextField(
                 textFieldValue = mutableStateOf(newUserPwCheckState.value),
-                onValueChange = { accountSettingViewModel.onNewUserPwCheckChanged(it) },
+                onValueChange = { accountSettingViewModel.updatePasswordField(AccountSettingViewModel.PasswordField.NEW_PASSWORD_CHECK, it) },
                 placeHolder = "새 비밀번호를 한 번 더 입력해 주세요.",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -268,17 +290,13 @@ fun AccountSettingsScreen(
                     .background(Color.White, shape = RoundedCornerShape(8.dp))
                     .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
                 inputType = LikeLionOutlinedTextFieldInputType.PASSWORD,
-                trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD
-            )
-
-            if (newPwCheckError.value.isNotEmpty()) {
-                Text(
-                    text = newPwCheckError.value,
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD,
+                isError = accountSettingViewModel.isUserNewPwCheckError,
+                textRange = TextRange(8, 20),
+                checkList = listOf(
+                    Pair("비밀번호 일치", newUserPwCheckState.value)
                 )
-            }
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -290,10 +308,8 @@ fun AccountSettingsScreen(
                 BookVerseButton(
                     text = "비밀번호 변경",
                     onClick = {
-                        Timber.e("비밀번호 변경")
-                        Timber.e("${accountSettingViewModel.newUserPw.value}")
                         // 서버에 비밀번호 업데이트 요청
-                        // 예시: accountSettingViewModel.updatePassword(memberId)
+                        accountSettingViewModel.changeUserPassword("memberId") // memberId는 적절한 값으로 바꿔주세요
                     },
                     backgroundColor = Color.Black,
                     textColor = Color.White,
@@ -315,38 +331,6 @@ fun AccountSettingsScreen(
                 modifier = Modifier
                     .padding(start = 5.dp)
                     .clickable(onClick = { showDeleteDialog.value = true })
-            )
-
-            // 탈퇴 다이얼로그
-            /*if (showDeleteDialog.value) {
-                BookVerseCustomDialog(
-                    onDismiss = { showDeleteDialog.value = false },
-                    title = "탈퇴",
-                    message = "탈퇴하시겠습니까? 그동안 저장했던 글귀들은 복구할 수 없습니다.",
-                    positiveText = "예",
-                    negativeText = "아니오",
-                    onConfirm = {
-                        // accountSettingViewModel.deleteUser()
-                        // 탈퇴 후 네비게이션 처리 등 추가 작업
-                    }
-                )
-            }*/
-
-            BookVerseCustomDialog(
-                showDialogState = showDeleteDialog,  // 다이얼로그의 상태를 관리하는 MutableState
-                confirmButtonTitle = "확인",  // 확인 버튼 텍스트
-                confirmButtonOnClick = {
-                    // 확인 버튼 클릭 시 실행될 함수
-                    // showDialog.value = false
-                },
-                dismissButtonTitle = "취소",  // 취소 버튼 텍스트
-                dismissButtonOnClick = {
-                    // 취소 버튼 클릭 시 실행될 함수
-                    // showDialog.value = false
-                },
-                icon = Icons.Default.Warning,  // 다이얼로그에 표시할 아이콘
-                title = "탈퇴",  // 다이얼로그의 제목
-                text = "탈퇴하시겠습니까? 그동안 저장했던 글귀들은 복구할 수 없습니다.",  // 다이얼로그의 본문 텍스트
             )
         }
     }

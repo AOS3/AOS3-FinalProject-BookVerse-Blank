@@ -1,5 +1,9 @@
 package com.blank.bookverse.presentation.ui.MyPage
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,28 +11,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -41,18 +35,27 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.blank.bookverse.R
-import com.blank.bookverse.data.UserData
+import com.blank.bookverse.data.model.MemberModel
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseCustomDialog
-import com.blank.bookverse.presentation.ui.findAccount.FindAccountViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MyPageScreen(
     navController: NavController,
-    myPageViewModel: MyPageViewModel = hiltViewModel()
+    myPageViewModel: MyPageViewModel = hiltViewModel(),
 ) {
-    val userData by myPageViewModel.userData.collectAsState()
-    val showLogoutDialog = remember { mutableStateOf(false) } // 로그아웃 다이얼로그 상태
+    val memberProfile by myPageViewModel.memberProfile.collectAsState()
+    val showLogoutDialog = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // 화면이 처음 표시될 때 데이터를 로드
+    LaunchedEffect(Unit) {
+        val memberDocId = FirebaseAuth.getInstance().currentUser?.uid
+        if (memberDocId != null) {
+            myPageViewModel.getUserProfile(memberDocId)
+        }
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -62,86 +65,93 @@ fun MyPageScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProfileHeader(username = userData.username)
+            if (memberProfile == null) {
+                CircularProgressIndicator() // 로딩 중 표시
+            } else {
+                val memberData = memberProfile ?: MemberModel()
 
-            Spacer(modifier = Modifier.height(16.dp))
+                ProfileHeader(
+                    memberData = memberData,
+                    profileImageUrl = (memberData.memberProfileImage ?: R.drawable.ic_profile).toString()
+                )
 
-            ReadingInfoCard(userData = userData)
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                ReadingInfoCard(memberData = memberData)
 
-            SettingsMenu(
-                navController = navController,
-                onLogoutClicked = { showLogoutDialog.value = true } // 로그아웃 클릭 시 다이얼로그 표시
-            )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SettingsMenu(
+                    navController = navController,
+                    onLogoutClicked = { showLogoutDialog.value = true },
+                    onShareClicked = {
+                        myPageViewModel.copyToClipboard("북버스를 소개합니다.")
+                        Toast.makeText(context, "북버스 소개가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
         }
     }
 
-    BookVerseCustomDialog(
-        showDialogState = showLogoutDialog,  // 다이얼로그의 상태를 관리하는 MutableState
-        confirmButtonTitle = "확인",  // 확인 버튼 텍스트
-        confirmButtonOnClick = {
-            // 확인 버튼 클릭 시 실행될 함수
-            // showDialog.value = false
-        },
-        dismissButtonTitle = "취소",  // 취소 버튼 텍스트
-        dismissButtonOnClick = {
-            // 취소 버튼 클릭 시 실행될 함수
-            // showDialog.value = false
-        },
-        icon = Icons.Default.Warning,  // 다이얼로그에 표시할 아이콘
-        title = "로그아웃",  // 다이얼로그의 제목
-        text = "로그아웃 하시겠습니까?",  // 다이얼로그의 본문 텍스트
-    )
-
     // 로그아웃 다이얼로그
-    /*if (showLogoutDialog.value) {
-        BookVerseCustomDialog(
-            title = "로그아웃",
-            message = "로그아웃 하시겠습니까?",
-            onConfirm = {
-                // 로그아웃 처리 로직 (예: Firebase 로그아웃, 로컬 저장소 제거 등)
-                // 예시로 로그아웃 후 앱을 종료하거나 메인 화면으로 돌아갈 수 있습니다.
-                showLogoutDialog.value = false
-                // 로그아웃 처리 후, 홈 화면으로 돌아가기
-                navController.navigate("login") // 또는 홈 화면으로 변경 //
-            },
-            onCancel = {
-                showLogoutDialog.value = false
-            },
-            positiveText = "예",
-            negativeText = "아니오"
-        )
-    }*/
+    BookVerseCustomDialog(
+        showDialogState = showLogoutDialog,
+        confirmButtonTitle = "확인",
+        confirmButtonOnClick = {
+            myPageViewModel.memberLogout(navController)
+            showLogoutDialog.value = false
+        },
+        dismissButtonTitle = "취소",
+        dismissButtonOnClick = {
+            showLogoutDialog.value = false
+        },
+        icon = Icons.Default.Warning,
+        title = "로그아웃",
+        text = "로그아웃 하시겠습니까?",
+    )
 }
 
 @Composable
-fun ProfileHeader(username: String) {
+fun ProfileHeader(memberData: MemberModel, profileImageUrl: String?) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
-                .width(100.dp)
-                .height(100.dp)
+                .size(100.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color.White)
                 .border(2.dp, Color.Black, RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = Alignment.BottomCenter // 기본 아이콘을 하단에 붙이기 위해 설정
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_profile),
-                contentDescription = "Profile",
-                modifier = Modifier.size(80.dp)
-            )
+            if (memberData.memberProfileImage.isNotBlank() && profileImageUrl != null) {
+                // 프로필 이미지가 있을 경우
+                Image(
+                    painter = rememberImagePainter(data = profileImageUrl),
+                    contentDescription = "Profile Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // 기본 아이콘 표시 (박스 하단에 붙임)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_profile),
+                    contentDescription = "Default Profile Icon",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(90.dp) // 아이콘 크기 조정
+                        .align(Alignment.BottomCenter), // 박스의 하단에 아이콘 배치
+                    colorFilter = ColorFilter.tint(Color.Black)
+                )
+            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp)) // 아이콘과 텍스트 간격 조정
         Text("안녕하세요,", fontSize = 14.sp, color = Color.Gray)
-        Text("$username 님", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("${memberData.memberNickName} 님", fontSize = 18.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 
 @Composable
-fun ReadingInfoCard(userData: UserData) {
+fun ReadingInfoCard(memberData: MemberModel) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,15 +160,15 @@ fun ReadingInfoCard(userData: UserData) {
             .padding(2.dp)
     ) {
         Row(modifier = Modifier.padding(10.dp)) {
-            // 북 커버 이미지
             Box(
                 modifier = Modifier
                     .size(90.dp)
-                    // .graphicsLayer { shadowElevation = 8.dp.toPx() }
                     .clip(RoundedCornerShape(8.dp))
             ) {
                 Image(
-                    painter = rememberImagePainter(userData.bookCover), // bookCover URL을 사용
+                    painter = rememberImagePainter(
+                        data = memberData.memberBookCoverImage ?: R.drawable.ic_book_null
+                    ),
                     contentDescription = "Book Cover",
                     modifier = Modifier.fillMaxSize()
                 )
@@ -167,9 +177,9 @@ fun ReadingInfoCard(userData: UserData) {
             Column {
                 Text(
                     text = buildAnnotatedString {
-                        append("${userData.username} 님은 ")
+                        append("${memberData.memberNickName} 님은 ")
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(userData.favoriteBook)
+                            append(memberData.memberName)
                         }
                         append("을 인상 깊게 읽으셨군요")
                     },
@@ -179,7 +189,7 @@ fun ReadingInfoCard(userData: UserData) {
                     text = buildAnnotatedString {
                         append("총 ")
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("${userData.totalQuotes}편")
+                            append("0편")
                         }
                         append("의 글귀를 남겼어요")
                     },
@@ -195,8 +205,9 @@ fun ReadingInfoCard(userData: UserData) {
     )
 }
 
+
 @Composable
-fun SettingsMenu(navController: NavController, onLogoutClicked: () -> Unit) {
+fun SettingsMenu(navController: NavController, onLogoutClicked: () -> Unit, onShareClicked: () -> Unit) {
     val menuItems = listOf(
         Pair(Icons.Default.Person, "프로필 설정"),
         Pair(Icons.Default.Settings, "계정 설정"),
@@ -206,7 +217,7 @@ fun SettingsMenu(navController: NavController, onLogoutClicked: () -> Unit) {
         Pair(Icons.Default.Info, "이용약관")
     )
 
-    val customBottomSheetVisible = remember { mutableStateOf(false) } // 바텀 시트 상태 관리
+    val customBottomSheetVisible = remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         menuItems.forEach { (icon, text) ->
@@ -218,29 +229,27 @@ fun SettingsMenu(navController: NavController, onLogoutClicked: () -> Unit) {
                         "프로필 설정" -> navController.navigate("profile")
                         "계정 설정" -> navController.navigate("account_setting")
                         "이용약관" -> navController.navigate("terms")
-                        "폰트 설정" -> customBottomSheetVisible.value = true // 폰트 설정 클릭 시 바텀 시트 표시
-                        "로그아웃" -> onLogoutClicked() // 로그아웃 클릭 시 다이얼로그 표시
+                        "폰트 설정" -> customBottomSheetVisible.value = true
+                        "로그아웃" -> onLogoutClicked()
+                        "소개하기" -> onShareClicked()
                     }
                 }
             )
         }
     }
 
-    // 폰트 설정 클릭 시 바텀 시트 보여주기
     BookVerseBottomSheet(
         visible = customBottomSheetVisible,
-        containerColor = Color.White // 바텀시트 배경을 흰색으로 설정
-
+        containerColor = Color.White
     ) {
-        // 바텀 시트 내용
         FontSettingsContent()
     }
 }
 
 @Composable
 fun FontSettingsContent() {
-    val fonts = listOf("Noto Sans KR", "Mali", "Mitr", "Rubik") // 폰트 목록
-    val selectedFont = remember { mutableStateOf(fonts[0]) } // 기본 선택 폰트
+    val fonts = listOf("Noto Sans KR", "Mali", "Mitr", "Rubik")
+    val selectedFont = remember { mutableStateOf(fonts[0]) }
 
     Box(
         modifier = Modifier
@@ -267,13 +276,7 @@ fun FontSettingsContent() {
                         Text(
                             text = font,
                             fontSize = 16.sp,
-                            fontFamily = when (font) {
-                                "Noto Sans KR" -> FontFamily.SansSerif
-                                "Mali" -> FontFamily.Cursive
-                                "Mitr" -> FontFamily.Monospace
-                                "Rubik" -> FontFamily.Default
-                                else -> FontFamily.Default
-                            },
+                            fontFamily = FontFamily.Default,
                             modifier = Modifier.weight(1f)
                         )
 
@@ -287,4 +290,3 @@ fun FontSettingsContent() {
         }
     }
 }
-

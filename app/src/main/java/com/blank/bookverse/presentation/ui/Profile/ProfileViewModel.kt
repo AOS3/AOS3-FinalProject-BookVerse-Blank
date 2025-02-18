@@ -1,72 +1,89 @@
-package com.blank.bookverse.presentation.ui.Profile
+package com.blank.bookverse.presentation.viewmodel
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.blank.bookverse.data.model.MemberModel
 import com.blank.bookverse.data.repository.ProfileRepository
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.blank.bookverse.presentation.ui.login.LoginScreen
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    //private val profileRepository: ProfileRepository,
-    //private val firestore: FirebaseFirestore,
-    //private val firebaseStorage: FirebaseStorage
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
 
-    private val _nickname = MutableStateFlow("")
-    val nickname: StateFlow<String> get() = _nickname
+    private val _profileImageUrl = MutableStateFlow<String>("")
+    val profileImageUrl = _profileImageUrl.asStateFlow()
 
-    private val _profileImageUrl = MutableStateFlow("")
-    val profileImageUrl: StateFlow<String> get() = _profileImageUrl}
+    private val _nickName = MutableStateFlow<String>("")
+    val nickName = _nickName.asStateFlow()
 
-    // 닉네임 업데이트
-    /*fun updateNickname(newNickname: String) {
-        viewModelScope.launch {
-            try {
-                profileRepository.updateNickname("memberId", newNickname)
-                _nickname.value = newNickname
-            } catch (e: Exception) {
-                // 실패 처리
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    private val currentUserId: String? = FirebaseAuth.getInstance().currentUser?.uid
+
+    init {
+        loadUserProfile()
+    }
+
+    // 프로필 데이터 불러오기
+    private fun loadUserProfile() {
+        currentUserId?.let { memberId ->
+            viewModelScope.launch {
+                _isLoading.value = true
+                val profileData = profileRepository.getUserProfile(memberId)
+                profileData?.let {
+                    _profileImageUrl.value = it.memberProfileImage ?: ""
+                    _nickName.value = it.memberNickName // Firestore에서 받은 값만 사용
+                }
+                _isLoading.value = false
             }
         }
     }
 
-    // 프로필 이미지 업로드
-    fun uploadProfileImage(uri: Uri) {
-        viewModelScope.launch {
-            try {
-                val storageRef = firebaseStorage.reference.child("profile_images/userId.jpg")
-                val uploadTask = storageRef.putFile(uri).await()
-                val downloadUrl = storageRef.downloadUrl.await()
-                _profileImageUrl.value = downloadUrl.toString()
-                profileRepository.updateProfileImage("memberId", downloadUrl.toString())
-            } catch (e: Exception) {
-                // 실패 처리
+    // 닉네임 업데이트
+    fun updateNickname(newName: String) {
+        currentUserId?.let { userId ->
+            viewModelScope.launch {
+                profileRepository.updateNickname(userId, newName)
+                _nickName.value = newName
+            }
+        }
+    }
+
+    // 프로필 이미지 변경
+    fun updateProfileImage(imageUri: Uri) {
+        currentUserId?.let { memberId ->
+            viewModelScope.launch {
+                _isLoading.value = true
+                val imageUrl = profileRepository.uploadProfileImage(memberId, imageUri)
+                Log.d("test1", "${imageUrl}")
+                imageUrl?.let {
+                    _profileImageUrl.value = it
+                }
+                _isLoading.value = false
             }
         }
     }
 
     // 프로필 이미지 삭제
     fun deleteProfileImage() {
-        viewModelScope.launch {
-            try {
-                val storageRef = firebaseStorage.reference.child("profile_images/userId.jpg")
-                storageRef.delete().await()
+        currentUserId?.let { memberId ->
+            viewModelScope.launch {
+                profileRepository.deleteProfileImage(memberId)
                 _profileImageUrl.value = ""
-                profileRepository.updateProfileImage("memberId", "")
-            } catch (e: Exception) {
-                // 실패 처리
             }
         }
     }
-}*/
+}
 
 
 
