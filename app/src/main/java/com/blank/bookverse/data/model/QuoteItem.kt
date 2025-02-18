@@ -1,6 +1,6 @@
 package com.blank.bookverse.data.model
 
-data class Quote(
+data class QuoteItem(
     val bookTitle: String,
     val quoteContent: String,
     val timestamp: Long = System.currentTimeMillis(),

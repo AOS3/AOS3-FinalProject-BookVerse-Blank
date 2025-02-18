@@ -1,8 +1,8 @@
 package com.blank.bookverse.data.repository
 
-import com.blank.bookverse.data.HomeQuote
 import com.blank.bookverse.data.Storage
-import com.blank.bookverse.data.model.Quote
+import com.blank.bookverse.data.model.HomeQuote
+import com.blank.bookverse.data.model.QuoteItem
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,7 +15,7 @@ class BookDetailRepository @Inject constructor() {
         return Storage.homeDummy.find { it.bookTitle == bookTitle }!!
     }
 
-    fun getQuoteList(title: String): List<Quote> {
-        return Storage.quoteDummy.filter { it.bookTitle == title }.sortedByDescending { it.timestamp }
+    fun getQuoteList(title: String): List<QuoteItem> {
+        return Storage.quoteItemDummies.filter { it.bookTitle == title }.sortedByDescending { it.timestamp }
     }
 }

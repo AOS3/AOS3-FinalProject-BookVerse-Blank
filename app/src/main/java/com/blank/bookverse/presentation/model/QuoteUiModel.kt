@@ -1,6 +1,6 @@
 package com.blank.bookverse.presentation.model
 
-import com.blank.bookverse.data.model.Quote
+import com.blank.bookverse.data.model.QuoteItem
 import com.blank.bookverse.presentation.util.toFormattedDateString
 
 data class QuoteUiModel(
@@ -10,12 +10,12 @@ data class QuoteUiModel(
     val isDelete: Boolean
 ) {
     companion object {
-        fun from(quote: Quote): QuoteUiModel {
+        fun from(quoteItem: QuoteItem): QuoteUiModel {
             return QuoteUiModel(
-                bookTitle = quote.bookTitle,
-                quoteContent = quote.quoteContent,
-                formattedDate = quote.timestamp.toFormattedDateString(),
-                isDelete = quote.isDelete
+                bookTitle = quoteItem.bookTitle,
+                quoteContent = quoteItem.quoteContent,
+                formattedDate = quoteItem.timestamp.toFormattedDateString(),
+                isDelete = quoteItem.isDelete
             )
         }
     }

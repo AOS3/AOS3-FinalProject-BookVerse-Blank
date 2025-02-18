@@ -3,7 +3,7 @@ package com.blank.bookverse.presentation.ui.book_detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.blank.bookverse.data.HomeQuote
+import com.blank.bookverse.data.model.HomeQuote
 import com.blank.bookverse.data.repository.BookDetailRepository
 import com.blank.bookverse.presentation.model.QuoteUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,8 +1,8 @@
 package com.blank.bookverse.data.repository
 
-import com.blank.bookverse.data.HomeQuote
-import com.blank.bookverse.data.RecommendationContent
 import com.blank.bookverse.data.Storage
+import com.blank.bookverse.data.model.HomeQuote
+import com.blank.bookverse.data.model.RecommendationContent
 import javax.inject.Inject
 import javax.inject.Singleton
 
