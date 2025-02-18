@@ -1,5 +1,6 @@
 package com.blank.bookverse.data.repository
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
@@ -27,6 +28,7 @@ class FindAccountRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) {
     // 전화번호 인증 코드 전송 및 verificationId 반환
+    @SuppressLint("SuspiciousIndentation")
     fun sendVerificationCode(phoneNumber: String): Flow<Result<String>> = flow {
         val result = runCatching {
             suspendCancellableCoroutine<String> { continuation ->
