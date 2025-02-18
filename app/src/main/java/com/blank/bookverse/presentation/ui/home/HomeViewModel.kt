@@ -2,8 +2,8 @@ package com.blank.bookverse.presentation.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.blank.bookverse.data.HomeQuote
-import com.blank.bookverse.data.RecommendationContent
+import com.blank.bookverse.data.model.HomeQuote
+import com.blank.bookverse.data.model.RecommendationContent
 import com.blank.bookverse.data.repository.HomeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

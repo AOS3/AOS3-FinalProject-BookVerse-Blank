@@ -42,7 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
-import com.blank.bookverse.data.HomeQuote
+import com.blank.bookverse.data.model.HomeQuote
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.skydoves.landscapist.ImageOptions
