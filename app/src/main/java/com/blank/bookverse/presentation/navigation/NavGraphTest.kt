@@ -1,6 +1,5 @@
 package com.blank.bookverse.presentation.navigation
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -25,7 +24,7 @@ import com.blank.bookverse.presentation.ui.splash.SplashScreen
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavItem.Splash.route,
+        startDestination = MainNavItem.Splash.route,
         modifier = modifier
     ) {
         // 홈 화면
