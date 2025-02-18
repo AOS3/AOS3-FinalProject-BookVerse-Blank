@@ -1,5 +1,7 @@
 package com.blank.bookverse.data
 
+import com.blank.bookverse.data.model.Quote
+
 object Storage {
 
     val homeDummy = listOf(
@@ -66,6 +68,17 @@ object Storage {
         RecommendationContent(
             quote = "삶이 있는 한 희망은 있다.",
             bookTitle = "공중그네"
+        ),
+    )
+
+    val quoteDummy = listOf(
+        Quote(
+            bookTitle = "광인",
+            quoteContent = "아름답다는 건 그런 거지. 뭘 숨길 필요가 없는 거, 똑같이 해도 그냥 아름다운 거.",
+        ),
+        Quote(
+            bookTitle = "광인",
+            quoteContent = "좋은 사람이란 그 한사람만 있어도 살 만하다 생각이 드는 사람이죠.",
         ),
     )
 }
