@@ -1,6 +1,7 @@
 package com.blank.bookverse.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,4 +18,10 @@ object ContextModule {
     fun provideContext(@ApplicationContext context: Context): Context {
         return context
     }
+
+   /* @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("bookverse_prefs", Context.MODE_PRIVATE)
+    }*/
 }
