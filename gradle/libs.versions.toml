@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.3"
+cameraCore = "1.4.1"
 firebaseFirestore = "25.1.2"
 firebaseBom = "33.9.0"
 firebaseFunctionsKtx = "21.1.0"
@@ -35,6 +36,12 @@ pagingCompose = "3.3.5"
 kotlinxCoroutinesAndroid = "1.9.0"
 
 [libraries]
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
+androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "cameraCore" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCore" }
+androidx-camera-video = { module = "androidx.camera:camera-video", version.ref = "cameraCore" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-ui-unit = { module = "androidx.compose.ui:ui-unit" }
