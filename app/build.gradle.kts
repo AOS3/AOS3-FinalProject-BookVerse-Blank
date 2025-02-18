@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    id("com.google.gms.google-services")
 }
 
 val properties = Properties().apply {
@@ -69,6 +70,8 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.auth.ktx)
     ksp(libs.androidx.room.compiler)
 
     // Hilt
@@ -112,6 +115,16 @@ dependencies {
 
     // Timber
     implementation(libs.timber)
+
+    // FireBase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.play.services.auth)
+    implementation(libs.firebase.functions.ktx)
 
 
     implementation(libs.androidx.core.ktx)

@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.emptyFlow
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     // 바텀 아이템에 표시할 아이템 목록 정리
-    val items = listOf(BottomNavItem.Home, BottomNavItem.Search, BottomNavItem.Profile)
+    val items = listOf(BottomNavItem.Home, BottomNavItem.Search, BottomNavItem.Profile, BottomNavItem.MyPage)
     // 현재 네비게이션 백스택에서 최상단(현재화면) 화면의 route를 가져옴
     val currentRoute = navController.currentRoute()
 
