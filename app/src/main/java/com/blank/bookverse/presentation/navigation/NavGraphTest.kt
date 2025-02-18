@@ -16,8 +16,10 @@ import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
 import com.blank.bookverse.presentation.ui.home.HomeScreen
 import com.blank.bookverse.presentation.ui.login.LoginScreen
 import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
+import com.blank.bookverse.presentation.ui.quotewrite.QuoteWriteScreen
 import com.blank.bookverse.presentation.ui.quote_detail.QuoteDetailScreen
 import com.blank.bookverse.presentation.ui.register.RegisterScreen
+import com.blank.bookverse.presentation.ui.search.SearchScreen
 import com.blank.bookverse.presentation.ui.splash.SplashScreen
 
 @Composable
@@ -30,6 +32,11 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         // 홈 화면
         composable(BottomNavItem.Home.route) { HomeScreen(navController) }
         // 검색 화면
+        composable(BottomNavItem.Search.route) { SearchScreen(navController) }
+//        // 프로필 화면
+//        composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
+//        // 테스트 화면
+//        composable(MainNavItem.Test.route) { TestScreen(navController) }
         // composable(BottomNavItem.Write.route) { SearchScreen(navController) }
         // 작성 화면
         // composable(BottomNavItem.Favorite.route) { ProfileScreen(navController) }
@@ -80,5 +87,7 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(MainNavItem.Register.route) { RegisterScreen(navController) }
         // 아이디/비밀번호 찾기
         composable(MainNavItem.FindAccount.route) { FindAccountScreen(navController) }
+        // 아이디/비밀번호 찾기
+        composable(MainNavItem.QuoteWrite.route) { QuoteWriteScreen(navController) }
     }
 }

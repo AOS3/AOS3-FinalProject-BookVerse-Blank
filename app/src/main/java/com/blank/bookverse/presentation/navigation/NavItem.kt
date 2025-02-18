@@ -28,6 +28,8 @@ sealed class MainNavItem(val route: String, val label: String) {
         fun createRoute(quoteContent: String) = "quote_detail/$quoteContent"
     }
     data object MoreQuote : MainNavItem("more_quote", "더보기")
+    data object QuoteWrite: MainNavItem("write_quote", "글귀 작성")
+}
 }
 
 
@@ -40,3 +42,4 @@ sealed class MyPageNavItem(val route: String, val label: String) {
 // sealed class MainNavItem(val route: String, val label: String) {
 //     data object Test : MainNavItem("test", "테스트")
 // }
+
