@@ -279,7 +279,9 @@ fun HomeQuoteItemPreview() {
         quote = HomeQuote(
             bookTitle = "광인",
             quoteCount = 3,
-            bookCover = "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788937454677.jpg"
+            bookCover = "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788937454677.jpg",
+            quoteDocId = "",
+            memberDocId = "",
         ),
     )
 }
