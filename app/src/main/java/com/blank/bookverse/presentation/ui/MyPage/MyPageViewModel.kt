@@ -48,7 +48,7 @@ class MyPageViewModel @Inject constructor(
         // Firebase 로그아웃
         auth.signOut()
 
-        // 자동 로그인 정보 삭제
+        // 자동 로그인 정보 삭제 //
         val sharedPreferences = context.getSharedPreferences("userInfo", Context.MODE_PRIVATE)
         sharedPreferences.edit().clear().apply()
 
