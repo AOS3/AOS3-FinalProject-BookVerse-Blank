@@ -137,7 +137,7 @@ fun BookDetailContent(
             }
 
             items(
-                items = uiState.quoteList
+                items = uiState.quoteList,
             ) { quote ->
                 BookDetailQuoteItem(
                     quote = quote,
@@ -216,7 +216,6 @@ fun BookDetailScreenPreview() {
 fun BookDetailQuoteItemPreview() {
     BookDetailQuoteItem(
         QuoteUiModel(
-            bookTitle = "",
             quoteContent = "아름답다는 건 그런 거지. 뭘 숨길 필요가 없는 거, 똑같이 해도 그냥 아름다운 거.",
             formattedDate = "2023.07.11",
             isDelete = false

@@ -42,4 +42,14 @@ class HomeRepository @Inject constructor(
             .documents
             .map { it.toHomeQuote() }
     }
+
+    // 책 정보 불러오기
+    suspend fun getBookInfo(bookId: String): HomeQuote {
+        return firestore.collection("HomeQuote")
+            .document(bookId)
+            .get()
+            .await()
+            .toHomeQuote()
+    }
+
 }

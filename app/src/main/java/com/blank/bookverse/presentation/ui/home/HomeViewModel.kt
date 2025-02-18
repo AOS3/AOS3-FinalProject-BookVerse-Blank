@@ -60,8 +60,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun navigateToBookDetail(bookTitle: String) = viewModelScope.launch {
-        _homeEffect.emit(HomeEffect.NavigateToBookDetail(bookTitle))
+    fun navigateToBookDetail(quoteDocId: String) = viewModelScope.launch {
+        _homeEffect.emit(HomeEffect.NavigateToBookDetail(quoteDocId))
     }
 }
 
@@ -77,5 +77,5 @@ data class HomeUiState(
 )
 
 sealed class HomeEffect {
-    data class NavigateToBookDetail(val id: String) : HomeEffect()
+    data class NavigateToBookDetail(val quoteDocId: String) : HomeEffect()
 }

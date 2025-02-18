@@ -27,10 +27,12 @@ object Storage {
 
     val quoteItemDummies = listOf(
         QuoteItem(
+            quoteDocId = "pj4QOf2GDnDf8ichN5WU",
             bookTitle = "광인",
             quoteContent = "아름답다는 건 그런 거지. 뭘 숨길 필요가 없는 거, 똑같이 해도 그냥 아름다운 거.",
         ),
         QuoteItem(
+            quoteDocId = "pj4QOf2GDnDf8ichN5WU",
             bookTitle = "광인",
             quoteContent = "좋은 사람이란 그 한사람만 있어도 살 만하다 생각이 드는 사람이죠.",
         ),
