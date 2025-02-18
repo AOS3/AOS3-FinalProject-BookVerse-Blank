@@ -61,7 +61,7 @@ fun HomeScreen(
         viewModel.homeEffect.collectLatest { effect ->
             when (effect) {
                 is HomeEffect.NavigateToBookDetail -> {
-                    navController.navigate(MainNavItem.BookDetail.route)
+                    navController.navigate(MainNavItem.BookDetail.createRoute(effect.id))
                 }
             }
         }

@@ -52,7 +52,7 @@ fun MoreQuoteScreen(
         viewModel.moreQuoteEffect.collectLatest { effect ->
             when (effect) {
                 is MoreQuoteEffect.NavigateToBookDetail -> {
-                    navController.navigate(MainNavItem.BookDetail.route)
+                    navController.navigate(MainNavItem.BookDetail.createRoute(effect.id))
                 }
             }
         }
