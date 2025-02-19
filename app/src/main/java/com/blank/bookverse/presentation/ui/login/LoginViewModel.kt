@@ -3,7 +3,6 @@ package com.blank.bookverse.presentation.ui.login
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,65 +48,74 @@ class LoginViewModel @Inject constructor(
         _userPw.value = ""
     }
 
-    // 카카오 로그인 처리
-    // 카카오 로그인 처리
+    // 카카오 로그인 처리 (웹 로그인만 진행)
     fun loginWithKakao(context: Context) {
-        // 카카오 계정으로 로그인 (카카오톡 여부와 상관없이)
         UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
-            if (error != null) {
-                Log.e("KAKAO_LOGIN", "카카오 계정 로그인 실패: $error")
-            } else if (token != null) {
-                Log.e("KAKAO_LOGIN", "카카오 계정 로그인 성공: ${token.accessToken}")
-                getKakaoUserInfo()
+            viewModelScope.launch {
+                when {
+                    error != null -> {
+                        // 만약 JsonSyntaxException이 발생하면 fallback으로 사용자 정보 요청을 진행
+                        if (error is com.google.gson.JsonSyntaxException) {
+                            Timber.e("카카오 계정 로그인 JsonSyntaxException 발생: ${error.localizedMessage}")
+                            // 서버 응답이 문자열로 내려오는 문제로 인한 파싱 오류일 수 있으므로,
+                            // 이미 내부적으로 세션이 생성되었을 가능성을 고려하여 사용자 정보 요청 시도
+                            getKakaoUserInfo(context)
+                        } else {
+                            Timber.e("카카오 계정 로그인 실패: $error")
+                            _loginState.emit(LoginState.Error("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                            showDialogLoginState.value = true
+                        }
+                    }
+                    token != null -> {
+                        Timber.i("카카오 계정 로그인 성공: ${token.accessToken}")
+                        getKakaoUserInfo(context)
+                    }
+                }
             }
         }
     }
 
-    // 카카오 정보 가져오기 및 로그인 및 회원가입 처리
-    private fun getKakaoUserInfo() {
+    // 카카오 사용자 정보 요청 및 로그인/회원가입 처리
+    private fun getKakaoUserInfo(context: Context) {
         UserApiClient.instance.me { user, error ->
             if (error != null) {
-                Log.e("KAKAO_USER", "사용자 정보 요청 실패: $error")
-            } else if (user != null) {
-                Log.e("KAKAO_USER", "사용자 닉네임: ${user.kakaoAccount?.profile?.nickname.toString()}")
-                Log.e("KAKAO_USER", "사용자 이메일: ${user.kakaoAccount?.email.toString()}")
-                Log.e("KAKAO_USER", "사용자 전화번호: ${user.kakaoAccount?.phoneNumber.toString()}")
+                Timber.e("사용자 정보 요청 실패: $error")
+            } else {
+                user?.kakaoAccount?.let { account ->
+                    val nickname = account.profile?.nickname.orEmpty()
+                    val email = account.email.orEmpty()
 
-                viewModelScope.launch {
-                    // RegisterModel 생성
-                    val registerModel =
-                        RegisterModel(
+                    viewModelScope.launch {
+                        // RegisterModel 생성 및 로그인/회원가입 API 호출
+                        val registerModel = RegisterModel(
                             memberDocId = "",
-                            memberName = user.kakaoAccount?.profile?.nickname.toString(),
+                            memberName = nickname,
                             memberProfileImage = "",
-                            memberId = user.kakaoAccount?.email.toString(),
-                            memberPassword = user.kakaoAccount?.email.toString(),
+                            memberId = email,
+                            memberPassword = email,
                             memberPhoneNumber = "",
-                            memberNickName = user.kakaoAccount?.profile?.nickname.toString(),
+                            memberNickName = nickname,
                             LoginType = "카카오",
                             createAt = System.currentTimeMillis(),
                             isDelete = false
                         )
 
-                    loginRepository.loginWithKakao(registerModel)
-                        .onStart { _loginState.value = LoginState.Loading }
-                        .collectLatest { result ->
-                            result.fold(
-                                onSuccess = {
-                                    _loginState.value = LoginState.Success(it)
-                                    // 사용자 정보 저장
-                                    saveUserInfo(
-                                        context,
-                                        "카카오",
-                                        user.kakaoAccount?.email.toString(),
-                                        user.kakaoAccount?.email.toString()
-                                    )
-                                },
-                                onFailure = {
-
-                                }
-                            )
-                        }
+                        loginRepository.loginWithKakao(registerModel)
+                            .onStart { _loginState.value = LoginState.Loading }
+                            .collectLatest { result ->
+                                result.fold(
+                                    onSuccess = { response ->
+                                        _loginState.value = LoginState.Success(response)
+                                        // 로그인 성공 시 사용자 정보 로컬 저장
+                                        saveUserInfo(context, "카카오", email, email)
+                                    },
+                                    onFailure = {
+                                        _loginState.emit(LoginState.Error("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                                        showDialogLoginState.value = true
+                                    }
+                                )
+                            }
+                    }
                 }
             }
         }
