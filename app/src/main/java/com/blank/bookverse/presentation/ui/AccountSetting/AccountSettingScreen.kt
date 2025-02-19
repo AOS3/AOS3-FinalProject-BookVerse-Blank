@@ -338,7 +338,7 @@ fun AccountSettingsScreen(
                     BookVerseButton(
                         text = "비밀번호 변경",
                         onClick = {
-                            // 서버에 비밀번호 업데이트 요청
+                            // 서버에 비밀번호 업데이트 요청 //
                             accountSettingViewModel.changeUserPassword()
                         },
                         backgroundColor = Color.Black,
