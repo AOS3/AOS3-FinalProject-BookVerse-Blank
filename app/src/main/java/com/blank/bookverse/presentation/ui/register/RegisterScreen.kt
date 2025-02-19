@@ -50,8 +50,6 @@ import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldEndIconMode
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldInputType
-import com.kakao.sdk.common.util.Utility
-import timber.log.Timber
 
 @Composable
 fun RegisterScreen(
@@ -364,7 +362,7 @@ fun RegisterScreen(
                         shape = RoundedCornerShape(8.dp)
                     ),
                 checkList = listOf(
-                    Pair("2~8자", Regex("^.{2,8}\$"))
+                    Pair("2~12자", Regex("^.{2,12}\$"))
                 ),
                 isError = registerViewModel.isUserNicknameError,
                 inputType = LikeLionOutlinedTextFieldInputType.TEXT,

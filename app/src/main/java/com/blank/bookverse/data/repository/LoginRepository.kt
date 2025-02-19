@@ -1,14 +1,11 @@
 package com.blank.bookverse.data.repository
 
 import android.content.Context
-import com.google.firebase.auth.AuthCredential
+import com.blank.bookverse.data.model.RegisterModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.user.UserApiClient
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -17,9 +14,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 @Singleton
 class LoginRepository @Inject constructor(
@@ -39,7 +33,6 @@ class LoginRepository @Inject constructor(
 
         emit(result)
     }.flowOn(Dispatchers.IO)
-
 
     // 구글 로그인
     fun loginWithGoogle(googleIdToken: String): Flow<Result<FirebaseUser?>> = flow {
@@ -81,77 +74,41 @@ class LoginRepository @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     // 카카오 로그인
-    fun loginWithKakao(context: Context): Flow<Result<Pair<FirebaseUser?, String>>> = flow {
-        emit(runCatching {
-            // 카카오 액세스 토큰 가져오기
-            val kakaoToken = getKakaoAccessToken(context)
+    fun loginWithKakao(registerModel: RegisterModel): Flow<Result<FirebaseUser?>> = flow {
+        val result = runCatching {
+            // Firestore에서 기존 memberId 조회
+            val querySnapShot = firebaseStore.collection("Member")
+                .whereEqualTo("memberId", registerModel.memberId)
+                .get()
+                .await()
 
-            // Firebase 인증 정보 생성
-            val firebaseCredential = getFirebaseCredential(kakaoToken)
+            if (querySnapShot.isEmpty) {
+                // 회원가입 처리
+                val authResult = firebaseAuth.createUserWithEmailAndPassword(
+                    registerModel.memberId,
+                    registerModel.memberPassword
+                ).await()
 
-            // Firebase에 로그인 시도
-            val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
-            val firebaseUser = authResult.user
+                val uid = authResult.user?.uid ?: throw Exception("회원가입 실패: UID 없음")
 
-            // 로그인한 FirebaseUser 객체가 있을 때
-            firebaseUser?.let {
-                // Firestore에서 사용자 정보 조회
-                val userDocRef = firebaseStore.collection("Member").document(it.uid)
-                val docSnapshot = userDocRef.get().await()
+                // Firestore에 회원 정보 저장
+                val updatedRegisterModel = registerModel.copy(memberDocId = uid)
+                firebaseStore.collection("Member")
+                    .document(uid)
+                    .set(updatedRegisterModel)
+                    .await()
 
-                // Firestore에 데이터가 없으면 새 데이터 추가
-                if (!docSnapshot.exists()) {
-                    val newUserData = hashMapOf(
-                        "memberDocId" to it.uid,
-                        "memberId" to it.email,
-                        "memberName" to it.displayName,
-                        "memberProfileImage" to it.photoUrl.toString(),
-                        "createdAt" to System.currentTimeMillis(),
-                        "loginType" to "카카오",
-                        "delete" to "false",
-                        "memberNickName" to it.displayName,
-                        "memberPhoneNumber" to it.phoneNumber,
-                        "memberPassword" to ""
-                    )
-                    // Firestore에 사용자 데이터 삽입
-                    userDocRef.set(newUserData).await()
-                }
-            }
-
-            // 로그인한 사용자와 카카오 토큰을 함께 반환
-            Pair(firebaseUser, kakaoToken)
-        })
-    }.flowOn(Dispatchers.IO)
-
-    // 카카오 액세스 토큰 가져오기
-    private suspend fun getKakaoAccessToken(context: Context): String {
-        return suspendCoroutine { continuation ->
-            val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
-                if (error != null) {
-                    continuation.resumeWithException(error)
-                } else {
-                    // 카카오 액세스 토큰이 null이면 예외를 발생시킴
-                    val accessToken = token?.accessToken
-                    if (accessToken != null) {
-                        continuation.resume(accessToken)
-                    } else {
-                        continuation.resumeWithException(IllegalStateException("Kakao access token is null"))
-                    }
-                }
-            }
-
-            if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
-                UserApiClient.instance.loginWithKakaoTalk(context, callback = callback)
+                authResult.user  // 회원가입 성공한 FirebaseUser 반환
             } else {
-                UserApiClient.instance.loginWithKakaoAccount(context, callback = callback)
+                // 로그인 처리
+                val authResult = firebaseAuth.signInWithEmailAndPassword(
+                    registerModel.memberId,
+                    registerModel.memberPassword
+                ).await()
+                authResult.user  // 로그인 성공한 FirebaseUser 반환
             }
         }
-    }
+        emit(result)
+    }.flowOn(Dispatchers.IO)
 
-    // Firebase 인증 자격 증명 생성
-    private fun getFirebaseCredential(kakaoToken: String): AuthCredential {
-        return OAuthProvider.newCredentialBuilder("oidc.kakao.com")
-            .setIdToken(kakaoToken) // 카카오 액세스 토큰을 설정
-            .build()
-    }
 }
