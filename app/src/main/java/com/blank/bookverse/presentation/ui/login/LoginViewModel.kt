@@ -49,26 +49,15 @@ class LoginViewModel @Inject constructor(
     }
 
     // 카카오 로그인 처리
+    // 카카오 로그인 처리
     fun loginWithKakao(context: Context) {
-        if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
-            // 카카오톡으로 로그인
-            UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
-                if (error != null) {
-                    Log.e("KAKAO_LOGIN", "카카오 로그인 실패: $error")
-                } else if (token != null) {
-                    Log.d("KAKAO_LOGIN", "카카오 로그인 성공: ${token.accessToken}")
-                    getKakaoUserInfo()
-                }
-            }
-        } else {
-            // 카카오 계정으로 로그인 (카카오톡이 없을 경우)
-            UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
-                if (error != null) {
-                    Log.e("KAKAO_LOGIN", "카카오 계정 로그인 실패: $error")
-                } else if (token != null) {
-                    Log.d("KAKAO_LOGIN", "카카오 계정 로그인 성공: ${token.accessToken}")
-                    getKakaoUserInfo()
-                }
+        // 카카오 계정으로 로그인 (카카오톡 여부와 상관없이)
+        UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
+            if (error != null) {
+                Log.e("KAKAO_LOGIN", "카카오 계정 로그인 실패: $error")
+            } else if (token != null) {
+                Log.e("KAKAO_LOGIN", "카카오 계정 로그인 성공: ${token.accessToken}")
+                getKakaoUserInfo()
             }
         }
     }
