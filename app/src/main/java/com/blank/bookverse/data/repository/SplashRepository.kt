@@ -1,7 +1,6 @@
 package com.blank.bookverse.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -38,5 +37,18 @@ class SplashRepository @Inject constructor(
             authResult.user
         }
         emit(result.isSuccess && result.getOrNull() != null)
+    }.flowOn(Dispatchers.IO)
+
+    // 카카오 로그인
+    fun loginWithKakao(userId: String, userPassWord: String): Flow<Boolean> = flow {
+        val result = runCatching {
+            val authResult =
+                firebaseAuth.signInWithEmailAndPassword(userId, userPassWord)
+                    .await()
+            authResult.user // 성공 시 user 반환
+        }
+
+        // Result 처리를 통해 로그인 성공 여부를 판단하여 true/false 반환
+        emit(result.isSuccess && result.getOrNull() != null) // 성공 시 true, 실패 시 false
     }.flowOn(Dispatchers.IO)
 }

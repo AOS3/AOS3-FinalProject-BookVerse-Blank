@@ -31,8 +31,8 @@ class SplashViewModel @Inject constructor(
                 }
             }
             "카카오" -> {
-                return if (!userId.isNullOrEmpty()) {
-                    val isLogin = splashRepository.loginWithGoogle(userId).firstOrNull() ?: false
+                return if (!userId.isNullOrEmpty() && !userPw.isNullOrEmpty()) {
+                    val isLogin = splashRepository.loginWithKakao(userId,userPw).firstOrNull() ?: false
                     isLogin
                 } else {
                     false

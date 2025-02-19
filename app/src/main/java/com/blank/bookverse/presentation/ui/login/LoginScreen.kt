@@ -1,9 +1,7 @@
 package com.blank.bookverse.presentation.ui.login
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,10 +48,8 @@ import com.blank.bookverse.presentation.common.BookVerseDefaultTextField
 import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
 import com.blank.bookverse.presentation.common.DefaultTextFieldEndIconMode
 import com.blank.bookverse.presentation.common.DefaultTextFieldInputType
-import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.FirebaseAuth
 import timber.log.Timber
 
 @Composable
@@ -275,7 +271,8 @@ fun LoginScreen(
                                     interactionSource = null,
                                     indication = null,
                                     onClick = {
-                                        loginViewModel.kakaoLogin()
+                                        //loginViewModel.kakaoLogin()
+                                        loginViewModel.loginWithKakao(context)
                                     }
                                 ),
                             contentScale = ContentScale.FillWidth
