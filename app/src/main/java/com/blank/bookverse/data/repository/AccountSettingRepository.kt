@@ -87,5 +87,37 @@ class AccountSettingRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun deleteUserAccount(): Boolean {
+        val memberId = firebaseAuth.currentUser?.uid
+        return try {
+            // Firestore에서 사용자 데이터 삭제
+            val snapshot = firebaseFireStore.collection("Member")
+                .whereEqualTo("memberDocId", memberId)
+                .get()
+                .await()
+
+            if (snapshot.isEmpty) {
+                Log.e("Firestore", "No matching document found for memberId: $memberId")
+                return false
+            }
+
+            // 사용자 문서 ID 가져오기
+            val documentId = snapshot.documents.first().id
+
+            // Firestore에서 사용자 데이터 삭제
+            firebaseFireStore.collection("Member").document(documentId).delete().await()
+
+            // Firebase Authentication에서 사용자 삭제
+            firebaseAuth.currentUser?.delete()?.await()
+
+            Log.d("firebaseAuth", "User account deleted successfully: $memberId")
+            true
+        } catch (e: Exception) {
+            Log.e("firebaseStore", "Error deleting user account: ${e.message}")
+            false
+        }
+    }
+
 }
 

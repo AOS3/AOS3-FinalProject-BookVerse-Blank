@@ -23,6 +23,15 @@ class MyPageViewModel @Inject constructor(
     private val context: Context
 ) : ViewModel() {
 
+    // 로그인 타입을 나타내는 상태
+    private val _loginType = MutableStateFlow<LoginType>(LoginType.NORMAL) // 기본값을 NORMAL로 설정
+    val loginType = _loginType.asStateFlow()
+
+    // 로그인 타입 열거형
+    enum class LoginType {
+        NORMAL, GOOGLE, KAKAO
+    }
+
     private val _memberProfile = MutableStateFlow<MemberModel?>(null)
     val memberProfile = _memberProfile.asStateFlow()
 
@@ -31,6 +40,18 @@ class MyPageViewModel @Inject constructor(
             myPageRepository.getUserProfile(memberDocId).collect { memberModel ->
                 _memberProfile.value = memberModel
             }
+        }
+    }
+
+    // 로그인 타입을 확인하는 메서드
+    fun checkLoginType() {
+        val auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+        when {
+            currentUser == null -> _loginType.value = LoginType.NORMAL
+            currentUser.providerData.any { it.providerId == "google.com" } -> _loginType.value = LoginType.GOOGLE
+            currentUser.providerData.any { it.providerId == "kakao.com" } -> _loginType.value = LoginType.KAKAO
+            else -> _loginType.value = LoginType.NORMAL
         }
     }
 

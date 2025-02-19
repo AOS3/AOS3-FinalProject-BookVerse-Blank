@@ -46,6 +46,7 @@ fun MyPageScreen(
     myPageViewModel: MyPageViewModel = hiltViewModel(),
 ) {
     val memberProfile by myPageViewModel.memberProfile.collectAsState()
+    val loginType by myPageViewModel.loginType.collectAsState()
     val showLogoutDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -55,6 +56,8 @@ fun MyPageScreen(
         if (memberDocId != null) {
             myPageViewModel.getUserProfile(memberDocId)
         }
+        // 로그인 타입 확인
+        myPageViewModel.checkLoginType()
     }
 
     Scaffold { innerPadding ->
@@ -81,13 +84,15 @@ fun MyPageScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // 로그인 타입에 따라 "계정 설정" 메뉴를 표시할지 말지를 결정
                 SettingsMenu(
                     navController = navController,
                     onLogoutClicked = { showLogoutDialog.value = true },
                     onShareClicked = {
                         myPageViewModel.copyToClipboard("북버스를 소개합니다.")
                         Toast.makeText(context, "북버스 소개가 복사되었습니다.", Toast.LENGTH_SHORT).show()
-                    }
+                    },
+                    isAccountSettingVisible = loginType == MyPageViewModel.LoginType.NORMAL // 일반 로그인일 때만 보이게
                 )
             }
         }
@@ -149,7 +154,6 @@ fun ProfileHeader(memberData: MemberModel, profileImageUrl: String?) {
     }
 }
 
-
 @Composable
 fun ReadingInfoCard(memberData: MemberModel) {
     Box(
@@ -205,9 +209,13 @@ fun ReadingInfoCard(memberData: MemberModel) {
     )
 }
 
-
 @Composable
-fun SettingsMenu(navController: NavController, onLogoutClicked: () -> Unit, onShareClicked: () -> Unit) {
+fun SettingsMenu(
+    navController: NavController,
+    onLogoutClicked: () -> Unit,
+    onShareClicked: () -> Unit,
+    isAccountSettingVisible: Boolean // 이 값을 통해 계정 설정 메뉴 보이기/숨기기
+) {
     val menuItems = listOf(
         Pair(Icons.Default.Person, "프로필 설정"),
         Pair(Icons.Default.Settings, "계정 설정"),
@@ -221,6 +229,10 @@ fun SettingsMenu(navController: NavController, onLogoutClicked: () -> Unit, onSh
 
     Column(modifier = Modifier.fillMaxWidth()) {
         menuItems.forEach { (icon, text) ->
+            if (text == "계정 설정" && !isAccountSettingVisible) {
+                // "계정 설정" 메뉴는 일반 로그인일 때만 표시
+                return@forEach
+            }
             ListItem(
                 leadingContent = { Icon(icon, contentDescription = null) },
                 headlineContent = { Text(text) },
@@ -290,3 +302,4 @@ fun FontSettingsContent() {
         }
     }
 }
+
