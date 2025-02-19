@@ -1,6 +1,8 @@
 package com.blank.bookverse.presentation.ui.AccountSetting
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,6 +47,7 @@ import androidx.navigation.NavHostController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseCustomDialog
+import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldEndIconMode
@@ -60,6 +63,8 @@ fun AccountSettingsScreen(
 ) {
     // Firebase 인증 인스턴스
     val auth = FirebaseAuth.getInstance()
+
+    val context = LocalContext.current
 
     // 로그인된 사용자 UID를 로그로 출력
     val currentUserUid = auth.currentUser?.uid
@@ -77,6 +82,7 @@ fun AccountSettingsScreen(
     val showDeleteDialog = remember { mutableStateOf(false) }
 
     val isLoading by accountSettingViewModel.isLoading.collectAsState() // 로딩 상태
+    val isDeleting by accountSettingViewModel.isDeleting.collectAsState() // 로딩 상태
 
     // 멤버 정보
     val memberInfo by accountSettingViewModel.memberInfo.collectAsState()
@@ -86,7 +92,6 @@ fun AccountSettingsScreen(
     val newUserPwState = accountSettingViewModel.newUserPw.collectAsState()
     val newUserPwCheckState = accountSettingViewModel.newUserPwCheck.collectAsState()
 
-
     // 비밀번호 변경 버튼 활성화 여부
     val isButtonEnabled =
         currentUserPwState.value.isNotEmpty() &&
@@ -94,24 +99,15 @@ fun AccountSettingsScreen(
                 newUserPwCheckState.value.isNotEmpty() &&
                 newUserPwState.value == newUserPwCheckState.value
 
-    // 화면 전환
-    when (passwordChangeStatus) {
-        is AccountSettingViewModel.PasswordChangeState.Success -> {
-            // 성공 시 mypage로 이동
-            navController.navigate("mypage") {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true // startDestinationId까지 포함하여 백스택을 제거
-                }
-                launchSingleTop = true // 새로운 화면이 기존 화면을 대체
-            }
-        }
-        is AccountSettingViewModel.PasswordChangeState.Error -> {
-            // 오류 시 처리할 코드 작성
-        }
-        else -> {
-            // Idle 상태는 기본 상태
+    // LaunchedEffect를 사용하여 한 번만 실행되도록 처리
+    LaunchedEffect(passwordChangeStatus) {
+        if (passwordChangeStatus is AccountSettingViewModel.PasswordChangeState.Success) {
+            // 비밀번호 변경 성공 시 "변경 완료" 메시지 표시
+            Toast.makeText(context, "변경 완료", Toast.LENGTH_SHORT).show()
         }
     }
+    // 로딩 다이얼로그 적용
+    BookVerseLoadingDialog(isVisible = isDeleting)
 
     Scaffold(
         topBar = {
@@ -244,9 +240,6 @@ fun AccountSettingsScreen(
                 inputType = LikeLionOutlinedTextFieldInputType.PASSWORD,
                 isError = accountSettingViewModel.isUserCurrentPwError,
                 trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD,
-                checkList = listOf(
-                    Pair("비밀번호 일치", currentUserPwState.value)
-                )
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -335,10 +328,11 @@ fun AccountSettingsScreen(
                         isEnable = false
                     )
                 } else {
+                    // 비밀번호 변경 버튼 클릭
                     BookVerseButton(
                         text = "비밀번호 변경",
                         onClick = {
-                            // 서버에 비밀번호 업데이트 요청
+                            // 비밀번호 변경 함수 호출
                             accountSettingViewModel.changeUserPassword()
                         },
                         backgroundColor = Color.Black,
@@ -370,8 +364,8 @@ fun AccountSettingsScreen(
                     showDialogState = showDeleteDialog,
                     confirmButtonTitle = "확인",
                     confirmButtonOnClick = {
-                        // accountSettingViewModel.deleteUserAccount(navController)
-                        // 탈퇴 확인 클릭 시 처리 로직
+                        // 탈퇴 확인 클릭 시
+                        accountSettingViewModel.deleteUserAccount(navController)
                         showDeleteDialog.value = false
                     },
                     dismissButtonTitle = "취소",

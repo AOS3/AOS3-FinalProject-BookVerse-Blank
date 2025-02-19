@@ -2,22 +2,27 @@ package com.blank.bookverse.presentation.ui.AccountSetting
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.blank.bookverse.data.repository.AccountSettingRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class AccountSettingViewModel @Inject constructor(
-    @ApplicationContext context: Context,
+    // @ApplicationContext context: Context,
+    private val context: Context,
     private val accountSettingRepository: AccountSettingRepository
 ) : ViewModel() {
 
@@ -46,6 +51,9 @@ class AccountSettingViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
+    // 탈퇴 중
+    private val _isDeleting = MutableStateFlow(false)
+    val isDeleting = _isDeleting.asStateFlow()
 
     // 멤버 아이디와 전화번호 상태
     private val _memberInfo = MutableStateFlow<Pair<String, String>?>(null)
@@ -65,13 +73,13 @@ class AccountSettingViewModel @Inject constructor(
         return _newUserPw.value == _newUserPwCheck.value && _newUserPw.value.isNotBlank()
     }
 
-    // 비밀번호 변경 로직
     fun changeUserPassword() = viewModelScope.launch {
         // 비밀번호 변경 시작 전에 로딩 상태 true로 설정
         _isLoading.value = true
 
-        if (!validatePasswordChange()) {
-            // 비밀번호 유효성 검사 실패 시 로딩 상태 종료
+        // 비밀번호 유효성 검사
+        val isValid = validatePasswordChange()
+        if (!isValid) {
             _isLoading.value = false
             return@launch
         }
@@ -81,6 +89,12 @@ class AccountSettingViewModel @Inject constructor(
         Log.d("", "$isCurrentPasswordValid")
         if (!isCurrentPasswordValid) {
             isUserCurrentPwError.value = true
+
+            // 현재 비밀번호가 틀리면 Toast 메시지 띄우기
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "현재 비밀번호를 다시 확인해 주세요.", Toast.LENGTH_SHORT).show()
+            }
+
             // 비밀번호 확인 실패 시 로딩 상태 종료
             _isLoading.value = false
             return@launch
@@ -99,6 +113,7 @@ class AccountSettingViewModel @Inject constructor(
     }
 
 
+
     // 멤버 정보 가져오기
     fun fetchMemberInfo(memberId: String) = viewModelScope.launch {
         _memberInfo.value = accountSettingRepository.getMemberInfo(memberId)
@@ -115,4 +130,27 @@ class AccountSettingViewModel @Inject constructor(
     enum class PasswordField {
         CURRENT_PASSWORD, NEW_PASSWORD, NEW_PASSWORD_CHECK
     }
+
+    // 회원 탈퇴 로직
+    fun deleteUserAccount(navController: NavHostController) = viewModelScope.launch {
+        _isDeleting.value = true // 탈퇴 시작 시 로딩 표시
+
+        val isDeleted = accountSettingRepository.deleteUserAccount()
+
+        _isDeleting.value = false // 탈퇴 완료 후 로딩 숨기기
+
+        if (isDeleted) {
+            // 탈퇴 성공 시 로그인 화면으로 이동
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        } else {
+            // 실패 시 오류 처리 (예: 사용자에게 메시지 표시)
+            Log.e("AccountSettingViewModel", "Error deleting account")
+        }
+    }
+
 }
