@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.repository.LoginRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
@@ -59,7 +60,6 @@ class LoginViewModel @Inject constructor(
                             _loginState.value = LoginState.Success(user)
                             // 카카오 토큰을 가져와서 사용자 정보 저장
                             saveUserInfo(context, "카카오", kakaoToken, "")
-                            Timber.e("카카오 토큰 : $kakaoToken")
                         },
                         onFailure = { error ->
                             _loginState.value = LoginState.Error(error.message ?: "알 수 없는 오류")

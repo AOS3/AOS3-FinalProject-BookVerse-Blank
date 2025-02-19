@@ -99,7 +99,8 @@ fun BookVerseTextField(
     unfocusedBorderColor: Color = Color.Gray,
     focusedContainerColor: Color = Color.White,
     unfocusedContainerColor: Color = Color.White,
-    cursorColor: Color = Color.DarkGray
+    cursorColor: Color = Color.DarkGray,
+    maxLines:Int = 1
 ) {
     val gridRow by remember { mutableStateOf(gridRow) }
     // 비밀번호가 보이는지...
@@ -120,9 +121,11 @@ fun BookVerseTextField(
             modifier = defaultModifier.fillMaxWidth(),
             value = textFieldValue.value,
             label = null,
+            maxLines = maxLines,
             placeholder = {
                 Text(
                     text = placeHolder,
+                    maxLines = maxLines,
                     color = MaterialTheme
                         .colorScheme
                         .onSurface

@@ -1,5 +1,8 @@
 package com.blank.bookverse.presentation.util
 
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
@@ -45,4 +48,12 @@ fun NavController.shouldShowBottomBar(): Boolean {
 fun Long.toFormattedDateString(pattern: String = "yyyy.MM.dd"): String {
     return SimpleDateFormat(pattern, Locale.getDefault())
         .format(Date(this))
+}
+
+fun Context.findActivity(): ComponentActivity? {
+    return when (this) {
+        is ComponentActivity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
+    }
 }
