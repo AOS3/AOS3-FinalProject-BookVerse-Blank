@@ -1,14 +1,18 @@
 package com.blank.bookverse.presentation.ui.AccountSetting
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.blank.bookverse.data.repository.AccountSettingRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,9 +42,10 @@ class AccountSettingViewModel @Inject constructor(
     private val _passwordChangeStatus = MutableStateFlow<PasswordChangeState>(PasswordChangeState.Idle)
     val passwordChangeStatus: StateFlow<PasswordChangeState> get() = _passwordChangeStatus
 
-    // 비밀번호 변경 효과 관리
-    private val _passwordChangeEffect = MutableSharedFlow<PasswordChangeEffect>()
-    val passwordChangeEffect: SharedFlow<PasswordChangeEffect> get() = _passwordChangeEffect
+    // 로딩 중
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
 
     // 멤버 아이디와 전화번호 상태
     private val _memberInfo = MutableStateFlow<Pair<String, String>?>(null)
@@ -61,30 +66,38 @@ class AccountSettingViewModel @Inject constructor(
     }
 
     // 비밀번호 변경 로직
-    fun changeUserPassword(memberId: String) = viewModelScope.launch {
+    fun changeUserPassword() = viewModelScope.launch {
+        // 비밀번호 변경 시작 전에 로딩 상태 true로 설정
+        _isLoading.value = true
+
         if (!validatePasswordChange()) {
-            _passwordChangeEffect.emit(PasswordChangeEffect.ShowMessage("새 비밀번호가 일치하지 않습니다."))
+            // 비밀번호 유효성 검사 실패 시 로딩 상태 종료
+            _isLoading.value = false
             return@launch
         }
 
         // 현재 비밀번호 확인
-        val isCurrentPasswordValid = accountSettingRepository.validateCurrentPassword(memberId, _currentUserPw.value)
+        val isCurrentPasswordValid = accountSettingRepository.validateCurrentPassword(_currentUserPw.value)
+        Log.d("", "$isCurrentPasswordValid")
         if (!isCurrentPasswordValid) {
-            _passwordChangeEffect.emit(PasswordChangeEffect.ShowMessage("현재 비밀번호가 올바르지 않습니다."))
             isUserCurrentPwError.value = true
+            // 비밀번호 확인 실패 시 로딩 상태 종료
+            _isLoading.value = false
             return@launch
         }
 
         // 비밀번호 변경 진행
-        val isPasswordChanged = accountSettingRepository.updatePassword(memberId, _newUserPw.value)
+        val isPasswordChanged = accountSettingRepository.updatePassword(_newUserPw.value)
         if (isPasswordChanged) {
             _passwordChangeStatus.value = PasswordChangeState.Success
-            _passwordChangeEffect.emit(PasswordChangeEffect.ShowMessage("비밀번호가 성공적으로 변경되었습니다."))
         } else {
             _passwordChangeStatus.value = PasswordChangeState.Error("비밀번호 변경 실패")
-            _passwordChangeEffect.emit(PasswordChangeEffect.ShowMessage("비밀번호 변경에 실패하였습니다."))
         }
+
+        // 비밀번호 변경 완료 후 로딩 상태 종료
+        _isLoading.value = false
     }
+
 
     // 멤버 정보 가져오기
     fun fetchMemberInfo(memberId: String) = viewModelScope.launch {
@@ -96,11 +109,6 @@ class AccountSettingViewModel @Inject constructor(
         object Idle : PasswordChangeState()
         object Success : PasswordChangeState()
         data class Error(val message: String) : PasswordChangeState()
-    }
-
-    // 비밀번호 변경 효과 정의
-    sealed class PasswordChangeEffect {
-        data class ShowMessage(val message: String) : PasswordChangeEffect()
     }
 
     // 비밀번호 필드 종류 정의
