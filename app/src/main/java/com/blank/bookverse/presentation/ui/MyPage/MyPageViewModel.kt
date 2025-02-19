@@ -60,7 +60,7 @@ class MyPageViewModel @Inject constructor(
         // Firebase 로그아웃이 적용되었는지 확인 후 이동
         if (auth.currentUser == null) {
             navController.navigate("login") {
-                popUpTo("myPage") { inclusive = true }
+                popUpTo("myPage") { inclusive = true } //
             }
         }
     }
