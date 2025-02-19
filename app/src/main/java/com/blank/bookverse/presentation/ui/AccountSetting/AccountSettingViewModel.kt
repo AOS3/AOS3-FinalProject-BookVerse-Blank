@@ -116,4 +116,3 @@ class AccountSettingViewModel @Inject constructor(
         CURRENT_PASSWORD, NEW_PASSWORD, NEW_PASSWORD_CHECK
     }
 }
-
