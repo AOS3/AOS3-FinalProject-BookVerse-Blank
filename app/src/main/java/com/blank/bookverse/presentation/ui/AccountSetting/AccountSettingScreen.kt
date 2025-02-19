@@ -319,7 +319,7 @@ fun AccountSettingsScreen(
                     .fillMaxSize()
                     .fillMaxHeight()
             ) {
-                // 로딩 중일 때 비밀번호 변경 버튼을 비활성화하고 로딩 표시 //
+                // 로딩 중일 때 비밀번호 변경 버튼을 비활성화하고 로딩 표시
                 if (isLoading) {
                     // 로딩 표시 추가 (예: 로딩 스피너)
                     BookVerseButton(
