@@ -386,7 +386,3 @@ fun AccountSettingsScreen(
         }
     }
 }
-
-
-
-
