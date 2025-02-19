@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -86,12 +85,9 @@ class LoginRepository @Inject constructor(
         emit(runCatching {
             // 카카오 액세스 토큰 가져오기
             val kakaoToken = getKakaoAccessToken(context)
-            Timber.e("repository kakaoToken : $kakaoToken")
 
             // Firebase 인증 정보 생성
             val firebaseCredential = getFirebaseCredential(kakaoToken)
-            Timber.e("repository firebaseCredential : $firebaseCredential")
-            Timber.e("repository authResult : ${firebaseAuth.signInWithCredential(firebaseCredential)}")
 
             // Firebase에 로그인 시도
             val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
