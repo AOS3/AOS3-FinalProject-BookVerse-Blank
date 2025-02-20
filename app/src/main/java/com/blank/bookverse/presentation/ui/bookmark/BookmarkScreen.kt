@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,8 @@ import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.BookmarkButton
 import com.blank.bookverse.presentation.model.BookDetailUiModel
 import com.blank.bookverse.presentation.model.BookmarkUiModel
+import com.blank.bookverse.presentation.navigation.MainNavItem
+import com.blank.bookverse.presentation.ui.book_detail.BookDetailEffect
 
 @Composable
 fun BookmarkScreen(
@@ -39,9 +42,21 @@ fun BookmarkScreen(
 ) {
     val uiState by viewModel.bookmarkUiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.bookDetailEffect.collect { effect ->
+            when (effect) {
+                is BookDetailEffect.NavigateToQuoteDetail -> {
+                    navController.navigate(MainNavItem.QuoteDetail.createRoute(effect.quoteDocId))
+                }
+            }
+        }
+    }
+
     BookmarkContent(
         modifier = modifier,
         uiState = uiState,
+        onNavigateToQuoteDetail = viewModel::navigateToQuoteDetail,
+        onBookmarkClick = viewModel::updateBookmark,
     )
 
 }
@@ -50,6 +65,8 @@ fun BookmarkScreen(
 fun BookmarkContent(
     modifier: Modifier = Modifier,
     uiState: BookmarkUiState,
+    onNavigateToQuoteDetail: (String) -> Unit = {},
+    onBookmarkClick: (String, Boolean) -> Unit = { _, _ -> },
 ) {
     Scaffold(
         topBar = {
@@ -72,7 +89,11 @@ fun BookmarkContent(
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(uiState.bookmarkedQuotes) { quote ->
-                        BookMarkQuoteItem(quote)
+                        BookMarkQuoteItem(
+                            quote,
+                            onNavigateToQuoteDetail = onNavigateToQuoteDetail,
+                            onBookmarkClick = onBookmarkClick
+                        )
                     }
                 }
 
