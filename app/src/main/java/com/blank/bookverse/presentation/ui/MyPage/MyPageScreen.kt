@@ -1,8 +1,5 @@
 package com.blank.bookverse.presentation.ui.MyPage
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,6 +35,7 @@ import com.blank.bookverse.R
 import com.blank.bookverse.data.model.MemberModel
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseCustomDialog
+import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -48,7 +46,9 @@ fun MyPageScreen(
     val memberProfile by myPageViewModel.memberProfile.collectAsState()
     val loginType by myPageViewModel.loginType.collectAsState()
     val showLogoutDialog = remember { mutableStateOf(false) }
+    val showDeleteAccountDialog = remember { mutableStateOf(false) } // 탈퇴 다이얼로그 상태
     val context = LocalContext.current
+    val isDeleting by myPageViewModel.isDeleting.collectAsState() // 로딩 상태
 
     // 화면이 처음 표시될 때 데이터를 로드
     LaunchedEffect(Unit) {
@@ -59,6 +59,9 @@ fun MyPageScreen(
         // 로그인 타입 확인
         myPageViewModel.checkLoginType()
     }
+
+    // 로딩 다이얼로그 적용
+    BookVerseLoadingDialog(isVisible = isDeleting)
 
     Scaffold { innerPadding ->
         Column(
@@ -84,7 +87,7 @@ fun MyPageScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 로그인 타입에 따라 "계정 설정" 메뉴를 표시할지 말지를 결정
+                // 설정 메뉴
                 SettingsMenu(
                     navController = navController,
                     onLogoutClicked = { showLogoutDialog.value = true },
@@ -92,7 +95,8 @@ fun MyPageScreen(
                         myPageViewModel.copyToClipboard("북버스를 소개합니다.")
                         Toast.makeText(context, "북버스 소개가 복사되었습니다.", Toast.LENGTH_SHORT).show()
                     },
-                    isAccountSettingVisible = loginType == MyPageViewModel.LoginType.NORMAL // 일반 로그인일 때만 보이게
+                    isAccountSettingVisible = loginType == MyPageViewModel.LoginType.NORMAL, // 일반 로그인 여부
+                    onDeleteAccountClicked = { showDeleteAccountDialog.value = true } // 탈퇴하기 클릭 시
                 )
             }
         }
@@ -113,6 +117,23 @@ fun MyPageScreen(
         icon = Icons.Default.Warning,
         title = "로그아웃",
         text = "로그아웃 하시겠습니까?",
+    )
+
+    // 탈퇴하기 다이얼로그
+    BookVerseCustomDialog(
+        showDialogState = showDeleteAccountDialog,
+        confirmButtonTitle = "확인",
+        confirmButtonOnClick = {
+            myPageViewModel.deleteUserAccountByKG(navController)
+            showDeleteAccountDialog.value = false
+        },
+        dismissButtonTitle = "취소",
+        dismissButtonOnClick = {
+            showDeleteAccountDialog.value = false
+        },
+        icon = Icons.Default.Warning,
+        title = "회원 탈퇴",
+        text = "탈퇴하시겠습니까? 그동안 저장했던 글귀들은 복구할 수 없습니다.",
     )
 }
 
@@ -214,25 +235,28 @@ fun SettingsMenu(
     navController: NavController,
     onLogoutClicked: () -> Unit,
     onShareClicked: () -> Unit,
-    isAccountSettingVisible: Boolean // 이 값을 통해 계정 설정 메뉴 보이기/숨기기
+    isAccountSettingVisible: Boolean, // 로그인 타입에 따라 메뉴를 결정
+    onDeleteAccountClicked: () -> Unit // 탈퇴하기 메뉴 클릭 시 동작
 ) {
-    val menuItems = listOf(
+    val menuItems = mutableListOf(
         Pair(Icons.Default.Person, "프로필 설정"),
-        Pair(Icons.Default.Settings, "계정 설정"),
         Pair(Icons.Default.Edit, "폰트 설정"),
         Pair(Icons.Default.Email, "소개하기"),
         Pair(Icons.Default.ExitToApp, "로그아웃"),
         Pair(Icons.Default.Info, "이용약관")
     )
 
+    // 로그인 타입에 따라 메뉴 항목 추가
+    if (isAccountSettingVisible) {
+        menuItems.add(1, Pair(Icons.Default.Settings, "계정 설정")) // 계정 설정 추가
+    } else {
+        menuItems.add(5, Pair(Icons.Default.Close, "탈퇴하기")) // 탈퇴하기 추가
+    }
+
     val customBottomSheetVisible = remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         menuItems.forEach { (icon, text) ->
-            if (text == "계정 설정" && !isAccountSettingVisible) {
-                // "계정 설정" 메뉴는 일반 로그인일 때만 표시
-                return@forEach
-            }
             ListItem(
                 leadingContent = { Icon(icon, contentDescription = null) },
                 headlineContent = { Text(text) },
@@ -240,6 +264,7 @@ fun SettingsMenu(
                     when (text) {
                         "프로필 설정" -> navController.navigate("profile")
                         "계정 설정" -> navController.navigate("account_setting")
+                        "탈퇴하기" -> onDeleteAccountClicked() // 탈퇴하기 클릭 시 동작
                         "이용약관" -> navController.navigate("terms")
                         "폰트 설정" -> customBottomSheetVisible.value = true
                         "로그아웃" -> onLogoutClicked()
@@ -250,6 +275,7 @@ fun SettingsMenu(
         }
     }
 
+    // 폰트 설정 바텀 시트
     BookVerseBottomSheet(
         visible = customBottomSheetVisible,
         containerColor = Color.White
@@ -257,6 +283,7 @@ fun SettingsMenu(
         FontSettingsContent()
     }
 }
+
 
 @Composable
 fun FontSettingsContent() {
