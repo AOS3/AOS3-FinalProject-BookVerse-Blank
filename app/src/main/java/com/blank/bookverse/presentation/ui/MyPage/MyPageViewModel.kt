@@ -43,9 +43,16 @@ class MyPageViewModel @Inject constructor(
     // 가장 많이 읽은 책을 가져오는 함수
     fun fetchTopBook() {
         viewModelScope.launch {
-            val book = quoteRepository.getTopBook() // 책 데이터 가져오기 //
+            val book = quoteRepository.getTopBook() // 책 데이터 가져오기
             _topBook.value = book
         }
+    }
+
+    private val _selectedFont = MutableStateFlow<FontFamily>(notoSansFamily) // 기본 폰트 설정
+    val selectedFont = _selectedFont.asStateFlow()
+
+    fun updateFontFamily(fontFamily: FontFamily) {
+        _selectedFont.value = fontFamily
     }
 
     private val _memberProfile = MutableStateFlow<MemberModel?>(null)

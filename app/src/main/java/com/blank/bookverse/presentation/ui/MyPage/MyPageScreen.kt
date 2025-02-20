@@ -250,7 +250,7 @@ fun SettingsMenu(
     navController: NavController,
     onLogoutClicked: () -> Unit,
     onShareClicked: () -> Unit,
-    isAccountSettingVisible: Boolean, // 로그인 타입에 따라 메뉴를 결정 //
+    isAccountSettingVisible: Boolean, // 로그인 타입에 따라 메뉴를 결정
     onDeleteAccountClicked: () -> Unit // 탈퇴하기 메뉴 클릭 시 동작
 ) {
     val menuItems = mutableListOf(
@@ -271,7 +271,6 @@ fun SettingsMenu(
     val customBottomSheetVisible = remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-
         menuItems.forEach { (icon, text) ->
             ListItem(
                 leadingContent = { Icon(icon, contentDescription = null) },
@@ -331,6 +330,8 @@ fun FontSettingsContent(myPageViewModel: MyPageViewModel = hiltViewModel()) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
+                                selectedFont.value = font
+                                myPageViewModel.updateFontFamily(fontFamilyList[font] ?: notoSansFamily)
                             }
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -345,6 +346,8 @@ fun FontSettingsContent(myPageViewModel: MyPageViewModel = hiltViewModel()) {
                         RadioButton(
                             selected = (font == selectedFont.value),
                             onClick = {
+                                selectedFont.value = font
+                                myPageViewModel.updateFontFamily(fontFamilyList[font] ?: notoSansFamily)
                             }
                         )
                     }
