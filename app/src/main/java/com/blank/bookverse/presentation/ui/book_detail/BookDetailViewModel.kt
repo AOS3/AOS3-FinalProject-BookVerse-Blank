@@ -1,12 +1,12 @@
 package com.blank.bookverse.presentation.ui.book_detail
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.blank.bookverse.data.model.HomeQuote
-import com.blank.bookverse.data.repository.BookDetailRepository
 import com.blank.bookverse.data.repository.QuoteRepository
-import com.blank.bookverse.presentation.model.QuoteUiModel
+import com.blank.bookverse.presentation.model.BookDetailUiModel
+import com.blank.bookverse.presentation.navigation.MainNavItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,9 +19,8 @@ import javax.inject.Inject
 class BookDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val quoteRepository: QuoteRepository,
-    private val detailRepository: BookDetailRepository,
 ): ViewModel() {
-    private val quoteDocId: String = checkNotNull(savedStateHandle["quoteDocId"])
+    private val bookDocId: String = checkNotNull(savedStateHandle[MainNavItem.BookDetail.ID_ARG])
 
     private val _bookDetailUiState = MutableStateFlow(BookDetailUiState())
     val bookDetailUiState = _bookDetailUiState.asStateFlow()
@@ -30,48 +29,39 @@ class BookDetailViewModel @Inject constructor(
     val bookDetailEffect = _bookDetailEffect.asSharedFlow()
 
     init {
-        getBookInfo(quoteDocId)
-        getQuoteList()
+        loadBookDetail()
     }
 
-    // 책 정보 불러오기
-    private fun getBookInfo(bookTitle: String) = viewModelScope.launch {
-        runCatching {
-            _bookDetailUiState.value = _bookDetailUiState.value.copy(isLoading = true)
-            quoteRepository.getBookInfo(bookTitle)
-        }.onSuccess { quote ->
+    private fun loadBookDetail() = viewModelScope.launch {
+        _bookDetailUiState.value = _bookDetailUiState.value.copy(isLoading = true)
+
+        val result = runCatching {
+            val book = quoteRepository.getBookDetail(bookDocId)
+            val quotes = quoteRepository.getBookQuotes(bookDocId)
+            BookDetailUiModel.from(book, quotes)
+        }
+
+        result.onSuccess { bookDetailUiModel ->
             _bookDetailUiState.value = _bookDetailUiState.value.copy(
-                isLoading = false,
-                quote = quote
+                bookDetail = bookDetailUiModel,
+                isLoading = false
             )
-        }.onFailure {
+        }.onFailure { error ->
+            Log.e("BookDetailViewModel", "Error loading book detail", error)
             _bookDetailUiState.value = _bookDetailUiState.value.copy(isLoading = false)
         }
     }
 
-    private fun getQuoteList() = viewModelScope.launch {
-        runCatching {
-            detailRepository.getQuoteList(quoteDocId)
-        }.onSuccess { quoteList ->
-            _bookDetailUiState.value = _bookDetailUiState.value.copy(
-                quoteList = quoteList.map { QuoteUiModel.from(it) }
-            )
-        }
+    fun navigateToQuoteDetail(quoteDocId: String) = viewModelScope.launch {
+        _bookDetailEffect.emit(BookDetailEffect.NavigateToQuoteDetail(quoteDocId))
     }
-
-
-    fun navigateToQuoteDetail(quoteContent: String) = viewModelScope.launch {
-        _bookDetailEffect.emit(BookDetailEffect.NavigateToQuoteDetail(quoteContent))
-    }
-
 }
 
 data class BookDetailUiState(
     val isLoading: Boolean = false,
-    val quote: HomeQuote? = null,
-    val quoteList: List<QuoteUiModel> = emptyList(),
+    val bookDetail: BookDetailUiModel? = null
 )
 
 sealed class BookDetailEffect {
-    data class NavigateToQuoteDetail(val quoteContent: String): BookDetailEffect()
+    data class NavigateToQuoteDetail(val quoteDocId: String): BookDetailEffect()
 }

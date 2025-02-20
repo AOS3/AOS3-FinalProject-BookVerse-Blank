@@ -1,10 +1,9 @@
 package com.blank.bookverse.presentation.ui.more_qoute
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.blank.bookverse.data.model.HomeQuote
 import com.blank.bookverse.data.repository.QuoteRepository
+import com.blank.bookverse.presentation.model.HomeBookUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,30 +23,33 @@ class MoreQuoteViewModel @Inject constructor(
     val moreQuoteEffect = _moreQuoteEffect.asSharedFlow()
 
     init {
-        loadAllQuoteList()
+        loadAllBooks()
     }
 
-    private fun loadAllQuoteList() = viewModelScope.launch {
+    private fun loadAllBooks() = viewModelScope.launch {
         runCatching {
-            quoteRepository.getAllQuoteList()
-        }.onSuccess {
+            _moreQuoteUiState.value = _moreQuoteUiState.value.copy(isLoading = true)
+            quoteRepository.getAllBooks()
+        }.onSuccess { books ->
             _moreQuoteUiState.value = _moreQuoteUiState.value.copy(
-                quoteList = it
+                books = books.map { HomeBookUiModel.from(it) },
+                isLoading = false
             )
-        }.onFailure {
-            it.printStackTrace()
+        }.onFailure { error ->
+            _moreQuoteUiState.value = _moreQuoteUiState.value.copy(isLoading = false)
         }
     }
 
-    fun navigateToBookDetail(quoteDocId: String) = viewModelScope.launch {
-        _moreQuoteEffect.emit(MoreQuoteEffect.NavigateToBookDetail(quoteDocId))
+    fun navigateToBookDetail(bookDocId: String) = viewModelScope.launch {
+        _moreQuoteEffect.emit(MoreQuoteEffect.NavigateToBookDetail(bookDocId))
     }
 }
 
 data class MoreQuoteUiState(
-    val quoteList: List<HomeQuote> = emptyList(),
-    )
+    val isLoading: Boolean = false,
+    val books: List<HomeBookUiModel> = emptyList()
+)
 
 sealed class MoreQuoteEffect {
-    data class NavigateToBookDetail(val id: String) : MoreQuoteEffect()
+    data class NavigateToBookDetail(val bookDocId: String) : MoreQuoteEffect()
 }

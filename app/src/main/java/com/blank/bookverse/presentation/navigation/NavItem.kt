@@ -23,9 +23,9 @@ sealed class MainNavItem(val route: String, val label: String) {
         fun createRoute(quoteDocId: String) = "book_detail/${quoteDocId}"
     }
 
-    data object QuoteDetail : MainNavItem("quote_detail/{quote_content}", "명언 상세") {
-        const val QUOTE_CONTENT_ARG = "quote_content"
-        fun createRoute(quoteContent: String) = "quote_detail/$quoteContent"
+    data object QuoteDetail : MainNavItem("quote_detail/{quoteDocId}", "명언 상세") {
+        const val ID_ARG = "quoteDocId"
+        fun createRoute(quoteDocId: String) = "quote_detail/$quoteDocId"
     }
     data object MoreQuote : MainNavItem("more_quote", "더보기")
     data object QuoteWrite: MainNavItem("write_quote", "글귀 작성")

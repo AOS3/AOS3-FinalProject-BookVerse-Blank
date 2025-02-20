@@ -1,26 +1,37 @@
 package com.blank.bookverse.data.mapper
 
-import com.blank.bookverse.data.model.HomeQuote
-import com.blank.bookverse.data.model.QuoteItem
+import com.blank.bookverse.data.model.Book
+import com.blank.bookverse.data.model.Comment
+import com.blank.bookverse.data.model.Quote
 import com.blank.bookverse.data.model.RecommendationContent
 import com.google.firebase.firestore.DocumentSnapshot
-
-fun DocumentSnapshot.toHomeQuote(): HomeQuote = HomeQuote(
-    quoteDocId = id,
-    memberDocId = getString("member_doc_id") ?: "",
-    bookTitle = getString("book_title") ?: "",
-    quoteCount = getLong("quote_count")?.toInt() ?: 0,
-    bookCover = getString("book_cover") ?: "",
-    isBookmark = getBoolean("is_bookmark") ?: false,
-)
 
 fun DocumentSnapshot.toRecommendationContent(): RecommendationContent = RecommendationContent(
     quote = getString("quote") ?: "",
     bookTitle = getString("book_title") ?: "",
 )
 
-fun DocumentSnapshot.toQuoteItem(): QuoteItem = QuoteItem(
-    quoteDocId = id,
+fun DocumentSnapshot.toBook() = Book(
+    bookDocId = id,
+    memberId = getString("member_id") ?: "",
     bookTitle = getString("book_title") ?: "",
+    bookCover = getString("book_cover") ?: "",
+    quoteCount = getLong("quote_count")?.toInt() ?: 0,
+    createdAt = getLong("created_at") ?: System.currentTimeMillis(),
+)
+
+fun DocumentSnapshot.toQuote() = Quote(
+    quoteDocId = id,
+    bookDocId = getString("book_doc_id") ?: "",
+    memberId = getString("member_id") ?: "",
+    photoUrl = getString("photo_url") ?: "",
     quoteContent = getString("quote_content") ?: "",
+    createdAt = getLong("created_at") ?: System.currentTimeMillis(),
+)
+
+fun DocumentSnapshot.toComment() = Comment(
+    commentDocId = id,
+    quoteDocId = getString("quote_doc_id") ?: "",
+    commentContent = getString("comment_content") ?: "",
+    createdAt = getLong("created_at") ?: System.currentTimeMillis(),
 )
