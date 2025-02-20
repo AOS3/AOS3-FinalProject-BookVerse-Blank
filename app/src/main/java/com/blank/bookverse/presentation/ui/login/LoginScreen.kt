@@ -1,9 +1,7 @@
 package com.blank.bookverse.presentation.ui.login
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,10 +48,9 @@ import com.blank.bookverse.presentation.common.BookVerseDefaultTextField
 import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
 import com.blank.bookverse.presentation.common.DefaultTextFieldEndIconMode
 import com.blank.bookverse.presentation.common.DefaultTextFieldInputType
-import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.FirebaseAuth
+import com.google.android.gms.common.api.ApiException
 import timber.log.Timber
 
 @Composable
@@ -81,29 +78,35 @@ fun LoginScreen(
     val userPwState = remember { mutableStateOf(loginViewModel.userPw.value) }
 
 
-    // GoogleSignInClient 초기화
+    // 기존 GoogleSignInClient 초기화
     val googleSignInClient = remember {
         GoogleSignIn.getClient(
             context,
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID) // 웹 클라이언트 ID 설정
+                .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
                 .requestEmail()
                 .build()
         )
     }
 
     // ActivityResultLauncher 설정
-    val activityResultLauncher = rememberLauncherForActivityResult(
+    val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            val account = task.result
-            account?.idToken?.let { googleIdToken ->
-                loginViewModel.loginGoogle(googleIdToken)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                account?.idToken?.let { token ->
+                    loginViewModel.loginGoogle(token)
+                }
+            } catch (e: ApiException) {
+                // 에러 로그 및 사용자 피드백 처리
+                Timber.e("error $e")
             }
         }
     }
+
 
     LaunchedEffect(loginState) {
         loginState.let { result ->
@@ -275,7 +278,8 @@ fun LoginScreen(
                                     interactionSource = null,
                                     indication = null,
                                     onClick = {
-                                        loginViewModel.kakaoLogin()
+                                        //loginViewModel.kakaoLogin()
+                                        loginViewModel.loginWithKakao(context)
                                     }
                                 ),
                             contentScale = ContentScale.FillWidth
@@ -303,7 +307,7 @@ fun LoginScreen(
                                         Timber.e("구글 로그인 처리")
                                         // Google 로그인 시작
                                         val signInIntent = googleSignInClient.signInIntent
-                                        activityResultLauncher.launch(signInIntent)
+                                        launcher.launch(signInIntent)
                                     }
                                 ),
                             contentScale = ContentScale.FillWidth

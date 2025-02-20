@@ -1,137 +1,156 @@
 package com.blank.bookverse.presentation.ui.AccountSetting
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.blank.bookverse.data.repository.AccountSettingRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class AccountSettingViewModel @Inject constructor(
+    // @ApplicationContext context: Context,
+    private val context: Context,
     private val accountSettingRepository: AccountSettingRepository
-): ViewModel() {
-    // MutableStateFlow를 사용하여 상태 관리
+) : ViewModel() {
+
+    // 현재 비밀번호 상태
     private val _currentUserPw = MutableStateFlow("")
-    val currentUserPw: StateFlow<String> get() = _currentUserPw
+    val currentUserPw = _currentUserPw.asStateFlow()
 
+    // 새 비밀번호 상태
     private val _newUserPw = MutableStateFlow("")
-    val newUserPw: StateFlow<String> get() = _newUserPw
+    val newUserPw = _newUserPw.asStateFlow()
 
+    // 새 비밀번호 확인 상태
     private val _newUserPwCheck = MutableStateFlow("")
-    val newUserPwCheck: StateFlow<String> get() = _newUserPwCheck
+    val newUserPwCheck = _newUserPwCheck.asStateFlow()
 
-    // 에러 메시지 상태
-    private val _currentPwError = MutableStateFlow("")
-    val currentPwError: StateFlow<String> get() = _currentPwError
+    // 비밀번호 입력 오류 상태
+    val isUserCurrentPwError = mutableStateOf(false)
+    val isUserNewPwError = mutableStateOf(false)
+    val isUserNewPwCheckError = mutableStateOf(false)
 
-    private val _newPwError = MutableStateFlow("")
-    val newPwError: StateFlow<String> get() = _newPwError
+    // 비밀번호 변경 상태 관리
+    private val _passwordChangeStatus = MutableStateFlow<PasswordChangeState>(PasswordChangeState.Idle)
+    val passwordChangeStatus: StateFlow<PasswordChangeState> get() = _passwordChangeStatus
 
-    private val _newPwCheckError = MutableStateFlow("")
-    val newPwCheckError: StateFlow<String> get() = _newPwCheckError
+    // 로딩 중
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
-    // 유저 아이디와 전화번호 상태 추가
-    private val _memberCurrentId = MutableStateFlow("")
-    val memberCurrentId: StateFlow<String> get() = _memberCurrentId
+    // 탈퇴 중
+    private val _isDeleting = MutableStateFlow(false)
+    val isDeleting = _isDeleting.asStateFlow()
 
-    private val _memberCurrentPhoneNumber = MutableStateFlow("")
-    val memberCurrentPhoneNumber: StateFlow<String> get() = _memberCurrentPhoneNumber
+    // 멤버 아이디와 전화번호 상태
+    private val _memberInfo = MutableStateFlow<Pair<String, String>?>(null)
+    val memberInfo: StateFlow<Pair<String, String>?> get() = _memberInfo
 
-    private val passwordRegex = Regex("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$")
-
-    // 탈퇴 여부 상태
-    private val _isUserDeleted = MutableStateFlow(false)
-    val isUserDeleted: StateFlow<Boolean> get() = _isUserDeleted
-
-    /*// 유저 정보를 가져오는 메서드
-    fun loadUserData() {
-        viewModelScope.launch {
-            val user = accountSettingRepository.getUserData() // Repository에서 데이터를 가져오는 메서드
-            _memberCurrentId.value = user.id
-            _memberCurrentPhoneNumber.value = user.phoneNumber
-            _currentUserPw.value = user.pw
+    // 비밀번호 필드 업데이트
+    fun updatePasswordField(field: PasswordField, value: String) {
+        when (field) {
+            PasswordField.CURRENT_PASSWORD -> _currentUserPw.value = value
+            PasswordField.NEW_PASSWORD -> _newUserPw.value = value
+            PasswordField.NEW_PASSWORD_CHECK -> _newUserPwCheck.value = value
         }
     }
 
-    // 탈퇴 요청 처리
-    fun deleteUser() {
-        viewModelScope.launch {
-            try {
-                val result = accountSettingRepository.deleteUser()
-                if (result) {
-                    _isUserDeleted.value = true
-                    // 탈퇴 성공 시 추가 작업 (예: 로그아웃 처리, 네비게이션 등)
-                } else {
-                    _isUserDeleted.value = false
-                    // 실패 처리 (에러 메시지, 네비게이션 등)
+    // 비밀번호 변경 유효성 검사
+    fun validatePasswordChange(): Boolean {
+        return _newUserPw.value == _newUserPwCheck.value && _newUserPw.value.isNotBlank()
+    }
+
+    fun changeUserPassword() = viewModelScope.launch {
+        // 비밀번호 변경 시작 전에 로딩 상태 true로 설정
+        _isLoading.value = true
+
+        // 비밀번호 유효성 검사
+        val isValid = validatePasswordChange()
+        if (!isValid) {
+            _isLoading.value = false
+            return@launch
+        }
+
+        // 현재 비밀번호 확인
+        val isCurrentPasswordValid = accountSettingRepository.validateCurrentPassword(_currentUserPw.value)
+        Log.d("", "$isCurrentPasswordValid")
+        if (!isCurrentPasswordValid) {
+            isUserCurrentPwError.value = true
+
+            // 현재 비밀번호가 틀리면 Toast 메시지 띄우기
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "현재 비밀번호를 다시 확인해 주세요.", Toast.LENGTH_SHORT).show()
+            }
+
+            // 비밀번호 확인 실패 시 로딩 상태 종료
+            _isLoading.value = false
+            return@launch
+        }
+
+        // 비밀번호 변경 진행
+        val isPasswordChanged = accountSettingRepository.updatePassword(_newUserPw.value)
+        if (isPasswordChanged) {
+            _passwordChangeStatus.value = PasswordChangeState.Success
+        } else {
+            _passwordChangeStatus.value = PasswordChangeState.Error("비밀번호 변경 실패")
+        }
+
+        // 비밀번호 변경 완료 후 로딩 상태 종료
+        _isLoading.value = false
+    }
+
+
+
+    // 멤버 정보 가져오기
+    fun fetchMemberInfo(memberId: String) = viewModelScope.launch {
+        _memberInfo.value = accountSettingRepository.getMemberInfo(memberId)
+    }
+
+    // 비밀번호 변경 상태 정의
+    sealed class PasswordChangeState {
+        object Idle : PasswordChangeState()
+        object Success : PasswordChangeState()
+        data class Error(val message: String) : PasswordChangeState()
+    }
+
+    // 비밀번호 필드 종류 정의
+    enum class PasswordField {
+        CURRENT_PASSWORD, NEW_PASSWORD, NEW_PASSWORD_CHECK
+    }
+
+    // 회원 탈퇴 로직
+    fun deleteUserAccount(navController: NavHostController) = viewModelScope.launch {
+        _isDeleting.value = true // 탈퇴 시작 시 로딩 표시
+
+        val isDeleted = accountSettingRepository.deleteUserAccount()
+
+        _isDeleting.value = false // 탈퇴 완료 후 로딩 숨기기
+
+        if (isDeleted) {
+            // 탈퇴 성공 시 로그인 화면으로 이동
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
                 }
-            } catch (e: Exception) {
-                _isUserDeleted.value = false
-                // 예외 처리 (예: 서버 통신 실패 등)
+                launchSingleTop = true
             }
-        }
-    }*/
-
-    fun onCurrentUserPwChanged(newPw: String) {
-        _currentUserPw.value = newPw
-        validateCurrentPassword()
-    }
-
-    fun onNewUserPwChanged(newPw: String) {
-        _newUserPw.value = newPw
-        validateNewPassword()
-        validateNewPasswordCheck()
-    }
-
-    fun onNewUserPwCheckChanged(newPwCheck: String) {
-        _newUserPwCheck.value = newPwCheck
-        validateNewPasswordCheck()
-    }
-
-    private fun validateCurrentPassword() {
-        _currentPwError.value = if (_currentUserPw.value != "yourCurrentPassword") {
-            "비밀번호가 일치하지 않습니다."
         } else {
-            ""
+            // 실패 시 오류 처리 (예: 사용자에게 메시지 표시)
+            Log.e("AccountSettingViewModel", "Error deleting account")
         }
     }
 
-    private fun validateNewPassword() {
-        _newPwError.value = if (!passwordRegex.matches(_newUserPw.value)) {
-            "비밀번호는 영문, 숫자를 포함하여 8~20자로 입력해 주세요."
-        } else {
-            ""
-        }
-    }
-
-    private fun validateNewPasswordCheck() {
-        _newPwCheckError.value = if (_newUserPwCheck.value != _newUserPw.value) {
-            "비밀번호가 일치하지 않습니다."
-        } else {
-            ""
-        }
-    }
-
-    // 비밀번호를 서버에 전송
-    fun updatePassword(memberId: String) {
-        viewModelScope.launch {
-            val result = accountSettingRepository.updatePassword(memberId, _newUserPw.value)
-            if (result) {
-                // 비밀번호 변경 성공 후 처리
-                // 예: 화면에 알림 메시지 표시
-                Log.d("AccountSettingViewModel", "비밀번호 업데이트 성공")
-            } else {
-                // 실패 처리 (예: 에러 메시지 표시)
-                _currentPwError.value = "비밀번호 업데이트 실패"
-            }
-        }
-    }
 }
-

@@ -82,6 +82,7 @@ fun BookVerseDefaultTextField(
             placeholder = {
                 Text(
                     text = placeHolder,
+                    maxLines = 1,
                     color = MaterialTheme
                         .colorScheme
                         .onSurface

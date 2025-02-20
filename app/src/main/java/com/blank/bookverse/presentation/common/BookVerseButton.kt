@@ -31,12 +31,9 @@ fun BookVerseButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier
-            .background(
-                color = backgroundColor,
-                shape = RoundedCornerShape(cornerRadius.dp), // corner radius 설정
-            ),
+        modifier = modifier,
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(cornerRadius.dp), // corner radius 설정
         enabled = isEnable
     ) {
         Text(

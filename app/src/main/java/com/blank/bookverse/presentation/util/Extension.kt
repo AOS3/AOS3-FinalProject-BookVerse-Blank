@@ -1,10 +1,16 @@
 package com.blank.bookverse.presentation.util
 
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.blank.bookverse.presentation.navigation.BottomNavItem
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 // currentBackStackEntryAsState()를 사용하여 현재 활성화된 화면(Route)을 반환
 // 함수 내부에서 자동으로 변경 감지
@@ -32,7 +38,22 @@ fun NavController.shouldShowBottomBar(): Boolean {
     // 현재 route 반환
     val currentRoute = currentBackStackEntryAsState().value?.destination?.route
     return when (currentRoute) {
-        BottomNavItem.Home.route, BottomNavItem.Search.route, BottomNavItem.Profile.route, BottomNavItem.MyPage.route -> true
+        BottomNavItem.Home.route, BottomNavItem.Search.route, BottomNavItem.Bookmark.route, BottomNavItem.MyPage.route -> true
         else -> false
+    }
+}
+
+// long -> yyyy.MM.dd 날짜 변환 Long 확장 함수
+// 받은 long 형태를 날짜 형식으로 변경한다
+fun Long.toFormattedDateString(pattern: String = "yyyy.MM.dd"): String {
+    return SimpleDateFormat(pattern, Locale.getDefault())
+        .format(Date(this))
+}
+
+fun Context.findActivity(): ComponentActivity? {
+    return when (this) {
+        is ComponentActivity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
     }
 }

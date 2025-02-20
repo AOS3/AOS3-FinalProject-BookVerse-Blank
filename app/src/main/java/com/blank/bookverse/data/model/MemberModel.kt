@@ -7,8 +7,9 @@ class MemberModel {
     val memberId: String = ""
     val memberPassword: String = ""
     val memberPhoneNumber: String = ""
-    val memberNickname: String = ""
+    val memberNickName: String = ""
     val LoginType: String = ""
     val createAt: Long = System.currentTimeMillis()
     val isDelete: Boolean = false
+    val memberBookCoverImage: String = ""
 }

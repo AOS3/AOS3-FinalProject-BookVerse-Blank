@@ -1,35 +1,43 @@
 package com.blank.bookverse.presentation.navigation
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.blank.bookverse.presentation.ui.AccountSetting.AccountSettingsScreen
-import androidx.navigation.compose.rememberNavController
 import com.blank.bookverse.presentation.ui.MyPage.MyPageScreen
 import com.blank.bookverse.presentation.ui.Profile.ProfileScreen
 import com.blank.bookverse.presentation.ui.Terms.TermsScreen
 import com.blank.bookverse.presentation.ui.book_detail.BookDetailScreen
+import com.blank.bookverse.presentation.ui.bookmark.BookmarkScreen
 import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
+import com.blank.bookverse.presentation.ui.home.HomeScreen
 import com.blank.bookverse.presentation.ui.login.LoginScreen
 import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
+import com.blank.bookverse.presentation.ui.quotewrite.QuoteWriteScreen
+import com.blank.bookverse.presentation.ui.quote_detail.QuoteDetailScreen
 import com.blank.bookverse.presentation.ui.register.RegisterScreen
+import com.blank.bookverse.presentation.ui.search.SearchScreen
 import com.blank.bookverse.presentation.ui.splash.SplashScreen
-
 
 @Composable
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = MainNavItem.MoreQuote.route,
+        startDestination = MainNavItem.Splash.route,
         modifier = modifier
     ) {
         // 홈 화면
-        // composable(BottomNavItem.Home.route) { HomeScreen(navController) }
+        composable(BottomNavItem.Home.route) { HomeScreen(navController) }
         // 검색 화면
+        composable(BottomNavItem.Search.route) { SearchScreen(navController) }
+        // 책갈피 화면
+        composable(BottomNavItem.Bookmark.route) { BookmarkScreen(navController) }
+//        // 테스트 화면
+//        composable(MainNavItem.Test.route) { TestScreen(navController) }
         // composable(BottomNavItem.Write.route) { SearchScreen(navController) }
         // 작성 화면
         // composable(BottomNavItem.Favorite.route) { ProfileScreen(navController) }
@@ -47,9 +55,31 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
             MoreQuoteScreen(navController = navController)
         }
 
-        composable(route = MainNavItem.BookDetail.route) {
+        composable(
+            route = MainNavItem.BookDetail.route,
+            arguments = listOf(
+                navArgument(MainNavItem.BookDetail.ID_ARG) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) {
             BookDetailScreen(navController = navController)
         }
+
+
+        composable(
+            route = MainNavItem.QuoteDetail.route,
+            arguments = listOf(
+                navArgument(MainNavItem.QuoteDetail.ID_ARG) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) {
+            QuoteDetailScreen(navController = navController)
+        }
+
         // 스플래쉬 화면
         composable(MainNavItem.Splash.route) { SplashScreen(navController) }
         // 로그인
@@ -58,5 +88,7 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(MainNavItem.Register.route) { RegisterScreen(navController) }
         // 아이디/비밀번호 찾기
         composable(MainNavItem.FindAccount.route) { FindAccountScreen(navController) }
+        // 아이디/비밀번호 찾기
+        composable(MainNavItem.QuoteWrite.route) { QuoteWriteScreen(navController) }
     }
 }
