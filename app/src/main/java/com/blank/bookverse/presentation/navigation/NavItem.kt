@@ -4,13 +4,37 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import com.blank.bookverse.R
 
-sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
-    data object Home : BottomNavItem("home", Icons.Filled.Home, "홈")
-    data object Search : BottomNavItem("search", Icons.Filled.Search, "검색")
-    data object Profile : BottomNavItem("profile", Icons.Filled.Person, "프로필")
-    data object MyPage : BottomNavItem("myPage", Icons.Filled.Person, "마이")
+sealed class BottomNavItem(
+    val route: String,
+    val icon: @Composable () -> Unit,
+    val label: String
+) {
+    data object Home : BottomNavItem(
+        route = "home",
+        icon = { Icon(Icons.Filled.Home, contentDescription = null) },
+        label = "홈"
+    )
+    data object Search : BottomNavItem(
+        route = "search",
+        icon = { Icon(Icons.Filled.Search, contentDescription = null) },
+        label = "검색"
+    )
+    data object Bookmark : BottomNavItem(
+        route = "bookmark",
+        icon = { Icon(painterResource(R.drawable.ic_bookmark_fill), contentDescription = null) },
+        label = "북마크"
+    )
+    data object MyPage : BottomNavItem(
+        route = "myPage",
+        icon = { Icon(Icons.Filled.Person, contentDescription = null) },
+        label = "마이"
+    )
 }
 
 sealed class MainNavItem(val route: String, val label: String) {
