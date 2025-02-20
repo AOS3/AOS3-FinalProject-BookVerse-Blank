@@ -18,7 +18,8 @@ data class BookDetailUiModel(
         val quoteDocId: String,
         val quoteContent: String,
         val photoUrl: String,
-        val createdAt: Long
+        val isBookmark: Boolean = false,
+        val createdAt: Long,
     )
 
     companion object {
@@ -34,6 +35,7 @@ data class BookDetailUiModel(
                     quoteDocId = quote.quoteDocId,
                     quoteContent = quote.quoteContent,
                     photoUrl = quote.photoUrl,
+                    isBookmark = quote.isBookmark,
                     createdAt = quote.createdAt
                 )
             }

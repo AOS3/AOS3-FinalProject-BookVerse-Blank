@@ -52,6 +52,31 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
+    fun updateBookmark(quoteDocId: String, isBookmark: Boolean) = viewModelScope.launch {
+        runCatching {
+            // 서버 요청
+            quoteRepository.updateBookmark(quoteDocId, isBookmark)
+        }.onSuccess {
+            // 서버 요청 성공 시에만 UI 상태 업데이트
+            val currentBookDetail = _bookDetailUiState.value.bookDetail
+            val updatedQuotes = currentBookDetail?.quotes?.map { quote ->
+                if (quote.quoteDocId == quoteDocId) {
+                    quote.copy(isBookmark = isBookmark)
+                } else {
+                    quote
+                }
+            }
+
+            _bookDetailUiState.value = _bookDetailUiState.value.copy(
+                bookDetail = currentBookDetail?.copy(
+                    quotes = updatedQuotes ?: emptyList()
+                )
+            )
+        }.onFailure { error ->
+            Log.e("BookDetailViewModel", "Error updating bookmark", error)
+        }
+    }
+    
     fun navigateToQuoteDetail(quoteDocId: String) = viewModelScope.launch {
         _bookDetailEffect.emit(BookDetailEffect.NavigateToQuoteDetail(quoteDocId))
     }

@@ -12,6 +12,7 @@ import com.blank.bookverse.presentation.ui.MyPage.MyPageScreen
 import com.blank.bookverse.presentation.ui.Profile.ProfileScreen
 import com.blank.bookverse.presentation.ui.Terms.TermsScreen
 import com.blank.bookverse.presentation.ui.book_detail.BookDetailScreen
+import com.blank.bookverse.presentation.ui.bookmark.BookmarkScreen
 import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
 import com.blank.bookverse.presentation.ui.home.HomeScreen
 import com.blank.bookverse.presentation.ui.login.LoginScreen
@@ -33,8 +34,8 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(BottomNavItem.Home.route) { HomeScreen(navController) }
         // 검색 화면
         composable(BottomNavItem.Search.route) { SearchScreen(navController) }
-//        // 프로필 화면
-//        composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
+        // 책갈피 화면
+        composable(BottomNavItem.Bookmark.route) { BookmarkScreen(navController) }
 //        // 테스트 화면
 //        composable(MainNavItem.Test.route) { TestScreen(navController) }
         // composable(BottomNavItem.Write.route) { SearchScreen(navController) }

@@ -1,5 +1,6 @@
 package com.blank.bookverse.data.repository
 
+import android.util.Log
 import com.blank.bookverse.data.mapper.toBook
 import com.blank.bookverse.data.mapper.toComment
 import com.blank.bookverse.data.mapper.toQuote
@@ -105,12 +106,37 @@ class QuoteRepository @Inject constructor(
             if (!existingBook.exists()) {
                 transaction.set(bookRef, book)
             } else {
-                transaction.update(bookRef, "quoteCount",
-                    (existingBook.getLong("quoteCount") ?: 0) + 1)
+                transaction.update(
+                    bookRef, "quoteCount",
+                    (existingBook.getLong("quoteCount") ?: 0) + 1
+                )
             }
 
             val quoteRef = firestore.collection("Quotes").document(quote.quoteDocId)
             transaction.set(quoteRef, quote)
         }.await()
+    }
+
+    // 북마크 상태 업데이트
+    suspend fun updateBookmark(quoteDocId: String, isBookmark: Boolean) {
+        try {
+            // 여기서 await()를 호출하지 않으면 요청이 실제로 실행되지 않을 수 있습니다
+            firestore.collection("Quotes")
+                .document(quoteDocId)
+                .update("is_bookmark", isBookmark)
+                .await()
+        } catch (e: Exception) {
+            Log.e("QuoteRepository", "Error updating bookmark", e)
+            throw e
+        }
+    }
+
+    suspend fun getUserBookmarkedQuotes(): List<Quote> {
+        return firestore.collection("Quotes")
+            .whereEqualTo("is_bookmark", true)
+            .get()
+            .await()
+            .documents
+            .map { document -> document.toQuote() }
     }
 }

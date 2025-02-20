@@ -124,14 +124,14 @@ fun HomeContent(
                     ) {
                         items(
                             items = uiState.books,
-                            key = { it.bookDocId }  // bookTitle 대신 고유한 ID 사용
+                            key = { it.bookDocId }
                         ) { book ->
                             HomeBookItem(
                                 book = book,
                                 onNavigateToDetail = { onNavigateToDetail(book.bookDocId) }
                             )
                         }
-                        if (uiState.hasMore) {  // isMore -> hasMore
+                        if (uiState.hasMore) {
                             item {
                                 Box(
                                     modifier = Modifier

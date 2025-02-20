@@ -45,6 +45,20 @@ class QuoteDetailViewModel @Inject constructor(
             _quoteDetailUiState.value = _quoteDetailUiState.value.copy(isLoading = false)
         }
     }
+
+    fun updateBookmark(isBookmark: Boolean) = viewModelScope.launch {
+        runCatching {
+            quoteRepository.updateBookmark(quoteDocId, isBookmark)
+        }.onSuccess {
+            _quoteDetailUiState.value = _quoteDetailUiState.value.copy(
+                quoteDetail = _quoteDetailUiState.value.quoteDetail?.copy(
+                    isBookmark = isBookmark
+                )
+            )
+        }.onFailure { error ->
+            Log.e("QuoteDetailViewModel", "Error updating bookmark", error)
+        }
+    }
 }
 
 data class QuoteDetailUiState(

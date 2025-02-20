@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.common.BookmarkButton
 import com.blank.bookverse.presentation.model.BookDetailUiModel
 import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.blank.bookverse.presentation.util.toFormattedDateString
@@ -79,7 +80,8 @@ fun BookDetailScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            onNavigateToQuoteDetail = viewModel::navigateToQuoteDetail
+            onNavigateToQuoteDetail = viewModel::navigateToQuoteDetail,
+            onBookmarkClick = viewModel::updateBookmark,
         )
     }
 }
@@ -89,6 +91,7 @@ fun BookDetailContent(
     uiState: BookDetailUiState,
     modifier: Modifier = Modifier,
     onNavigateToQuoteDetail: (String) -> Unit = {},
+    onBookmarkClick: (String, Boolean) -> Unit = { _, _ -> },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         if (uiState.isLoading) {
@@ -148,7 +151,8 @@ fun BookDetailContent(
                 ) { quote ->
                     BookDetailQuoteItem(
                         quote = quote,
-                        onNavigateToQuoteDetail = onNavigateToQuoteDetail
+                        onNavigateToQuoteDetail = onNavigateToQuoteDetail,
+                        onBookmarkClick = onBookmarkClick
                     )
                 }
 
@@ -177,34 +181,49 @@ fun BookDetailQuoteItem(
     quote: BookDetailUiModel.QuoteItem,
     modifier: Modifier = Modifier,
     onNavigateToQuoteDetail: (String) -> Unit = {},
+    onBookmarkClick: (String, Boolean) -> Unit = { _, _ -> },
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onNavigateToQuoteDetail(quote.quoteDocId) }
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = quote.quoteContent,
-            textAlign = TextAlign.Center,
+        BookmarkButton(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 58.dp)
+                .align(Alignment.TopEnd),
+            isBookmark = quote.isBookmark,
+            onBookmarkClick = {
+                onBookmarkClick(quote.quoteDocId, !quote.isBookmark)
+            }
         )
 
-        Spacer(modifier = Modifier.height(22.dp))
-        Text(
-            text = quote.createdAt.toFormattedDateString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 16.dp)
-        )
-        Spacer(modifier = Modifier.height(22.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.height(10.dp))
 
-        HorizontalDivider()
+            Text(
+                text = quote.quoteContent,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 58.dp)
+            )
+
+            Spacer(modifier = Modifier.height(22.dp))
+            Text(
+                text = quote.createdAt.toFormattedDateString(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(22.dp))
+
+            HorizontalDivider()
+        }
     }
 }
 

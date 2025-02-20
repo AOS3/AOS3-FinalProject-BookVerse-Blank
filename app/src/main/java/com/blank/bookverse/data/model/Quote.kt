@@ -6,5 +6,6 @@ data class Quote(
     val memberId: String = "", // Firebase Auth UID
     val photoUrl: String = "",
     val quoteContent: String = "",
+    val isBookmark: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )

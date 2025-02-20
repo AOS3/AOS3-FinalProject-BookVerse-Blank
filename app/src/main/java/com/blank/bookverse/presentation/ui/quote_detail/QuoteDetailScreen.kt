@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.common.BookmarkButton
 import com.blank.bookverse.presentation.model.QuoteDetailUiModel
 import com.blank.bookverse.presentation.util.toFormattedDateString
 import com.skydoves.landscapist.ImageOptions
@@ -70,6 +71,12 @@ fun QuoteDetailScreen(
                             contentDescription = "수정"
                         )
                     }
+                    BookmarkButton(
+                        isBookmark = uiState.quoteDetail?.isBookmark ?: false,
+                        onBookmarkClick = {
+                            viewModel.updateBookmark(!uiState.quoteDetail?.isBookmark!!)
+                        }
+                    )
                 }
             )
         }
