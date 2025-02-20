@@ -30,13 +30,20 @@ sealed class MainNavItem(val route: String, val label: String) {
     data object MoreQuote : MainNavItem("more_quote", "더보기")
     data object QuoteWrite: MainNavItem("write_quote", "글귀 작성")
 }
-}
+
 
 
 sealed class MyPageNavItem(val route: String, val label: String) {
     data object Profile : MyPageNavItem("profile", "프로필 설정")
     data object AccountSetting : MyPageNavItem("account_setting", "계정 설정")
     data object Terms : MyPageNavItem("terms", "이용약관")
+}
+
+sealed class CameraNavItem(val route: String, val label: String) {
+    data object TakeBook : CameraNavItem("camera/{camera_state}", "촬영") {
+        const val CAMERA_STATE_ARG = "camera_state"
+        fun createRoute(cameraState: String) = "quote_detail/$cameraState"
+    }
 }
 
 // sealed class MainNavItem(val route: String, val label: String) {
