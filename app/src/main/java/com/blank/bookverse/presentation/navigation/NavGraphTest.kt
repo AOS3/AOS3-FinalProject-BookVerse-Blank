@@ -57,7 +57,7 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(
             route = MainNavItem.BookDetail.route,
             arguments = listOf(
-                navArgument(MainNavItem.BookDetail.TITLE_ARG) {
+                navArgument(MainNavItem.BookDetail.ID_ARG) {
                     type = NavType.StringType
                     nullable = false
                 }
@@ -70,7 +70,7 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(
             route = MainNavItem.QuoteDetail.route,
             arguments = listOf(
-                navArgument(MainNavItem.QuoteDetail.QUOTE_CONTENT_ARG) {
+                navArgument(MainNavItem.QuoteDetail.ID_ARG) {
                     type = NavType.StringType
                     nullable = false
                 }

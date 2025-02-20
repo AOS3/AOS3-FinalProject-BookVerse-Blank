@@ -2,8 +2,8 @@ package com.blank.bookverse.presentation.ui.more_qoute
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.blank.bookverse.data.model.HomeQuote
-import com.blank.bookverse.data.repository.HomeRepository
+import com.blank.bookverse.data.repository.QuoteRepository
+import com.blank.bookverse.presentation.model.HomeBookUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MoreQuoteViewModel @Inject constructor(
-    private val homeRepository: HomeRepository,
+    private val quoteRepository: QuoteRepository,
 ): ViewModel() {
     private val _moreQuoteUiState = MutableStateFlow(MoreQuoteUiState())
     val moreQuoteUiState = _moreQuoteUiState.asStateFlow()
@@ -23,30 +23,33 @@ class MoreQuoteViewModel @Inject constructor(
     val moreQuoteEffect = _moreQuoteEffect.asSharedFlow()
 
     init {
-        loadAllQuoteList()
+        loadAllBooks()
     }
 
-    private fun loadAllQuoteList() = viewModelScope.launch {
+    private fun loadAllBooks() = viewModelScope.launch {
         runCatching {
-            homeRepository.getAllQuoteList()
-        }.onSuccess {
+            _moreQuoteUiState.value = _moreQuoteUiState.value.copy(isLoading = true)
+            quoteRepository.getAllBooks()
+        }.onSuccess { books ->
             _moreQuoteUiState.value = _moreQuoteUiState.value.copy(
-                quoteList = it
+                books = books.map { HomeBookUiModel.from(it) },
+                isLoading = false
             )
-        }.onFailure {
-            it.printStackTrace()
+        }.onFailure { error ->
+            _moreQuoteUiState.value = _moreQuoteUiState.value.copy(isLoading = false)
         }
     }
 
-    fun navigateToBookDetail(bookTitle: String) = viewModelScope.launch {
-        _moreQuoteEffect.emit(MoreQuoteEffect.NavigateToBookDetail(bookTitle))
+    fun navigateToBookDetail(bookDocId: String) = viewModelScope.launch {
+        _moreQuoteEffect.emit(MoreQuoteEffect.NavigateToBookDetail(bookDocId))
     }
 }
 
 data class MoreQuoteUiState(
-    val quoteList: List<HomeQuote> = emptyList(),
-    )
+    val isLoading: Boolean = false,
+    val books: List<HomeBookUiModel> = emptyList()
+)
 
 sealed class MoreQuoteEffect {
-    data class NavigateToBookDetail(val id: String) : MoreQuoteEffect()
+    data class NavigateToBookDetail(val bookDocId: String) : MoreQuoteEffect()
 }

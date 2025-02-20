@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +36,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
-import com.blank.bookverse.presentation.model.QuoteUiModel
+import com.blank.bookverse.presentation.model.BookDetailUiModel
 import com.blank.bookverse.presentation.navigation.MainNavItem
+import com.blank.bookverse.presentation.util.toFormattedDateString
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
@@ -51,7 +53,7 @@ fun BookDetailScreen(
         viewModel.bookDetailEffect.collect { effect ->
             when (effect) {
                 is BookDetailEffect.NavigateToQuoteDetail -> {
-                    navController.navigate(MainNavItem.QuoteDetail.createRoute(effect.quoteContent))
+                    navController.navigate(MainNavItem.QuoteDetail.createRoute(effect.quoteDocId))
                 }
             }
         }
@@ -60,7 +62,7 @@ fun BookDetailScreen(
     Scaffold(
         topBar = {
             BookVerseToolbar(
-                title = "북버스",
+                title = uiState.bookDetail?.bookInfo?.bookTitle ?: "북버스",
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -68,7 +70,7 @@ fun BookDetailScreen(
                             contentDescription = "뒤로가기"
                         )
                     }
-                },
+                }
             )
         }
     ) { paddingValues ->
@@ -88,109 +90,112 @@ fun BookDetailContent(
     modifier: Modifier = Modifier,
     onNavigateToQuoteDetail: (String) -> Unit = {},
 ) {
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(22.dp))
-                HorizontalDivider()
+    Box(modifier = modifier.fillMaxSize()) {
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item {
+                    Spacer(modifier = Modifier.height(22.dp))
+                    HorizontalDivider()
 
-                CoilImage(
-                    modifier = Modifier
-                        .padding(horizontal = 42.dp)
-                        .fillMaxWidth()
-                        .height(520.dp),
-                    imageModel = { uiState.quote?.bookCover },
-                )
-
-                HorizontalDivider()
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 42.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    Text(
+                    CoilImage(
                         modifier = Modifier
-                            .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                            .alignByBaseline(),
-                        text = "${uiState.quote?.bookTitle}",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                        )
+                            .padding(horizontal = 42.dp)
+                            .fillMaxWidth()
+                            .height(520.dp),
+                        imageModel = { uiState.bookDetail?.bookInfo?.bookCover },
                     )
 
-                    Text(
+                    HorizontalDivider()
+
+                    Row(
                         modifier = Modifier
-                            .padding(end = 12.dp)
-                            .alignByBaseline(),
-                        text = "남긴 글귀 ${uiState.quote?.quoteCount}개",
-                        style = MaterialTheme.typography.bodyMedium
+                            .fillMaxWidth()
+                            .padding(horizontal = 42.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                                .alignByBaseline(),
+                            text = uiState.bookDetail?.bookInfo?.bookTitle ?: "",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                            )
+                        )
+
+                        Text(
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .alignByBaseline(),
+                            text = "남긴 글귀 ${uiState.bookDetail?.bookInfo?.quoteCount ?: 0}개",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    HorizontalDivider()
+                }
+
+                items(
+                    items = uiState.bookDetail?.quotes ?: emptyList(),
+                    key = { it.quoteDocId }
+                ) { quote ->
+                    BookDetailQuoteItem(
+                        quote = quote,
+                        onNavigateToQuoteDetail = onNavigateToQuoteDetail
                     )
                 }
-                HorizontalDivider()
+
+                item {
+                    Spacer(modifier = Modifier.height(22.dp))
+                }
             }
 
-            items(
-                items = uiState.quoteList
-            ) { quote ->
-                BookDetailQuoteItem(
-                    quote = quote,
-                    onNavigateToQuoteDetail = onNavigateToQuoteDetail
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(22.dp))
-            }
+            VerticalDivider(
+                modifier = Modifier
+                    .padding(start = 42.dp)
+                    .fillMaxHeight()
+            )
+            VerticalDivider(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 42.dp)
+                    .fillMaxHeight()
+            )
         }
-
-        VerticalDivider(
-            modifier = Modifier
-                .padding(start = 42.dp)
-                .fillMaxHeight()
-        )
-        VerticalDivider(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(end = 42.dp)
-                .fillMaxHeight()
-        )
     }
 }
 
 @Composable
 fun BookDetailQuoteItem(
-    quote: QuoteUiModel,
+    quote: BookDetailUiModel.QuoteItem,
     modifier: Modifier = Modifier,
     onNavigateToQuoteDetail: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                onNavigateToQuoteDetail(quote.quoteContent)
-            }
+            .clickable { onNavigateToQuoteDetail(quote.quoteDocId) }
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "${quote.quoteContent}",
+            text = quote.quoteContent,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 16.dp)
-                .padding(horizontal = 42.dp)
+                .padding(horizontal = 58.dp)
         )
 
         Spacer(modifier = Modifier.height(22.dp))
         Text(
-            text = "${quote.formattedDate}",
+            text = quote.createdAt.toFormattedDateString(),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
@@ -215,11 +220,11 @@ fun BookDetailScreenPreview() {
 @Composable
 fun BookDetailQuoteItemPreview() {
     BookDetailQuoteItem(
-        QuoteUiModel(
-            bookTitle = "",
+        quote = BookDetailUiModel.QuoteItem(
+            quoteDocId = "",
             quoteContent = "아름답다는 건 그런 거지. 뭘 숨길 필요가 없는 거, 똑같이 해도 그냥 아름다운 거.",
-            formattedDate = "2023.07.11",
-            isDelete = false
+            photoUrl = "",
+            createdAt = System.currentTimeMillis()
         )
     )
 }

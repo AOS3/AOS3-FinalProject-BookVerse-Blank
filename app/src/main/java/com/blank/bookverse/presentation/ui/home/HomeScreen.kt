@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,8 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
-import com.blank.bookverse.data.model.HomeQuote
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.model.HomeBookUiModel
 import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
@@ -61,7 +62,7 @@ fun HomeScreen(
         viewModel.homeEffect.collectLatest { effect ->
             when (effect) {
                 is HomeEffect.NavigateToBookDetail -> {
-                    navController.navigate(MainNavItem.BookDetail.createRoute(effect.id))
+                    navController.navigate(MainNavItem.BookDetail.createRoute(effect.bookDocId))
                 }
             }
         }
@@ -122,15 +123,15 @@ fun HomeContent(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(
-                            items = uiState.homeQuoteList,
-                            key = { it.bookTitle }
-                        ) { quote ->
-                            HomeQuoteItem(
-                                quote = quote,
-                                onNavigateToDetail = { onNavigateToDetail(quote.bookTitle) }
+                            items = uiState.books,
+                            key = { it.bookDocId }  // bookTitle 대신 고유한 ID 사용
+                        ) { book ->
+                            HomeBookItem(
+                                book = book,
+                                onNavigateToDetail = { onNavigateToDetail(book.bookDocId) }
                             )
                         }
-                        if (uiState.isMore) {
+                        if (uiState.hasMore) {  // isMore -> hasMore
                             item {
                                 Box(
                                     modifier = Modifier
@@ -139,7 +140,7 @@ fun HomeContent(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     MoreButton(
-                                        onNavigateToMore = { onNavigateToMore() }
+                                        onNavigateToMore = onNavigateToMore
                                     )
                                 }
                             }
@@ -191,17 +192,18 @@ fun RecommendationCard(uiState: HomeUiState) {
 }
 
 @Composable
-fun HomeQuoteItem(
-    quote: HomeQuote,
-    onNavigateToDetail: () -> Unit = {},
-    modifier: Modifier = Modifier
+fun HomeBookItem(
+    book: HomeBookUiModel,
+    modifier: Modifier = Modifier,
+    onNavigateToDetail: () -> Unit = {}
 ) {
+    Log.d("HomeBookItem", "book: $book")
     Column(
         modifier = modifier
             .padding(start = 16.dp, end = 16.dp)
     ) {
         CoilImage(
-            imageModel = { quote.bookCover },
+            imageModel = { book.bookCover },
             modifier = Modifier
                 .width(280.dp)
                 .height(420.dp)
@@ -226,7 +228,7 @@ fun HomeQuoteItem(
                 .padding(horizontal = 4.dp)
         ) {
             Text(
-                text = quote.bookTitle,
+                text = book.bookTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 2,
@@ -234,7 +236,7 @@ fun HomeQuoteItem(
                 lineHeight = 16.sp
             )
             Text(
-                text = "남긴 글귀 ${quote.quoteCount}개",
+                text = "남긴 글귀 ${book.quoteCount}개",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 lineHeight = 16.sp
@@ -272,17 +274,19 @@ fun HomeScreenPreview() {
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun HomeQuoteItemPreview() {
-    HomeQuoteItem(
-        quote = HomeQuote(
-            bookTitle = "광인",
-            quoteCount = 3,
-            bookCover = "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788937454677.jpg"
-        ),
+fun HomeBookItemPreview() {
+    HomeBookItem(
+        book = HomeBookUiModel(
+            bookDocId = "1",
+            bookTitle = "어린 왕자",
+            bookCover = "",
+            quoteCount = 3
+        )
     )
 }
+
 
 @Preview
 @Composable
