@@ -1,6 +1,8 @@
 package com.blank.bookverse.presentation.ui.AccountSetting
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -42,6 +46,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseButton
+import com.blank.bookverse.presentation.common.BookVerseCustomDialog
+import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.LikeLionOutlinedTextFieldEndIconMode
@@ -58,40 +64,30 @@ fun AccountSettingsScreen(
     // Firebase 인증 인스턴스
     val auth = FirebaseAuth.getInstance()
 
+    val context = LocalContext.current
+
     // 로그인된 사용자 UID를 로그로 출력
     val currentUserUid = auth.currentUser?.uid
     Timber.e("Current User UID: $currentUserUid") // UID 출력
 
-    // 다이얼로그 상태 관리
-    val showDeleteDialog = remember { mutableStateOf(false) }
-    val passwordChangeStatus by accountSettingViewModel.passwordChangeStatus.collectAsState()
-    val passwordChangeEffectFlow by accountSettingViewModel.passwordChangeEffect.collectAsState(initial = null)
-
-    // context
-    val context = LocalContext.current
-
-    when (passwordChangeStatus) {
-        is AccountSettingViewModel.PasswordChangeState.Success -> {
-            // 성공 시 mypage로 이동
-            navController.navigate("mypage") {
-                // 백스택에서 모든 화면을 제거하고 "mypage"로 이동
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true // startDestinationId까지 포함하여 백스택을 제거
-                }
-                launchSingleTop = true // 새로운 화면이 기존 화면을 대체
-            }
-        }
-
-        is AccountSettingViewModel.PasswordChangeState.Error -> {
-            // 오류 시 처리할 코드 작성
-        }
-
-        else -> {
-            // Idle 상태는 기본 상태
+    // 멤버 정보 가져오기
+    LaunchedEffect(currentUserUid) {
+        currentUserUid?.let {
+            accountSettingViewModel.fetchMemberInfo(it) // UID를 memberId로 사용하여 멤버 정보 가져오기
         }
     }
 
     // 상태 관리
+    val passwordChangeStatus by accountSettingViewModel.passwordChangeStatus.collectAsState()
+    val showDeleteDialog = remember { mutableStateOf(false) }
+
+    val isLoading by accountSettingViewModel.isLoading.collectAsState() // 로딩 상태
+    val isDeleting by accountSettingViewModel.isDeleting.collectAsState() // 로딩 상태
+
+    // 멤버 정보
+    val memberInfo by accountSettingViewModel.memberInfo.collectAsState()
+
+    // 비밀번호 필드 상태
     val currentUserPwState = accountSettingViewModel.currentUserPw.collectAsState()
     val newUserPwState = accountSettingViewModel.newUserPw.collectAsState()
     val newUserPwCheckState = accountSettingViewModel.newUserPwCheck.collectAsState()
@@ -103,17 +99,30 @@ fun AccountSettingsScreen(
                 newUserPwCheckState.value.isNotEmpty() &&
                 newUserPwState.value == newUserPwCheckState.value
 
-    // 사용자 정보 (아이디, 전화번호)
-    val memberInfo by accountSettingViewModel.memberInfo.collectAsState()
+    // LaunchedEffect를 사용하여 한 번만 실행되도록 처리
+    LaunchedEffect(passwordChangeStatus) {
+        if (passwordChangeStatus is AccountSettingViewModel.PasswordChangeState.Success) {
+            // 비밀번호 변경 성공 시 "변경 완료" 메시지 표시
+            Toast.makeText(context, "변경 완료", Toast.LENGTH_SHORT).show()
+        }
+    }
+    // 로딩 다이얼로그 적용
+    BookVerseLoadingDialog(isVisible = isDeleting)
 
     Scaffold(
         topBar = {
             BookVerseToolbar(
                 title = "계정 설정",
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            // 비밀번호 변경 중일 때는 뒤로 가는 버튼을 막음
+                            if (!isLoading) {
+                                navController.popBackStack()
+                            }
+                        },
+                        enabled = !isLoading // isLoading이 true일 때는 버튼 비활성화
+                    ) {
                         Icon(
                             painterResource(id = R.drawable.ic_back_arrow),
                             contentDescription = null,
@@ -124,7 +133,7 @@ fun AccountSettingsScreen(
             )
         },
         modifier = Modifier.background(Color.White)
-    ) {
+    ){
         Column(
             modifier = Modifier
                 .background(Color.White)
@@ -152,7 +161,7 @@ fun AccountSettingsScreen(
                     BookVerseTextField(
                         onValueChange = {}, // 값 변경 불가능
                         readOnly = true, // 아이디는 읽기 전용으로 설정
-                        textFieldValue = mutableStateOf(memberInfo?.first ?: ""), // 실제 아이디 값을 넣어주세요.
+                        textFieldValue = mutableStateOf(memberInfo?.first ?: ""),
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
@@ -184,7 +193,7 @@ fun AccountSettingsScreen(
                     BookVerseTextField(
                         onValueChange = {}, // 값 변경 불가능
                         readOnly = true, // 전화번호는 읽기 전용으로 설정
-                        textFieldValue = mutableStateOf(memberInfo?.second ?: ""), // 실제 전화번호 값을 넣어주세요.
+                        textFieldValue = mutableStateOf(memberInfo?.second ?: ""),
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
@@ -229,10 +238,8 @@ fun AccountSettingsScreen(
                     )
                     .padding(horizontal = 0.dp),
                 inputType = LikeLionOutlinedTextFieldInputType.PASSWORD,
+                isError = accountSettingViewModel.isUserCurrentPwError,
                 trailingIconMode = LikeLionOutlinedTextFieldEndIconMode.PASSWORD,
-                checkList = listOf(
-                    Pair("비밀번호 일치", currentUserPwState.value)
-                )
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -294,7 +301,7 @@ fun AccountSettingsScreen(
                 isError = accountSettingViewModel.isUserNewPwCheckError,
                 textRange = TextRange(8, 20),
                 checkList = listOf(
-                    Pair("비밀번호 일치", newUserPwCheckState.value)
+                    Pair("비밀번호 일치", newUserPwState.value)
                 )
             )
 
@@ -305,21 +312,39 @@ fun AccountSettingsScreen(
                     .fillMaxSize()
                     .fillMaxHeight()
             ) {
-                BookVerseButton(
-                    text = "비밀번호 변경",
-                    onClick = {
-                        // 서버에 비밀번호 업데이트 요청
-                        accountSettingViewModel.changeUserPassword("memberId") // memberId는 적절한 값으로 바꿔주세요
-                    },
-                    backgroundColor = Color.Black,
-                    textColor = Color.White,
-                    modifier = Modifier
-                        .height(60.dp)
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    textStyle = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
-                    isEnable = isButtonEnabled
-                )
+                // 로딩 중일 때 비밀번호 변경 버튼을 비활성화하고 로딩 표시
+                if (isLoading) {
+                    // 로딩 표시 추가 (예: 로딩 스피너)
+                    BookVerseButton(
+                        text = "비밀번호 변경 중...",
+                        onClick = {},
+                        backgroundColor = Color.Gray,
+                        textColor = Color.White,
+                        modifier = Modifier
+                            .height(60.dp)
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                        textStyle = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                        isEnable = false
+                    )
+                } else {
+                    // 비밀번호 변경 버튼 클릭
+                    BookVerseButton(
+                        text = "비밀번호 변경",
+                        onClick = {
+                            // 비밀번호 변경 함수 호출
+                            accountSettingViewModel.changeUserPassword()
+                        },
+                        backgroundColor = Color.Black,
+                        textColor = Color.White,
+                        modifier = Modifier
+                            .height(60.dp)
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                        textStyle = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                        isEnable = isButtonEnabled
+                    )
+                }
             }
 
             // 탈퇴하기
@@ -332,9 +357,26 @@ fun AccountSettingsScreen(
                     .padding(start = 5.dp)
                     .clickable(onClick = { showDeleteDialog.value = true })
             )
+
+            // 탈퇴 다이얼로그 표시
+            if (showDeleteDialog.value) {
+                BookVerseCustomDialog(
+                    showDialogState = showDeleteDialog,
+                    confirmButtonTitle = "확인",
+                    confirmButtonOnClick = {
+                        // 탈퇴 확인 클릭 시
+                        accountSettingViewModel.deleteUserAccount(navController)
+                        showDeleteDialog.value = false
+                    },
+                    dismissButtonTitle = "취소",
+                    dismissButtonOnClick = {
+                        showDeleteDialog.value = false
+                    },
+                    icon = Icons.Default.Warning,
+                    title = "탈퇴",
+                    text = "탈퇴하시겠습니까? 그동안 저장했던 글귀들은 복구할 수 없습니다."
+                )
+            }
         }
     }
 }
-
-
-

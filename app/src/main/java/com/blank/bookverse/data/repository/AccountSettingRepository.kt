@@ -16,11 +16,12 @@ class AccountSettingRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    suspend fun validateCurrentPassword(memberId: String, currentPassword: String): Boolean {
+    suspend fun validateCurrentPassword(currentPassword: String): Boolean {
+        val memberId = firebaseAuth.currentUser?.uid
         return try {
             // Firestore에서 memberId로 사용자 정보 가져오기
-            val snapshot = firebaseFireStore.collection("member")
-                .whereEqualTo("memberId", memberId)
+            val snapshot = firebaseFireStore.collection("Member")
+                .whereEqualTo("memberDocId", memberId)
                 .get()
                 .await()
 
@@ -40,11 +41,12 @@ class AccountSettingRepository @Inject constructor(
         }
     }
 
-    suspend fun updatePassword(memberId: String, newPassword: String): Boolean {
+    suspend fun updatePassword(newPassword: String): Boolean {
+        val memberId = firebaseAuth.currentUser?.uid
         return try {
             // Firestore에서 memberId로 사용자 정보 가져오기
-            val snapshot = firebaseFireStore.collection("member")
-                .whereEqualTo("memberId", memberId)
+            val snapshot = firebaseFireStore.collection("Member")
+                .whereEqualTo("memberDocId", memberId)
                 .get()
                 .await()
 
@@ -57,9 +59,12 @@ class AccountSettingRepository @Inject constructor(
             val documentId = snapshot.documents.first().id
 
             // Firestore에서 비밀번호 업데이트
-            firebaseFireStore.collection("member").document(documentId)
+            firebaseFireStore.collection("Member").document(documentId)
                 .update("memberPassword", newPassword)
                 .await()
+
+            // Firebase Authentication에서 비밀번호 업데이트
+            firebaseAuth.currentUser?.updatePassword(newPassword)?.await()
 
             Log.d("firebaseStore", "Password updated successfully for memberId: $memberId")
             true
@@ -69,29 +74,50 @@ class AccountSettingRepository @Inject constructor(
         }
     }
 
+
     // 로그인한 멤버의 아이디와 전화번호를 가져오는 메소드 추가
     suspend fun getMemberInfo(memberId: String): Pair<String, String>? {
+        // Firebase에서 데이터 가져오는 예시
+        val member = firebaseFireStore.collection("Member").document(memberId).get().await()
+        return if (member.exists()) {
+            val memberCurrentId = member.getString("memberId") ?: ""
+            val memberPhoneNumber = member.getString("memberPhoneNumber") ?: ""
+            Pair(memberCurrentId, memberPhoneNumber)
+        } else {
+            null
+        }
+    }
+
+    suspend fun deleteUserAccount(): Boolean {
+        val memberId = firebaseAuth.currentUser?.uid
         return try {
-            val snapshot = firebaseFireStore.collection("member")
-                .whereEqualTo("memberId", memberId)
+            // Firestore에서 사용자 데이터 삭제
+            val snapshot = firebaseFireStore.collection("Member")
+                .whereEqualTo("memberDocId", memberId)
                 .get()
                 .await()
 
             if (snapshot.isEmpty) {
                 Log.e("Firestore", "No matching document found for memberId: $memberId")
-                return null
+                return false
             }
 
-            // 해당 멤버의 전화번호와 아이디를 가져옴
-            val member = snapshot.documents.first()
-            val phoneNumber = member.getString("memberPhoneNumber") ?: ""
-            val id = member.getString("memberId") ?: ""
+            // 사용자 문서 ID 가져오기
+            val documentId = snapshot.documents.first().id
 
-            Pair(id, phoneNumber) // 아이디와 전화번호 반환
+            // Firestore에서 사용자 데이터 삭제
+            firebaseFireStore.collection("Member").document(documentId).delete().await()
+
+            // Firebase Authentication에서 사용자 삭제
+            firebaseAuth.currentUser?.delete()?.await()
+
+            Log.d("firebaseAuth", "User account deleted successfully: $memberId")
+            true
         } catch (e: Exception) {
-            Log.e("firebaseStore", "Error getting member info: ${e.message}")
-            null
+            Log.e("firebaseStore", "Error deleting user account: ${e.message}")
+            false
         }
     }
+
 }
 
