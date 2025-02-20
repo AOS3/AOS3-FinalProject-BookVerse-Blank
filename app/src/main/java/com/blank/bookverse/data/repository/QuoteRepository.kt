@@ -117,6 +117,7 @@ class QuoteRepository @Inject constructor(
         }.await()
     }
 
+    // 북마크 상태 업데이트
     suspend fun updateBookmark(quoteDocId: String, isBookmark: Boolean) {
         try {
             // 여기서 await()를 호출하지 않으면 요청이 실제로 실행되지 않을 수 있습니다
@@ -128,5 +129,14 @@ class QuoteRepository @Inject constructor(
             Log.e("QuoteRepository", "Error updating bookmark", e)
             throw e
         }
+    }
+
+    suspend fun getUserBookmarkedQuotes(): List<Quote> {
+        return firestore.collection("Quotes")
+            .whereEqualTo("is_bookmark", true)
+            .get()
+            .await()
+            .documents
+            .map { document -> document.toQuote() }
     }
 }

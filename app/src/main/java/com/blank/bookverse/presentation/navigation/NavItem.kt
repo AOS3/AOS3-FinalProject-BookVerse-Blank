@@ -28,7 +28,7 @@ sealed class BottomNavItem(
     data object Bookmark : BottomNavItem(
         route = "bookmark",
         icon = { Icon(painterResource(R.drawable.ic_bookmark_fill), contentDescription = null) },
-        label = "북마크"
+        label = "책갈피"
     )
     data object MyPage : BottomNavItem(
         route = "myPage",
