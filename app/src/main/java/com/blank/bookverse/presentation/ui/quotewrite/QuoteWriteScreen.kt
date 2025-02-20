@@ -83,6 +83,8 @@ import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.navigation.CameraNavItem
+import com.blank.bookverse.presentation.ui.takeBook.CameraState
 import com.kakao.sdk.friend.l.b
 import kotlinx.coroutines.launch
 
@@ -128,7 +130,7 @@ fun QuoteWriteScreen(
                 actions = {
                     IconButton(
                         onClick = {
-
+                            navController.navigate(CameraNavItem.TakeBook.route)
                         }
                     ) {
                         Icon(
