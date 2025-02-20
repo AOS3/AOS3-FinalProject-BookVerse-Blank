@@ -94,11 +94,11 @@ fun MoreQuoteContent(
             ) {
                 items(
                     items = quoteList,
-                    key = { quote -> "${quote.bookTitle}" }
+                    key = { quote -> "${quote.quoteDocId}" }
                 ) { quote ->
                     MoreQuoteItem(
                         quote = quote,
-                        onNavigateToDetail = { onNavigateToDetail(quote.bookTitle) }
+                        onNavigateToDetail = { onNavigateToDetail(quote.quoteDocId) }
                     )
                 }
             }

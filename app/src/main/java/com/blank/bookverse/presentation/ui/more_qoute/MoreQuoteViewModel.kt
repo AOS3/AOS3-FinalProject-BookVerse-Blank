@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.more_qoute
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.model.HomeQuote
@@ -38,8 +39,8 @@ class MoreQuoteViewModel @Inject constructor(
         }
     }
 
-    fun navigateToBookDetail(bookTitle: String) = viewModelScope.launch {
-        _moreQuoteEffect.emit(MoreQuoteEffect.NavigateToBookDetail(bookTitle))
+    fun navigateToBookDetail(quoteDocId: String) = viewModelScope.launch {
+        _moreQuoteEffect.emit(MoreQuoteEffect.NavigateToBookDetail(quoteDocId))
     }
 }
 
