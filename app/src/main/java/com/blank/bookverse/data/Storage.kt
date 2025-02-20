@@ -3,28 +3,8 @@ package com.blank.bookverse.data
 import com.blank.bookverse.data.model.Comment
 import com.blank.bookverse.data.model.QuoteDetail
 import com.blank.bookverse.data.model.QuoteItem
-import com.blank.bookverse.data.model.RecommendationContent
 
 object Storage {
-    val recommendationDummy = listOf(
-        RecommendationContent(
-            quote = "세상에서 가장 어려운 일은 사람이 사람의마음을 얻는 일이란다.",
-            bookTitle = "어린왕자"
-        ),
-        RecommendationContent(
-            quote = "사막이 아름다운 것은 어딘가에 우물을 숨기고 있기 때문이야.",
-            bookTitle = "어린왕자"
-        ),
-        RecommendationContent(
-            quote = "어른들은 누구나 처음에는 어린이였다. 하지만 그것을 기억하는 어른은 별로 없다.",
-            bookTitle = "어린왕자"
-        ),
-        RecommendationContent(
-            quote = "삶이 있는 한 희망은 있다.",
-            bookTitle = "공중그네"
-        ),
-    )
-
     val quoteItemDummies = listOf(
         QuoteItem(
             quoteDocId = "pj4QOf2GDnDf8ichN5WU",

@@ -1,8 +1,8 @@
 package com.blank.bookverse.data.repository
 
 import android.util.Log
-import com.blank.bookverse.data.Storage
 import com.blank.bookverse.data.mapper.toHomeQuote
+import com.blank.bookverse.data.mapper.toRecommendationContent
 import com.blank.bookverse.data.model.HomeQuote
 import com.blank.bookverse.data.model.RecommendationContent
 import com.google.firebase.auth.FirebaseAuth
@@ -18,8 +18,14 @@ class HomeRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
 ) {
 
-    fun getRecommendationContent(): RecommendationContent {
-        return Storage.recommendationDummy.random()
+    suspend fun getRecommendationContent(): RecommendationContent {
+        val snapshot = firestore.collection("RecommedationContent")
+            .get()
+            .await()
+
+            val randomIndex = (0 until snapshot.size()).random()
+            val randomDoc = snapshot.documents[randomIndex]
+            return randomDoc.toRecommendationContent()
     }
 
     suspend fun getHomeQuoteList(): List<HomeQuote> {

@@ -1,6 +1,7 @@
 package com.blank.bookverse.data.mapper
 
 import com.blank.bookverse.data.model.HomeQuote
+import com.blank.bookverse.data.model.RecommendationContent
 import com.google.firebase.firestore.DocumentSnapshot
 
 fun DocumentSnapshot.toHomeQuote(): HomeQuote = HomeQuote(
@@ -10,4 +11,9 @@ fun DocumentSnapshot.toHomeQuote(): HomeQuote = HomeQuote(
     quoteCount = getLong("quote_count")?.toInt() ?: 0,
     bookCover = getString("book_cover") ?: "",
     isBookmark = getBoolean("is_bookmark") ?: false,
+)
+
+fun DocumentSnapshot.toRecommendationContent(): RecommendationContent = RecommendationContent(
+    quote = getString("quote") ?: "",
+    bookTitle = getString("book_title") ?: "",
 )

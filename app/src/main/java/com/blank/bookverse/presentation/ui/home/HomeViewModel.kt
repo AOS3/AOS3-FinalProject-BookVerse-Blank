@@ -30,6 +30,9 @@ class HomeViewModel @Inject constructor(
 
     private fun loadRecommendationContent() = viewModelScope.launch {
         runCatching {
+            _homeUiState.value = _homeUiState.value.copy(
+                isLoading = true
+            )
             homeRepository.getRecommendationContent()
         }.onSuccess {
             _homeUiState.value = _homeUiState.value.copy(
