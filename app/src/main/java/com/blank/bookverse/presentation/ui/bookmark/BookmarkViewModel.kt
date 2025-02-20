@@ -28,7 +28,7 @@ class BookmarkViewModel @Inject constructor(
         getUserBookmarkedQuotes()
     }
 
-    private fun getUserBookmarkedQuotes() = viewModelScope.launch {
+    fun getUserBookmarkedQuotes() = viewModelScope.launch {
         runCatching {
             _bookmarkUiState.value = _bookmarkUiState.value.copy(isLoading = true)
             quoteRepository.getUserBookmarkedQuotes()

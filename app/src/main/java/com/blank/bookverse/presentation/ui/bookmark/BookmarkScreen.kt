@@ -52,6 +52,10 @@ fun BookmarkScreen(
         }
     }
 
+    LaunchedEffect(navController.currentBackStackEntry) {
+        viewModel.getUserBookmarkedQuotes()
+    }
+
     BookmarkContent(
         modifier = modifier,
         uiState = uiState,
