@@ -26,6 +26,7 @@ fun DocumentSnapshot.toQuote() = Quote(
     memberId = getString("member_id") ?: "",
     photoUrl = getString("photo_url") ?: "",
     quoteContent = getString("quote_content") ?: "",
+    isBookmark = getBoolean("is_bookmark") ?: false,
     createdAt = getLong("created_at") ?: System.currentTimeMillis(),
 )
 
