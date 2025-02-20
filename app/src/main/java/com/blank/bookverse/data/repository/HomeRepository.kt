@@ -1,6 +1,5 @@
 package com.blank.bookverse.data.repository
 
-import android.util.Log
 import com.blank.bookverse.data.mapper.toHomeQuote
 import com.blank.bookverse.data.mapper.toRecommendationContent
 import com.blank.bookverse.data.model.HomeQuote
