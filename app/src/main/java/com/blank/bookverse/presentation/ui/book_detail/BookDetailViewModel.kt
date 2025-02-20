@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.model.HomeQuote
 import com.blank.bookverse.data.repository.BookDetailRepository
-import com.blank.bookverse.data.repository.HomeRepository
+import com.blank.bookverse.data.repository.QuoteRepository
 import com.blank.bookverse.presentation.model.QuoteUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val homeRepository: HomeRepository,
+    private val quoteRepository: QuoteRepository,
     private val detailRepository: BookDetailRepository,
 ): ViewModel() {
     private val quoteDocId: String = checkNotNull(savedStateHandle["quoteDocId"])
@@ -38,7 +38,7 @@ class BookDetailViewModel @Inject constructor(
     private fun getBookInfo(bookTitle: String) = viewModelScope.launch {
         runCatching {
             _bookDetailUiState.value = _bookDetailUiState.value.copy(isLoading = true)
-            homeRepository.getBookInfo(bookTitle)
+            quoteRepository.getBookInfo(bookTitle)
         }.onSuccess { quote ->
             _bookDetailUiState.value = _bookDetailUiState.value.copy(
                 isLoading = false,

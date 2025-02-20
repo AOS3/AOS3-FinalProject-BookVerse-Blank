@@ -3,7 +3,7 @@ package com.blank.bookverse.presentation.ui.more_qoute
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.model.HomeQuote
-import com.blank.bookverse.data.repository.HomeRepository
+import com.blank.bookverse.data.repository.QuoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MoreQuoteViewModel @Inject constructor(
-    private val homeRepository: HomeRepository,
+    private val quoteRepository: QuoteRepository,
 ): ViewModel() {
     private val _moreQuoteUiState = MutableStateFlow(MoreQuoteUiState())
     val moreQuoteUiState = _moreQuoteUiState.asStateFlow()
@@ -28,7 +28,7 @@ class MoreQuoteViewModel @Inject constructor(
 
     private fun loadAllQuoteList() = viewModelScope.launch {
         runCatching {
-            homeRepository.getAllQuoteList()
+            quoteRepository.getAllQuoteList()
         }.onSuccess {
             _moreQuoteUiState.value = _moreQuoteUiState.value.copy(
                 quoteList = it

@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.model.HomeQuote
 import com.blank.bookverse.data.model.RecommendationContent
-import com.blank.bookverse.data.repository.HomeRepository
+import com.blank.bookverse.data.repository.QuoteRepository
+import com.blank.bookverse.data.repository.RecommendationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val homeRepository: HomeRepository,
+    private val quoteRepository: QuoteRepository,
+    private val recommendationRepository: RecommendationRepository,
 ) : ViewModel() {
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
@@ -33,7 +35,7 @@ class HomeViewModel @Inject constructor(
             _homeUiState.value = _homeUiState.value.copy(
                 isLoading = true
             )
-            homeRepository.getRecommendationContent()
+            recommendationRepository.getRecommendationContent()
         }.onSuccess {
             _homeUiState.value = _homeUiState.value.copy(
                 recommendationContent = it,
@@ -49,7 +51,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadHomeQuoteList() = viewModelScope.launch {
         runCatching {
-            homeRepository.getHomeQuoteList()
+            quoteRepository.getHomeQuoteList()
         }.onSuccess { quotes ->
             _homeUiState.value = _homeUiState.value.copy(
                 homeQuoteList = quotes,
