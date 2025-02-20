@@ -56,6 +56,7 @@ sealed class MainNavItem(val route: String, val label: String) {
 }
 
 
+
 sealed class MyPageNavItem(val route: String, val label: String) {
     data object Profile : MyPageNavItem("profile", "프로필 설정")
     data object AccountSetting : MyPageNavItem("account_setting", "계정 설정")
