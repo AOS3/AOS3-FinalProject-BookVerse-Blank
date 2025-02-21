@@ -48,13 +48,6 @@ class MyPageViewModel @Inject constructor(
         }
     }
 
-    private val _selectedFont = MutableStateFlow<FontFamily>(notoSansFamily) // 기본 폰트 설정
-    val selectedFont = _selectedFont.asStateFlow()
-
-    fun updateFontFamily(fontFamily: FontFamily) {
-        _selectedFont.value = fontFamily
-    }
-
     private val _memberProfile = MutableStateFlow<MemberModel?>(null)
     val memberProfile = _memberProfile.asStateFlow()
 
