@@ -1,17 +1,22 @@
 package com.blank.bookverse.presentation.ui.takeBook
 
+import android.R.attr.name
+import android.R.attr.path
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.Parcel
 import android.provider.MediaStore
+import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,6 +47,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
@@ -51,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -71,7 +78,6 @@ import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.util.Constant
-import com.blank.bookverse.presentation.util.Constant.FILENAME_FORMAT
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.fido.fido2.api.common.RequestOptions
@@ -84,6 +90,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.Dispatcher
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URI
@@ -109,7 +116,6 @@ fun TakeBookScreen(
         }
     }
     val imageURI = remember { mutableStateOf<Uri?>(null) }
-    val extraURI = remember { mutableStateOf<Uri?>(null) }
     val state = remember { MutableStateFlow(cameraState) }
     val isCameraPermissionGranted: StateFlow<Boolean> = state
     val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
@@ -121,14 +127,9 @@ fun TakeBookScreen(
     val backColor = Color(0xFF6C6C6C)
     val imageViewButtonTextColor = Color.White
     val imageViewButtonBackColor = Color.Transparent
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            Log.d("Delete", "이미지 삭제 성공!")
-        } else {
-            Log.e("Delete", "이미지 삭제 취소 또는 실패!")
-        }
+
+    LaunchedEffect(Unit) {
+
     }
 
     SideEffect {
@@ -226,7 +227,7 @@ fun TakeBookScreen(
                         "캡쳐",
                         textColor = Color.Black,
                         onClick = {
-                            takePhoto(cameraController, context,imageURI,extraURI,launcher)
+                            takePhoto(cameraController, context,imageURI)
                         },
                         isEnable = isCameraPermissionGranted.value
                     )
@@ -271,7 +272,9 @@ fun TakeBookScreen(
                             textColor = imageViewButtonTextColor,
                             backgroundColor = imageViewButtonBackColor,
                             onClick = {
-
+                                //
+                                val base64 = uriToBase64(context, Constant.captureName)
+                                Log.d("st","$base64")
                             }
                         )
                     }
@@ -315,18 +318,8 @@ fun takePhoto(
     cameraCapture: LifecycleCameraController,
     context:Context,
     imageURI: MutableState<Uri?>,
-    extraUri: MutableState<Uri?>,
-    launcher: ActivityResultLauncher<IntentSenderRequest>
 ) {
-    val path =
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/cameraX")
-    if (!path.exists()) path.mkdirs()
-    val name = SimpleDateFormat(
-        "yyyy-MM-dd-HH-mm-ss-SSS", Locale.KOREA
-    ).format(System.currentTimeMillis()) + ".jpg"
-
-    val photoFile = File(path, name)
-
+    val photoFile = File(context.filesDir, Constant.captureName)
     val outputFileOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
     cameraCapture.takePicture(outputFileOptions,
@@ -339,21 +332,8 @@ fun takePhoto(
             }
 
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                val saveName = "saved_quote.png"
                 val resultUri = outputFileResults.savedUri!!
-                imageURI.value = copyImageToInternalStorage(
-                    context,
-                    resultUri,
-                    saveName
-                )
-                extraUri.value = resultUri
-                if (imageURI.value != null){
-                    Timber.tag("st").d("${imageURI.value}")
-                    Timber.tag("st").d("extraUri ${extraUri.value}")
-//                    val pendingIntent = MediaStore.createDeleteRequest(context.contentResolver, listOf(extraUri.value!!))
-//                    val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
-//                    launcher.launch(intentSenderRequest)
-                }
+                imageURI.value = resultUri
                 Toast.makeText(context, "캡쳐 성공", Toast.LENGTH_SHORT).show()
             }
         }
@@ -362,16 +342,22 @@ fun takePhoto(
 
 }
 
-fun copyImageToInternalStorage(context: Context, uri: Uri, fileName: String): Uri? {
-    val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-    val destinationFile = File(context.filesDir, fileName)
-
-    inputStream.use { input ->
-        FileOutputStream(destinationFile).use { output ->
-            input.copyTo(output)
-        }
+fun uriToBase64(context: Context, image: String): String? {
+    return try {
+        val inputStream = context.openFileInput(image)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        encodeBitmapToBase64(bitmap)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
-    return destinationFile.absolutePath.toUri()
+}
+
+fun encodeBitmapToBase64(bitmap: Bitmap): String {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream) // PNG 포맷 사용
+    val byteArray = byteArrayOutputStream.toByteArray()
+    return Base64.encodeToString(byteArray, Base64.DEFAULT)
 }
 
 
