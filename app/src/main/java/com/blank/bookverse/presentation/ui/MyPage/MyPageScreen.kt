@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -32,10 +33,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.blank.bookverse.R
+import com.blank.bookverse.data.model.Book
 import com.blank.bookverse.data.model.MemberModel
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseCustomDialog
 import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
+import com.blank.bookverse.presentation.theme.iWinFamily
+import com.blank.bookverse.presentation.theme.nanumMyeonJoFamily
+import com.blank.bookverse.presentation.theme.notoSansFamily
+import com.blank.bookverse.presentation.theme.treasureFamily
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -49,12 +55,15 @@ fun MyPageScreen(
     val showDeleteAccountDialog = remember { mutableStateOf(false) } // 탈퇴 다이얼로그 상태
     val context = LocalContext.current
     val isDeleting by myPageViewModel.isDeleting.collectAsState() // 로딩 상태
+    val topBook by myPageViewModel.topBook.collectAsState() // 가장 많이 읽은 책
+
 
     // 화면이 처음 표시될 때 데이터를 로드
     LaunchedEffect(Unit) {
         val memberDocId = FirebaseAuth.getInstance().currentUser?.uid
         if (memberDocId != null) {
             myPageViewModel.getUserProfile(memberDocId)
+            myPageViewModel.fetchTopBook()
         }
         // 로그인 타입 확인
         myPageViewModel.checkLoginType()
@@ -83,7 +92,13 @@ fun MyPageScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                ReadingInfoCard(memberData = memberData)
+                // 가장 많이 읽은 책 정보 카드
+                topBook?.let {
+                    ReadingInfoCard(
+                        memberData = memberData,
+                        book = it
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -176,7 +191,7 @@ fun ProfileHeader(memberData: MemberModel, profileImageUrl: String?) {
 }
 
 @Composable
-fun ReadingInfoCard(memberData: MemberModel) {
+fun ReadingInfoCard(memberData: MemberModel, book: Book) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -192,7 +207,7 @@ fun ReadingInfoCard(memberData: MemberModel) {
             ) {
                 Image(
                     painter = rememberImagePainter(
-                        data = memberData.memberBookCoverImage ?: R.drawable.ic_book_null
+                        data = book.bookCover
                     ),
                     contentDescription = "Book Cover",
                     modifier = Modifier.fillMaxSize()
@@ -204,9 +219,9 @@ fun ReadingInfoCard(memberData: MemberModel) {
                     text = buildAnnotatedString {
                         append("${memberData.memberNickName} 님은 ")
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(memberData.memberName)
+                            append(book.bookTitle)
                         }
-                        append("을 인상 깊게 읽으셨군요")
+                        append("을(를) 인상 깊게 읽으셨군요")
                     },
                     fontSize = 15.sp
                 )
@@ -214,9 +229,9 @@ fun ReadingInfoCard(memberData: MemberModel) {
                     text = buildAnnotatedString {
                         append("총 ")
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("0편")
+                            append(book.quoteCount.toString())
                         }
-                        append("의 글귀를 남겼어요")
+                        append("편의 글귀를 남겼어요")
                     },
                     fontSize = 15.sp
                 )
@@ -235,7 +250,7 @@ fun SettingsMenu(
     navController: NavController,
     onLogoutClicked: () -> Unit,
     onShareClicked: () -> Unit,
-    isAccountSettingVisible: Boolean, // 로그인 타입에 따라 메뉴를 결정
+    isAccountSettingVisible: Boolean, // 로그인 타입에 따라 메뉴를 결정 //
     onDeleteAccountClicked: () -> Unit // 탈퇴하기 메뉴 클릭 시 동작
 ) {
     val menuItems = mutableListOf(
@@ -256,6 +271,7 @@ fun SettingsMenu(
     val customBottomSheetVisible = remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
+
         menuItems.forEach { (icon, text) ->
             ListItem(
                 leadingContent = { Icon(icon, contentDescription = null) },
@@ -286,9 +302,15 @@ fun SettingsMenu(
 
 
 @Composable
-fun FontSettingsContent() {
-    val fonts = listOf("Noto Sans KR", "Mali", "Mitr", "Rubik")
+fun FontSettingsContent(myPageViewModel: MyPageViewModel = hiltViewModel()) {
+    val fonts = listOf("Noto Sans KR", "나눔명조", "이겨낸다", "금은보화")
     val selectedFont = remember { mutableStateOf(fonts[0]) }
+    val fontFamilyList = mapOf(
+        "Noto Sans KR" to notoSansFamily,
+        "나눔명조" to nanumMyeonJoFamily,  // Mali 폰트는 추가해야 합니다.
+        "이겨낸다" to iWinFamily,  // Mitr 폰트는 추가해야 합니다.
+        "금은보화" to treasureFamily // Rubik 폰트는 추가해야 합니다.
+    )
 
     Box(
         modifier = Modifier
@@ -308,20 +330,22 @@ fun FontSettingsContent() {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { selectedFont.value = font }
+                            .clickable {
+                            }
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = font,
                             fontSize = 16.sp,
-                            fontFamily = FontFamily.Default,
+                            fontFamily = fontFamilyList[font] ?: notoSansFamily,
                             modifier = Modifier.weight(1f)
                         )
 
                         RadioButton(
                             selected = (font == selectedFont.value),
-                            onClick = { selectedFont.value = font }
+                            onClick = {
+                            }
                         )
                     }
                 }

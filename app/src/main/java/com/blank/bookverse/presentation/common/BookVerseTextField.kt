@@ -103,7 +103,7 @@ fun BookVerseTextField(
     maxLines:Int = 1
 ) {
     val gridRow by remember { mutableStateOf(gridRow) }
-    // 비밀번호가 보이는지...
+    // 비밀번호가 보이는지....
     var isShowingPasswordFlag by rememberSaveable {
         mutableStateOf(false)
     }
@@ -197,17 +197,17 @@ fun BookVerseTextField(
                             }
                         ) {
                             if(isShowingPasswordFlag){
-//                                Icon(
-//                                    painter = painterResource(id = R.drawable.ic_pw_eye_on),
-//                                    contentDescription = null,
-//                                    modifier = Modifier.size(25.dp)
-//                                )
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_pw_eye_on),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(25.dp)
+                                )
                             } else {
-//                                Icon(
-//                                    painter = painterResource(id = R.drawable.ic_pw_eye_off),
-//                                    contentDescription = null,
-//                                    modifier = Modifier.size(25.dp)
-//                                )
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_pw_eye_off),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(25.dp)
+                                )
                             }
                         }
                     }
