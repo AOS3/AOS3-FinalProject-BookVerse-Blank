@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.model.RegisterModel
 import com.blank.bookverse.data.repository.LoginRepository
 import com.google.firebase.auth.FirebaseUser
+import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.user.UserApiClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -54,12 +55,17 @@ class LoginViewModel @Inject constructor(
             viewModelScope.launch {
                 when {
                     error != null -> {
-                        // 만약 JsonSyntaxException이 발생하면 fallback으로 사용자 정보 요청을 진행
-                        if (error is com.google.gson.JsonSyntaxException) {
-                            Timber.e("카카오 계정 로그인 JsonSyntaxException 발생: ${error.localizedMessage}")
-                            // 서버 응답이 문자열로 내려오는 문제로 인한 파싱 오류일 수 있으므로,
-                            // 이미 내부적으로 세션이 생성되었을 가능성을 고려하여 사용자 정보 요청 시도
-                            getKakaoUserInfo(context)
+                        // JsonSyntaxException 또는 IllegalStateException 처리
+                        if (error is com.google.gson.JsonSyntaxException || error is IllegalStateException) {
+                            Timber.e("카카오 로그인 파싱 오류: ${error.localizedMessage}")
+
+                            // 세션이 유효한지 확인 후 사용자 정보 요청
+                            if (AuthApiClient.instance.hasToken()) {
+                                getKakaoUserInfo(context)
+                            } else {
+                                _loginState.emit(LoginState.Error("로그인 세션이 만료되었습니다. 다시 로그인해주세요."))
+                                showDialogLoginState.value = true
+                            }
                         } else {
                             Timber.e("카카오 계정 로그인 실패: $error")
                             _loginState.emit(LoginState.Error("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
@@ -75,46 +81,62 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    // 카카오 사용자 정보 요청 및 로그인/회원가입 처리
     private fun getKakaoUserInfo(context: Context) {
-        UserApiClient.instance.me { user, error ->
+        // 토큰 유효성 검사 및 갱신
+        UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
             if (error != null) {
-                Timber.e("사용자 정보 요청 실패: $error")
-            } else {
-                user?.kakaoAccount?.let { account ->
-                    val nickname = account.profile?.nickname.orEmpty()
-                    val email = account.email.orEmpty()
+                Timber.e("토큰 정보 확인 실패: $error")
+                // 토큰이 유효하지 않으면 로그인 오류 처리
+                viewModelScope.launch {
+                    _loginState.emit(LoginState.Error("로그인 세션이 만료되었습니다. 다시 로그인해주세요."))
+                    showDialogLoginState.value = true
+                }
+            } else if (tokenInfo != null) {
+                // 토큰이 유효할 경우 사용자 정보 요청
+                UserApiClient.instance.me { user, error ->
+                    if (error != null) {
+                        Timber.e("사용자 정보 요청 실패: $error")
+                        viewModelScope.launch {
+                            _loginState.emit(LoginState.Error("사용자 정보 요청에 실패했습니다."))
+                            showDialogLoginState.value = true
+                        }
+                    } else {
+                        user?.kakaoAccount?.let { account ->
+                            val nickname = account.profile?.nickname.orEmpty()
+                            val email = account.email.orEmpty()
 
-                    viewModelScope.launch {
-                        // RegisterModel 생성 및 로그인/회원가입 API 호출
-                        val registerModel = RegisterModel(
-                            memberDocId = "",
-                            memberName = nickname,
-                            memberProfileImage = "",
-                            memberId = email,
-                            memberPassword = email,
-                            memberPhoneNumber = "",
-                            memberNickName = nickname,
-                            LoginType = "카카오",
-                            createAt = System.currentTimeMillis(),
-                            isDelete = false
-                        )
-
-                        loginRepository.loginWithKakao(registerModel)
-                            .onStart { _loginState.value = LoginState.Loading }
-                            .collectLatest { result ->
-                                result.fold(
-                                    onSuccess = { response ->
-                                        _loginState.value = LoginState.Success(response)
-                                        // 로그인 성공 시 사용자 정보 로컬 저장
-                                        saveUserInfo(context, "카카오", email, email)
-                                    },
-                                    onFailure = {
-                                        _loginState.emit(LoginState.Error("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
-                                        showDialogLoginState.value = true
-                                    }
+                            viewModelScope.launch {
+                                // RegisterModel 생성 및 로그인/회원가입 API 호출
+                                val registerModel = RegisterModel(
+                                    memberDocId = "",
+                                    memberName = nickname,
+                                    memberProfileImage = "",
+                                    memberId = email,
+                                    memberPassword = email,
+                                    memberPhoneNumber = "",
+                                    memberNickName = nickname,
+                                    LoginType = "카카오",
+                                    createAt = System.currentTimeMillis(),
+                                    isDelete = false
                                 )
+
+                                loginRepository.loginWithKakao(registerModel)
+                                    .onStart { _loginState.value = LoginState.Loading }
+                                    .collectLatest { result ->
+                                        result.fold(
+                                            onSuccess = { response ->
+                                                _loginState.value = LoginState.Success(response)
+                                                // 로그인 성공 시 사용자 정보 로컬 저장
+                                                saveUserInfo(context, "카카오", email, email)
+                                            },
+                                            onFailure = {
+                                                _loginState.emit(LoginState.Error("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                                                showDialogLoginState.value = true
+                                            }
+                                        )
+                                    }
                             }
+                        }
                     }
                 }
             }
