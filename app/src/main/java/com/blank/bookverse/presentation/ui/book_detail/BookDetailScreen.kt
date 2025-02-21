@@ -60,6 +60,10 @@ fun BookDetailScreen(
         }
     }
 
+    LaunchedEffect(navController.currentBackStackEntry) {
+        viewModel.loadBookDetail()
+    }
+
     Scaffold(
         topBar = {
             BookVerseToolbar(

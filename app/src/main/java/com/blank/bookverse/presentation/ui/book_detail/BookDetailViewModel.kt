@@ -32,7 +32,7 @@ class BookDetailViewModel @Inject constructor(
         loadBookDetail()
     }
 
-    private fun loadBookDetail() = viewModelScope.launch {
+    fun loadBookDetail() = viewModelScope.launch {
         _bookDetailUiState.value = _bookDetailUiState.value.copy(isLoading = true)
 
         val result = runCatching {

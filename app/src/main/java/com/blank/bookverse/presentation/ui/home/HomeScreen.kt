@@ -68,6 +68,11 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(navController.currentBackStackEntry) {
+        viewModel.loadBooks()
+    }
+
+
     HomeContent(
         uiState = uiState,
         modifier = modifier,

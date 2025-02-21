@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,14 @@ fun QuoteDetailScreen(
 ) {
     val uiState by viewModel.quoteDetailUiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.quoteDetailEffect.collect { effect ->
+            when (effect) {
+                is QuoteDetailEffect.NavigateBack -> navController.popBackStack()
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             BookVerseToolbar(
@@ -59,7 +68,7 @@ fun QuoteDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* 삭제 동작 */ }) {
+                    IconButton(onClick = { viewModel.deleteQuote() }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_delete),
                             contentDescription = "삭제"
