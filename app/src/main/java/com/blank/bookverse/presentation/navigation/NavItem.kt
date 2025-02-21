@@ -63,10 +63,7 @@ sealed class MyPageNavItem(val route: String, val label: String) {
 }
 
 sealed class CameraNavItem(val route: String, val label: String) {
-    data object TakeBook : CameraNavItem("camera/{camera_state}", "촬영") {
-        const val CAMERA_STATE_ARG = "camera_state"
-        fun createRoute(cameraState: String) = "quote_detail/$cameraState"
-    }
+    data object TakeBook : CameraNavItem("camera", "촬영")
 }
 
 // sealed class MainNavItem(val route: String, val label: String) {
