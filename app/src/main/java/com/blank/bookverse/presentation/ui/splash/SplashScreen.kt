@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.blank.bookverse.R
+import com.kakao.sdk.common.util.Utility
 import kotlinx.coroutines.delay
 import timber.log.Timber
 
@@ -27,6 +28,8 @@ fun SplashScreen(
 ) {
 
     val context = LocalContext.current
+
+    Timber.e("해쉬값 : ${Utility.getKeyHash(context)}")
 
     LaunchedEffect(Unit) {
         if(splashViewModel.autoLoginProcess(context)) {
