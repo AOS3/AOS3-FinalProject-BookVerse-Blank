@@ -250,7 +250,7 @@ fun SettingsMenu(
     navController: NavController,
     onLogoutClicked: () -> Unit,
     onShareClicked: () -> Unit,
-    isAccountSettingVisible: Boolean, // 로그인 타입에 따라 메뉴를 결정
+    isAccountSettingVisible: Boolean, // 로그인 타입에 따라 메뉴를 결정 //
     onDeleteAccountClicked: () -> Unit // 탈퇴하기 메뉴 클릭 시 동작
 ) {
     val menuItems = mutableListOf(

@@ -103,7 +103,7 @@ fun BookVerseTextField(
     maxLines:Int = 1
 ) {
     val gridRow by remember { mutableStateOf(gridRow) }
-    // 비밀번호가 보이는지...
+    // 비밀번호가 보이는지....
     var isShowingPasswordFlag by rememberSaveable {
         mutableStateOf(false)
     }

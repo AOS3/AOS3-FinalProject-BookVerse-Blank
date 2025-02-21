@@ -271,7 +271,7 @@ fun AccountSettingsScreen(
                 isError = accountSettingViewModel.isUserNewPwError,
                 textRange = TextRange(8, 20),
                 checkList = listOf(
-                    Pair("영문 소문자, 숫자, 특수문자 포함", Regex("^[a-zA-Z0-9!@#$%^&*(),.?\":{}|<>]+$"))
+                    Pair("영문 소문자 및 숫자", Regex("^[a-zA-Z0-9]+$"))
                 )
             )
 
