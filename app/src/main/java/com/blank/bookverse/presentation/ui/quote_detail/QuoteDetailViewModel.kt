@@ -8,7 +8,9 @@ import com.blank.bookverse.data.repository.QuoteRepository
 import com.blank.bookverse.presentation.model.QuoteDetailUiModel
 import com.blank.bookverse.presentation.navigation.MainNavItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,6 +24,9 @@ class QuoteDetailViewModel @Inject constructor(
 
     private val _quoteDetailUiState = MutableStateFlow(QuoteDetailUiState())
     val quoteDetailUiState = _quoteDetailUiState.asStateFlow()
+
+    private val _quoteDetailEffect = MutableSharedFlow<QuoteDetailEffect>()
+    val quoteDetailEffect = _quoteDetailEffect.asSharedFlow()
 
     init {
         loadQuoteDetail()
@@ -46,6 +51,16 @@ class QuoteDetailViewModel @Inject constructor(
         }
     }
 
+    fun deleteQuote() = viewModelScope.launch {
+        runCatching {
+            quoteRepository.deleteQuote(quoteDocId, _quoteDetailUiState.value.quoteDetail?.bookDocId ?: "")
+        }.onSuccess {
+            _quoteDetailEffect.emit(QuoteDetailEffect.NavigateBack)
+        }.onFailure { error ->
+            Log.e("QuoteDetailViewModel", "Error deleting quote", error)
+        }
+    }
+
     fun updateBookmark(isBookmark: Boolean) = viewModelScope.launch {
         runCatching {
             quoteRepository.updateBookmark(quoteDocId, isBookmark)
@@ -65,3 +80,7 @@ data class QuoteDetailUiState(
     val isLoading: Boolean = false,
     val quoteDetail: QuoteDetailUiModel? = null
 )
+
+sealed class QuoteDetailEffect {
+    data object NavigateBack: QuoteDetailEffect()
+}

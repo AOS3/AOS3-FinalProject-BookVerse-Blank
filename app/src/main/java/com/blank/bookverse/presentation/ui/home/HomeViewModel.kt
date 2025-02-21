@@ -47,7 +47,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadBooks() = viewModelScope.launch {
+    fun loadBooks() = viewModelScope.launch {
         runCatching {
             _homeUiState.value = _homeUiState.value.copy(isLoading = true)
             quoteRepository.getHomeBookList()

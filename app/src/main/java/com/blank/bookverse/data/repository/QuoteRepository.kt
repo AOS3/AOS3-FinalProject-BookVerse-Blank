@@ -19,11 +19,11 @@ class QuoteRepository @Inject constructor(
     private val firestoreAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
 ) {
-
     // 홈 화면 - 사용자가 작성한 글귀가 있는 책 목록
     suspend fun getHomeBookList(): List<Book> {
         return firestore.collection("Books")
             .whereEqualTo("member_id", firestoreAuth.uid)
+            .whereEqualTo("is_delete", false)
             .orderBy("quote_count", Query.Direction.DESCENDING)
             .limit(8)
             .get()
@@ -45,6 +45,7 @@ class QuoteRepository @Inject constructor(
     suspend fun getBookQuotes(bookDocId: String): List<Quote> {
         return firestore.collection("Quotes")
             .whereEqualTo("book_doc_id", bookDocId)
+            .whereEqualTo("is_delete", false)
             .orderBy("created_at", Query.Direction.DESCENDING)
             .get()
             .await()
@@ -65,6 +66,7 @@ class QuoteRepository @Inject constructor(
     suspend fun getQuoteComments(quoteDocId: String): List<Comment> {
         return firestore.collection("Comments")
             .whereEqualTo("quote_doc_id", quoteDocId)
+            .whereEqualTo("is_delete", false)
             .orderBy("created_at", Query.Direction.DESCENDING)
             .get()
             .await()
@@ -75,7 +77,8 @@ class QuoteRepository @Inject constructor(
     // 더보기 화면 - 모든 책 목록
     suspend fun getAllBooks(): List<Book> {
         return firestore.collection("Books")
-            .whereEqualTo("memberId", firestoreAuth.uid)
+            .whereEqualTo("member_id", firestoreAuth.uid)
+            .whereEqualTo("is_delete", false)
             .orderBy("quoteCount", Query.Direction.DESCENDING)
             .get()
             .await()
@@ -87,6 +90,7 @@ class QuoteRepository @Inject constructor(
     suspend fun getTopBook(): Book? {
         return firestore.collection("Books")
             .whereEqualTo("member_id", firestoreAuth.uid)
+            .whereEqualTo("is_delete", false)
             .orderBy("quote_count", Query.Direction.DESCENDING)
             .limit(1)
             .get()
@@ -98,7 +102,6 @@ class QuoteRepository @Inject constructor(
 
     // 새 글귀 저장 (책 정보가 없으면 책도 함께 생성)
     suspend fun saveQuote(quote: Quote, book: Book) {
-        // 트랜잭션으로 처리
         firestore.runTransaction { transaction ->
             val bookRef = firestore.collection("Books").document(book.bookDocId)
             val existingBook = transaction.get(bookRef)
@@ -117,10 +120,31 @@ class QuoteRepository @Inject constructor(
         }.await()
     }
 
+    // 책 글귀 삭제 (soft delete)
+    suspend fun deleteQuote(quoteDocId: String, bookDocId: String) {
+        firestore.runTransaction { transaction ->
+            val bookRef = firestore.collection("Books").document(bookDocId)
+            val quoteRef = firestore.collection("Quotes").document(quoteDocId)
+
+            val book = transaction.get(bookRef)
+
+            if (book.exists()) {
+                val currentCount = book.getLong("quoteCount") ?: 0
+                if (currentCount > 0) {
+                    transaction.update(bookRef, "quoteCount", currentCount - 1)
+                }
+
+                if (currentCount <= 1) {
+                    transaction.update(bookRef, "is_delete", true)
+                }
+            }
+            transaction.update(quoteRef, "is_delete", true)
+        }.await()
+    }
+
     // 북마크 상태 업데이트
     suspend fun updateBookmark(quoteDocId: String, isBookmark: Boolean) {
         try {
-            // 여기서 await()를 호출하지 않으면 요청이 실제로 실행되지 않을 수 있습니다
             firestore.collection("Quotes")
                 .document(quoteDocId)
                 .update("is_bookmark", isBookmark)
@@ -134,6 +158,7 @@ class QuoteRepository @Inject constructor(
     suspend fun getUserBookmarkedQuotes(): List<Quote> {
         return firestore.collection("Quotes")
             .whereEqualTo("is_bookmark", true)
+            .whereEqualTo("is_delete", false)
             .get()
             .await()
             .documents

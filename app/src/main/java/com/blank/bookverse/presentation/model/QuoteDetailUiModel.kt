@@ -5,6 +5,7 @@ import com.blank.bookverse.data.model.Quote
 
 data class QuoteDetailUiModel(
     val quoteDocId: String,
+    val bookDocId: String,
     val photoUrl: String,
     val quoteContent: String,
     val comments: List<CommentItem>,
@@ -25,6 +26,7 @@ data class QuoteDetailUiModel(
     companion object {
         fun from(quote: Quote, comments: List<Comment>) = QuoteDetailUiModel(
             quoteDocId = quote.quoteDocId,
+            bookDocId = quote.bookDocId,
             photoUrl = quote.photoUrl,
             quoteContent = quote.quoteContent,
             isBookmark = quote.isBookmark,
