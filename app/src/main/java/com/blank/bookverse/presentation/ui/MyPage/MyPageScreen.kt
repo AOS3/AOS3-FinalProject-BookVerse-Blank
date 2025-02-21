@@ -5,18 +5,44 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -24,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -38,10 +63,7 @@ import com.blank.bookverse.data.model.MemberModel
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseCustomDialog
 import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
-import com.blank.bookverse.presentation.theme.iWinFamily
-import com.blank.bookverse.presentation.theme.nanumMyeonJoFamily
 import com.blank.bookverse.presentation.theme.notoSansFamily
-import com.blank.bookverse.presentation.theme.treasureFamily
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -307,9 +329,9 @@ fun FontSettingsContent(myPageViewModel: MyPageViewModel = hiltViewModel()) {
     val selectedFont = remember { mutableStateOf(fonts[0]) }
     val fontFamilyList = mapOf(
         "Noto Sans KR" to notoSansFamily,
-        "나눔명조" to nanumMyeonJoFamily,  // Mali 폰트는 추가해야 합니다.
-        "이겨낸다" to iWinFamily,  // Mitr 폰트는 추가해야 합니다.
-        "금은보화" to treasureFamily // Rubik 폰트는 추가해야 합니다.
+        "나눔명조" to notoSansFamily,  // Mali 폰트는 추가해야 합니다.
+        "이겨낸다" to notoSansFamily,  // Mitr 폰트는 추가해야 합니다.
+        "금은보화" to notoSansFamily // Rubik 폰트는 추가해야 합니다.
     )
 
     Box(
