@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -90,6 +91,10 @@ class RegisterViewModel @Inject constructor(
     // 닉네임 에러 상태 관리
     val isUserNicknameError = mutableStateOf(false)
 
+    init {
+        generateNickname()
+    }
+
     // 회원가입 필드 업데이트 (중복 제거)
     fun updateRegisterField(field: RegisterField, value: String) {
         _registerState.value = when (field) {
@@ -104,22 +109,24 @@ class RegisterViewModel @Inject constructor(
 
     // 랜덤 닉네임 생성기
     fun generateNickname(): String {
-        val animals = listOf(
-            "토끼", "고양이", "강아지", "곰", "새", "호랑이", "사자", "거북이", "여우",
-            "사슴", "펭귄", "코끼리", "늑대", "기린", "여우", "기타", "부엉이", "토끼"
-        )
+        var nickname = ""
 
-        val adjectives = listOf(
-            "행복한", "사랑스러운", "귀여운", "용감한", "파란", "따뜻한", "조용한",
-            "반짝이는", "신비로운", "멋진", "무서운", "사랑받는", "피곤한", "평화로운",
-            "용감한", "고요한", "따뜻한", "부드러운", "부지런한", "매력적인", "밝은"
-        )
-
-        val randomAnimal = animals.random()
-        val randomAdjective = adjectives.random()
-
-        return "$randomAdjective $randomAnimal"
+        runBlocking {
+            registerRepository.getRandomNickName()
+                .collectLatest { result ->
+                    result.fold(
+                        onSuccess = {
+                            nickname = it
+                        },
+                        onFailure = {
+                            nickname = ""
+                        }
+                    )
+                }
+        }
+        return nickname
     }
+
 
     // 회원가입 유효성 검사
     fun checkIsRegister(): Boolean {
@@ -141,7 +148,7 @@ class RegisterViewModel @Inject constructor(
         userName: String,
         userPw: String,
         userPhoneNumber: String,
-        userNickName:String
+        userNickName: String
     ) = viewModelScope.launch {
 
         // RegisterModel 생성
