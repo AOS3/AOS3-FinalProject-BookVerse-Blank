@@ -1,6 +1,8 @@
 package com.blank.bookverse.presentation.ui.quote_detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -23,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -94,7 +99,8 @@ fun QuoteDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            uiState = uiState
+            uiState = uiState,
+            onCommentDelete = viewModel::deleteComment,
         )
     }
 }
@@ -103,6 +109,7 @@ fun QuoteDetailScreen(
 fun QuoteDetailContent(
     modifier: Modifier = Modifier,
     uiState: QuoteDetailUiState,
+    onCommentDelete: (String) -> Unit = {},
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         if (uiState.isLoading) {
@@ -147,7 +154,10 @@ fun QuoteDetailContent(
                 }
 
                 items(uiState.quoteDetail?.comments ?: emptyList()) { comment ->
-                    QuoteCommentItem(comment = comment)
+                    QuoteCommentItem(
+                        comment = comment,
+                        onCommentDelete = onCommentDelete,
+                        )
                 }
             }
 
@@ -170,33 +180,75 @@ fun QuoteDetailContent(
 fun QuoteCommentItem(
     comment: QuoteDetailUiModel.CommentItem,
     modifier: Modifier = Modifier,
+    onCommentDelete: (String) -> Unit = {},
 ) {
-    Column(
+
+    Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = comment.commentContent,
-            textAlign = TextAlign.Center,
+        CommentDeleteButton(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 54.dp)
+                .align(Alignment.TopEnd),
+            onCommentDelete = { onCommentDelete(comment.commentDocId) }
         )
 
-        Spacer(modifier = Modifier.height(22.dp))
-        Text(
-            text = comment.createdAt.toFormattedDateString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 16.dp)
-        )
-        Spacer(modifier = Modifier.height(22.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = comment.commentContent,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 54.dp)
+            )
 
-        HorizontalDivider()
+            Spacer(modifier = Modifier.height(22.dp))
+            Text(
+                text = comment.createdAt.toFormattedDateString(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(22.dp))
+
+            HorizontalDivider()
+        }
     }
+}
+
+@Composable
+fun CommentDeleteButton(
+    modifier: Modifier = Modifier,
+    onCommentDelete: () -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .padding(5.dp)
+            .size(32.dp)
+            .border(0.5.dp, Color.LightGray, RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(
+                onClick = { onCommentDelete() }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_remove),
+            contentDescription = "삭제",
+            modifier = Modifier.padding(8.dp)
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun CommentDeleteButtonPreview() {
+    CommentDeleteButton()
 }
 
 @Preview(showBackground = true)

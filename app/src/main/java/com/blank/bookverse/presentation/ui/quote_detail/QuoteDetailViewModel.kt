@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,6 +73,24 @@ class QuoteDetailViewModel @Inject constructor(
             )
         }.onFailure { error ->
             Log.e("QuoteDetailViewModel", "Error updating bookmark", error)
+        }
+    }
+
+    fun deleteComment(commentDocId: String) = viewModelScope.launch {
+        runCatching {
+            quoteRepository.deleteComment(commentDocId)
+        }.onSuccess {
+            _quoteDetailUiState.update { currentState ->
+                currentState.copy(
+                    quoteDetail = currentState.quoteDetail?.copy(
+                        comments = currentState.quoteDetail.comments.filter {
+                            it.commentDocId != commentDocId
+                        }
+                    )
+                )
+            }
+        }.onFailure { error ->
+            Log.e("QuoteDetailViewModel", "Error deleting comment", error)
         }
     }
 }

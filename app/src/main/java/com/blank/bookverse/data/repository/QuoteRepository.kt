@@ -164,4 +164,10 @@ class QuoteRepository @Inject constructor(
             .documents
             .map { document -> document.toQuote() }
     }
+
+    fun deleteComment(commentDocId: String) {
+        firestore.collection("Comments")
+            .document(commentDocId)
+            .update("is_delete", true)
+    }
 }
