@@ -86,7 +86,7 @@ class LoginRepository @Inject constructor(
                 // 회원가입 처리
                 val authResult = firebaseAuth.createUserWithEmailAndPassword(
                     registerModel.memberId,
-                    registerModel.memberPassword
+                    registerModel.memberId
                 ).await()
 
                 val uid = authResult.user?.uid ?: throw Exception("회원가입 실패: UID 없음")
@@ -103,7 +103,7 @@ class LoginRepository @Inject constructor(
                 // 로그인 처리
                 val authResult = firebaseAuth.signInWithEmailAndPassword(
                     registerModel.memberId,
-                    registerModel.memberPassword
+                    registerModel.memberId
                 ).await()
                 authResult.user  // 로그인 성공한 FirebaseUser 반환
             }

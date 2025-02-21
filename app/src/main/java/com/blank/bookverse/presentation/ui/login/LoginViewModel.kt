@@ -112,7 +112,7 @@ class LoginViewModel @Inject constructor(
                                     memberName = nickname,
                                     memberProfileImage = "",
                                     memberId = email,
-                                    memberPassword = email,
+                                    memberPassword = "",
                                     memberPhoneNumber = "",
                                     memberNickName = nickname,
                                     LoginType = "카카오",
