@@ -1,5 +1,6 @@
 package com.blank.bookverse.data.repository
 
+import com.blank.bookverse.data.api.NicknameApiService
 import com.blank.bookverse.data.model.RegisterModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,7 +15,8 @@ import javax.inject.Singleton
 @Singleton
 class RegisterRepository @Inject constructor(
     private val firebaseFireStore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val nicknameApiService: NicknameApiService
 ) {
     // 유저 정보 추가
     fun createUserData(registerModel: RegisterModel): Flow<Result<Unit>> = flow {
@@ -56,5 +58,44 @@ class RegisterRepository @Inject constructor(
             querySnapShot.isEmpty
         }
         emit(result)
+    }.flowOn(Dispatchers.IO)
+
+    // 랜덤 닉네임 생성기
+    fun getRandomNickName(): Flow<Result<String>> = flow {
+        var nickname: String
+        var isDuplicate: Boolean
+        var result: Result<String>
+
+        while (true) {
+            result = runCatching {
+                val response = nicknameApiService.getRandomNickname()
+
+                if (response.isSuccessful) {
+                    response.body()?.nickname ?: throw Exception("No nickname found")
+                } else {
+                    throw Exception("Failed to fetch nickname")
+                }
+            }
+
+            result.onSuccess { randomNickname ->
+                nickname = randomNickname
+                val querySnapShot = firebaseFireStore.collection("Member")
+                    .whereEqualTo("memberNickName", nickname)
+                    .get()
+                    .await()
+
+                isDuplicate = querySnapShot.documents.isNotEmpty()
+
+                if (!isDuplicate) {
+                    emit(result)
+                    return@flow // 'break' 대신 'return@flow' 사용
+                }
+            }
+
+            result.onFailure {
+                emit(Result.failure(it))
+                return@flow // 'break' 대신 'return@flow' 사용
+            }
+        }
     }.flowOn(Dispatchers.IO)
 }
