@@ -3,8 +3,10 @@ package com.blank.bookverse.presentation.ui.quote_detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +43,7 @@ import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.BookmarkButton
 import com.blank.bookverse.presentation.model.QuoteDetailUiModel
+import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.blank.bookverse.presentation.util.toFormattedDateString
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
@@ -101,6 +104,7 @@ fun QuoteDetailScreen(
                 .padding(paddingValues),
             uiState = uiState,
             onCommentDelete = viewModel::deleteComment,
+            onNavigateToAddComment = { navController.navigate(MainNavItem.AddComment.route) }
         )
     }
 }
@@ -110,6 +114,7 @@ fun QuoteDetailContent(
     modifier: Modifier = Modifier,
     uiState: QuoteDetailUiState,
     onCommentDelete: (String) -> Unit = {},
+    onNavigateToAddComment: () -> Unit = {},
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         if (uiState.isLoading) {
@@ -144,12 +149,24 @@ fun QuoteDetailContent(
                     Spacer(modifier = Modifier.height(18.dp))
                     HorizontalDivider()
 
-                    Text(
-                        text = "나의 생각",
+                    Row(
                         modifier = Modifier
-                            .padding(vertical = 8.dp, horizontal = 42.dp)
-                            .padding(start = 6.dp)
-                    )
+                            .fillMaxWidth()
+                            .padding(horizontal = 42.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "나의 생각",
+                            modifier = Modifier.padding(start = 6.dp)
+                        )
+
+                        CommentAddButton(
+                            modifier = Modifier.padding(end = 6.dp),
+                            onNavigateToAddComment = { onNavigateToAddComment() },
+                        )
+                    }
+
                     HorizontalDivider()
                 }
 
@@ -246,15 +263,45 @@ fun CommentDeleteButton(
 }
 
 @Composable
+fun CommentAddButton(
+    modifier: Modifier = Modifier,
+    onNavigateToAddComment: () -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .padding(5.dp)
+            .size(32.dp)
+            .border(0.5.dp, Color.LightGray, RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(
+                onClick = { onNavigateToAddComment() }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_add),
+            contentDescription = "작성",
+            modifier = Modifier.padding(8.dp)
+        )
+    }
+}
+
+@Composable
 @Preview(showBackground = true)
 fun CommentDeleteButtonPreview() {
     CommentDeleteButton()
+}
+
+@Composable
+@Preview(showBackground = true)
+fun CommentAddButtonPreview() {
+    CommentAddButton()
 }
 
 @Preview(showBackground = true)
 @Composable
 fun QuoteDetailScreenPreview() {
     QuoteDetailContent(
-        uiState = QuoteDetailUiState()
+        uiState = QuoteDetailUiState(),
     )
 }

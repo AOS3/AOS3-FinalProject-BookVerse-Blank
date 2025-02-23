@@ -11,6 +11,8 @@ import com.blank.bookverse.presentation.ui.AccountSetting.AccountSettingsScreen
 import com.blank.bookverse.presentation.ui.MyPage.MyPageScreen
 import com.blank.bookverse.presentation.ui.Profile.ProfileScreen
 import com.blank.bookverse.presentation.ui.Terms.TermsScreen
+import com.blank.bookverse.presentation.ui.add_comment.AddCommentContent
+import com.blank.bookverse.presentation.ui.add_comment.AddCommentScreen
 import com.blank.bookverse.presentation.ui.book_detail.BookDetailScreen
 import com.blank.bookverse.presentation.ui.bookmark.BookmarkScreen
 import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
@@ -78,6 +80,12 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
             )
         ) {
             QuoteDetailScreen(navController = navController)
+        }
+
+        composable(
+            route = MainNavItem.AddComment.route,
+        ) {
+            AddCommentScreen(navController = navController)
         }
 
         // 스플래쉬 화면
