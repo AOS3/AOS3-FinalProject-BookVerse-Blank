@@ -16,10 +16,22 @@ val notoSansFamily = FontFamily(
     Font(R.font.notosans_extra_light, FontWeight.ExtraLight)
 )
 
-val nanumMyungjoFamily = FontFamily(
+val nanumMyeongjoFamily = FontFamily(
     Font(R.font.nanummyeongjo, FontWeight.Normal),
     Font(R.font.nanummyeongjo_bold, FontWeight.Bold),
     Font(R.font.nanummyeongjo_extra_bold, FontWeight.ExtraBold)
+)
+
+val binggraeFamily = FontFamily(
+    Font(R.font.binggrae, FontWeight.Normal)
+)
+
+val binggraetogetherFamily = FontFamily(
+    Font(R.font.binggraetogether, FontWeight.Normal)
+)
+
+val kimjungchulFamily = FontFamily(
+    Font(R.font.kimjungchulscript, FontWeight.Normal)
 )
 
 fun getTypography(fontFamily: FontFamily): Typography {
