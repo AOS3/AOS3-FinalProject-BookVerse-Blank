@@ -84,6 +84,12 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
 
         composable(
             route = MainNavItem.AddComment.route,
+            arguments = listOf(
+                navArgument(MainNavItem.AddComment.ID_ARG) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
         ) {
             AddCommentScreen(navController = navController)
         }

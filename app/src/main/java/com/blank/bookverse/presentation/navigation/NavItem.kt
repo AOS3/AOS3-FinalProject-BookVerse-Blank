@@ -51,8 +51,9 @@ sealed class MainNavItem(val route: String, val label: String) {
         fun createRoute(quoteDocId: String) = "quote_detail/$quoteDocId"
     }
 
-    data object AddComment : MainNavItem("add_comment", "나의 생각 기록") {
-        const val ID_ARG = "addComment"
+    data object AddComment : MainNavItem("add_comment/{quoteDocId}", "나의 생각 기록") {
+        const val ID_ARG = "quoteDocId"
+        fun createRoute(quoteDocId: String) = "add_comment/$quoteDocId"
     }
 
     data object MoreQuote : MainNavItem("more_quote", "더보기")

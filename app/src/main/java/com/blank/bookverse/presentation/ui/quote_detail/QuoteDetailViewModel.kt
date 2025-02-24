@@ -20,7 +20,7 @@ import javax.inject.Inject
 class QuoteDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val quoteRepository: QuoteRepository,
-): ViewModel() {
+) : ViewModel() {
     private val quoteDocId: String = checkNotNull(savedStateHandle[MainNavItem.QuoteDetail.ID_ARG])
 
     private val _quoteDetailUiState = MutableStateFlow(QuoteDetailUiState())
@@ -32,6 +32,7 @@ class QuoteDetailViewModel @Inject constructor(
     init {
         loadQuoteDetail()
     }
+
     private fun loadQuoteDetail() = viewModelScope.launch {
         _quoteDetailUiState.value = _quoteDetailUiState.value.copy(isLoading = true)
 
@@ -54,7 +55,10 @@ class QuoteDetailViewModel @Inject constructor(
 
     fun deleteQuote() = viewModelScope.launch {
         runCatching {
-            quoteRepository.deleteQuote(quoteDocId, _quoteDetailUiState.value.quoteDetail?.bookDocId ?: "")
+            quoteRepository.deleteQuote(
+                quoteDocId,
+                _quoteDetailUiState.value.quoteDetail?.bookDocId ?: ""
+            )
         }.onSuccess {
             _quoteDetailEffect.emit(QuoteDetailEffect.NavigateBack)
         }.onFailure { error ->
@@ -93,6 +97,10 @@ class QuoteDetailViewModel @Inject constructor(
             Log.e("QuoteDetailViewModel", "Error deleting comment", error)
         }
     }
+
+    fun navigateToAddComment() = viewModelScope.launch {
+        _quoteDetailEffect.emit(QuoteDetailEffect.NavigateToAddComment(quoteDocId))
+    }
 }
 
 data class QuoteDetailUiState(
@@ -101,5 +109,6 @@ data class QuoteDetailUiState(
 )
 
 sealed class QuoteDetailEffect {
-    data object NavigateBack: QuoteDetailEffect()
+    data object NavigateBack : QuoteDetailEffect()
+    data class NavigateToAddComment(val quoteDocId: String) : QuoteDetailEffect()
 }

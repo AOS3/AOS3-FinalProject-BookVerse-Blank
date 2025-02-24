@@ -59,6 +59,9 @@ fun QuoteDetailScreen(
         viewModel.quoteDetailEffect.collect { effect ->
             when (effect) {
                 is QuoteDetailEffect.NavigateBack -> navController.popBackStack()
+                is QuoteDetailEffect.NavigateToAddComment -> {
+                    navController.navigate(MainNavItem.AddComment.createRoute(effect.quoteDocId))
+                }
             }
         }
     }
@@ -104,7 +107,7 @@ fun QuoteDetailScreen(
                 .padding(paddingValues),
             uiState = uiState,
             onCommentDelete = viewModel::deleteComment,
-            onNavigateToAddComment = { navController.navigate(MainNavItem.AddComment.route) }
+            onNavigateToAddComment = { viewModel.navigateToAddComment() }
         )
     }
 }
