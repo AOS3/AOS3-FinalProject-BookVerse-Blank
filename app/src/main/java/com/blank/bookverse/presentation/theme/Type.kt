@@ -17,9 +17,9 @@ val notoSansFamily = FontFamily(
 )
 
 val nanumMyungjoFamily = FontFamily(
-    Font(R.font.nanum_myeongjo, FontWeight.Normal),
-    Font(R.font.nanum_myeongjo_bold, FontWeight.Bold),
-    Font(R.font.nanum_myeongjo_extra_bold, FontWeight.ExtraBold)
+    Font(R.font.nanummyeongjo, FontWeight.Normal),
+    Font(R.font.nanummyeongjo_bold, FontWeight.Bold),
+    Font(R.font.nanummyeongjo_extra_bold, FontWeight.ExtraBold)
 )
 
 fun getTypography(fontFamily: FontFamily): Typography {
