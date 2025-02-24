@@ -22,20 +22,6 @@ val nanumMyungjoFamily = FontFamily(
     Font(R.font.nanum_myeongjo_extra_bold, FontWeight.ExtraBold)
 )
 
-// 폰트 타입 enum (폰트패밀리와 매핑)
-enum class FontType(val fontFamily: FontFamily) {
-    NOTO_SANS(notoSansFamily),
-    NANUM_MYUNGJO(nanumMyungjoFamily);
-
-    // 화면에 표시할 이름
-    fun displayName(): String {
-        return when (this) {
-            NOTO_SANS -> "Noto Sans"
-            NANUM_MYUNGJO -> "나눔명조"
-        }
-    }
-}
-
 fun getTypography(fontFamily: FontFamily): Typography {
     return Typography(
         bodyLarge = TextStyle(
