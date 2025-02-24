@@ -12,11 +12,13 @@ data class QuoteDetailUiModel(
     val isBookmark: Boolean = false,
 ) {
     data class CommentItem(
+        val commentDocId: String,
         val commentContent: String,
         val createdAt: Long
     ) {
         companion object {
             fun from(comment: Comment) = CommentItem(
+                commentDocId = comment.commentDocId,
                 commentContent = comment.commentContent,
                 createdAt = comment.createdAt
             )

@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import com.blank.bookverse.R
 
@@ -51,6 +50,12 @@ sealed class MainNavItem(val route: String, val label: String) {
         const val ID_ARG = "quoteDocId"
         fun createRoute(quoteDocId: String) = "quote_detail/$quoteDocId"
     }
+
+    data object AddComment : MainNavItem("add_comment/{quoteDocId}", "나의 생각 기록") {
+        const val ID_ARG = "quoteDocId"
+        fun createRoute(quoteDocId: String) = "add_comment/$quoteDocId"
+    }
+
     data object MoreQuote : MainNavItem("more_quote", "더보기")
     data object QuoteWrite: MainNavItem("write_quote", "글귀 작성")
 }
