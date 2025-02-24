@@ -33,7 +33,7 @@ import com.blank.bookverse.presentation.util.Constant
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = MainNavItem.Splash.route,
+        startDestination = MainNavItem.QuoteWrite.route,
         modifier = modifier
     ) {
         // 홈 화면
@@ -98,20 +98,6 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(MainNavItem.QuoteWrite.route) { QuoteWriteScreen(navController) }
 
         // 카메라 화면
-        composable(
-            route = CameraNavItem.TakeBook.route
-        ) {
-            val context = LocalContext.current
-            val checkPermission = Constant.REQUIRED_PERMISSIONS.all {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    it
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-            TakeBookScreen(
-            navController,
-            checkPermission
-        )
-        }
+        composable(CameraNavItem.TakeBook.route) { TakeBookScreen(navController) }
     }
 }

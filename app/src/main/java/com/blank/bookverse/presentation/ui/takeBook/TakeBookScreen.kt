@@ -1,7 +1,6 @@
 package com.blank.bookverse.presentation.ui.takeBook
 
-import android.R.attr.name
-import android.R.attr.path
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
@@ -16,6 +15,7 @@ import android.os.Build
 import android.os.Environment
 import android.os.Parcel
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
@@ -24,6 +24,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCapture.OutputFileOptions
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
@@ -51,6 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -59,6 +61,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -68,23 +71,32 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.Coil
 import coil.compose.AsyncImage
+import coil.util.CoilUtils.result
 import com.blank.bookverse.R
+import com.blank.bookverse.data.api.OcrService
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.navigation.CameraNavItem
 import com.blank.bookverse.presentation.util.Constant
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.google.android.gms.fido.fido2.api.common.RequestOptions
+import com.google.common.io.BaseEncoding.base64
 import com.kakao.sdk.talk.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -93,67 +105,57 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.net.URI
 import java.time.temporal.TemporalAdjusters.next
 import java.util.Locale
+import kotlin.text.Typography.half
 
 @OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun TakeBookScreen(
     navController: NavHostController,
-    cameraState: Boolean
+    viewModel: TakeBookViewModel = hiltViewModel()
 ) {
     val density = LocalDensity.current
     val context = LocalContext.current
-    val snackBarHostState = remember { SnackbarHostState() }
     val lifecycleOwner = LocalLifecycleOwner.current
-    // Remember a LifecycleCameraController for this composable
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    // 카메라 컨트롤러
     val cameraController = remember {
         LifecycleCameraController(context).apply {
             // Bind the LifecycleCameraController to the lifecycleOwner
             bindToLifecycle(lifecycleOwner)
         }
     }
-    val imageURI = remember { mutableStateOf<Uri?>(null) }
-    val state = remember { MutableStateFlow(cameraState) }
-    val isCameraPermissionGranted: StateFlow<Boolean> = state
-    val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
-    val launcherMultiplePermissions = rememberMultiplePermissionsState(
+    // 카메라 권한 가능 여부
+    var launcherMultiplePermissions = rememberMultiplePermissionsState(
         Constant.REQUIRED_PERMISSIONS
     ) { permissionsMap ->
-        Timber.tag("test5").d(permissionsMap.toString())
+        resultPermission(permissionsMap,snackBarHostState,navController)
     }
+
+    val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+
     val backColor = Color(0xFF6C6C6C)
     val imageViewButtonTextColor = Color.White
     val imageViewButtonBackColor = Color.Transparent
 
+
+
     LaunchedEffect(Unit) {
-
-    }
-
-    SideEffect {
-        if(!(isCameraPermissionGranted.value)){
-                launcherMultiplePermissions.launchMultiplePermissionRequest()
-                Timber.tag("test5").d("allPermissionsGranted " +
-                        "${launcherMultiplePermissions.allPermissionsGranted}")
-                val areGranted = launcherMultiplePermissions.allPermissionsGranted
-                /** 권한 요청시 동의 했을 경우 **/
-                if (areGranted) {
-                    CoroutineScope(Dispatchers.Default).launch{
-                        snackBarHostState.showSnackbar("권한이 동의되었습니다.")
-                    }.onJoin
-                    Timber.tag("test5").d("권한이 동의되었습니다.")
-                }
-                /** 권한 요청시 거부 했을 경우 **/
-                else {
-                    CoroutineScope(Dispatchers.Default).launch{
-                        snackBarHostState.showSnackbar("권한이 거부되었습니다.")
-                    }.onJoin
-                    Timber.tag("test5").d("권한이 거부되었습니다.")
-                }
-
+        if(!(launcherMultiplePermissions.allPermissionsGranted)){
+            Toast.makeText(context,"카메라 권한을 허용해주세요", Toast.LENGTH_SHORT).show()
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+            }
+            context.startActivity(intent)
+            navController.popBackStack()
         }
+
     }
 
     Scaffold(
@@ -199,7 +201,7 @@ fun TakeBookScreen(
         Box(
             modifier = Modifier.background(backColor)
         ) {
-            if (imageURI.value == null) {
+            if (viewModel.uploadFailed()) {
                 Column {
                     Column(
                         modifier = Modifier
@@ -209,11 +211,17 @@ fun TakeBookScreen(
                     ) {
 
                     }
-                    if (isCameraPermissionGranted.value) {
+                    if (launcherMultiplePermissions.allPermissionsGranted) {
                         CameraPreview(
                             cameraController = cameraController,
                             lifecycleOwner = lifecycleOwner
                         )
+                    }else{
+                        Box(
+                            Modifier.fillMaxSize()
+                        ){
+
+                        }
                     }
                 }
                 Column(
@@ -227,9 +235,13 @@ fun TakeBookScreen(
                         "캡쳐",
                         textColor = Color.Black,
                         onClick = {
-                            takePhoto(cameraController, context,imageURI)
+                            takePhoto(
+                                cameraController, context
+                            ){resultUri->
+                                viewModel.uploadImage(resultUri)
+                            }
                         },
-                        isEnable = isCameraPermissionGranted.value
+                        isEnable = launcherMultiplePermissions.allPermissionsGranted
                     )
                 }
             }else{
@@ -243,7 +255,7 @@ fun TakeBookScreen(
                     verticalArrangement = Arrangement.Bottom
                 ) {
                     AsyncImage(
-                        imageURI.value,
+                        viewModel.getCaptureImage(),
                         contentDescription = null,
                         modifier = Modifier.wrapContentSize()
                     )
@@ -261,7 +273,7 @@ fun TakeBookScreen(
                             textColor = imageViewButtonTextColor,
                             backgroundColor = imageViewButtonBackColor,
                             onClick = {
-                                imageURI.value = null
+                                viewModel.initUpload()
                             }
                         )
                         BookVerseButton(
@@ -272,9 +284,8 @@ fun TakeBookScreen(
                             textColor = imageViewButtonTextColor,
                             backgroundColor = imageViewButtonBackColor,
                             onClick = {
-                                //
-                                val base64 = uriToBase64(context, Constant.captureName)
-                                Log.d("st","$base64")
+                                //ocr viewModel IO로 요청
+                                viewModel.ocrRequest()
                             }
                         )
                     }
@@ -317,10 +328,10 @@ fun CameraPreview(
 fun takePhoto(
     cameraCapture: LifecycleCameraController,
     context:Context,
-    imageURI: MutableState<Uri?>,
+    uploadImageURI: (Uri?)-> Unit,
 ) {
     val photoFile = File(context.filesDir, Constant.captureName)
-    val outputFileOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+    val outputFileOptions = OutputFileOptions.Builder(photoFile).build()
 
     cameraCapture.takePicture(outputFileOptions,
         ContextCompat.getMainExecutor(context),
@@ -332,8 +343,8 @@ fun takePhoto(
             }
 
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                val resultUri = outputFileResults.savedUri!!
-                imageURI.value = resultUri
+                val resultUri = outputFileResults.savedUri
+                uploadImageURI(resultUri)
                 Toast.makeText(context, "캡쳐 성공", Toast.LENGTH_SHORT).show()
             }
         }
@@ -342,11 +353,28 @@ fun takePhoto(
 
 }
 
-fun uriToBase64(context: Context, image: String): String? {
+/*// 이미지의 사이즈를 줄이는 메서드
+fun resizeBitmap(
+    targetWidth:Int,
+    image: String,
+    context: Context
+):Bitmap{
+    val inputStream = context.openFileInput(image)
+    val bitmap = BitmapFactory.decodeStream(inputStream)
+    // 이미지의 축소/확대 비율을 구한다.
+    val ratio = targetWidth.toDouble() / bitmap.width.toDouble()
+    Log.d("st","width ${bitmap.width.toDouble()}")
+    Log.d("st","ratio $ratio")
+    // 세로 길이를 구한다.
+    val targetHeight = (bitmap.height.toDouble() * ratio).toInt()
+    // 크기를 조절한 Bitmap 객체를 생성한다.
+    val result = Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, false)
+    return result
+}
+
+fun bitmapToBase64(image: Bitmap): String? {
     return try {
-        val inputStream = context.openFileInput(image)
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        encodeBitmapToBase64(bitmap)
+        encodeBitmapToBase64(image)
     } catch (e: Exception) {
         e.printStackTrace()
         null
@@ -358,7 +386,30 @@ fun encodeBitmapToBase64(bitmap: Bitmap): String {
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream) // PNG 포맷 사용
     val byteArray = byteArrayOutputStream.toByteArray()
     return Base64.encodeToString(byteArray, Base64.DEFAULT)
+}*/
+
+fun resultPermission(
+    permissionsMap: Map<String, Boolean>,
+    snackBarHostState:SnackbarHostState,
+    navController: NavHostController
+){
+    val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
+
+    /** 권한 요청시 동의 했을 경우 **/
+    if (areGranted) {
+        CoroutineScope(Dispatchers.Default).launch {
+            snackBarHostState.showSnackbar("권한이 동의되었습니다.")
+        }
+
+        Timber.tag("test5").d("권한이 동의되었습니다.")
+    }
+    /** 권한 요청시 거부 했을 경우 **/
+    else {
+        CoroutineScope(Dispatchers.Default).launch {
+            snackBarHostState.showSnackbar("권한이 거부되었습니다.")
+        }
+        Timber.tag("test5").d("권한이 거부되었습니다.")
+        //navController.popBackStack(CameraNavItem.TakeBook.route,true)
+    }
 }
-
-
 
