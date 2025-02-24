@@ -1,6 +1,7 @@
 [versions]
 agp = "8.7.3"
 cameraCore = "1.4.1"
+datastorePreferences = "1.1.2"
 firebaseFirestore = "25.1.2"
 firebaseBom = "33.9.0"
 firebaseFunctionsKtx = "21.1.0"
@@ -43,6 +44,7 @@ androidx-camera-extensions = { module = "androidx.camera:camera-extensions", ver
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCore" }
 androidx-camera-video = { module = "androidx.camera:camera-video", version.ref = "cameraCore" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-ui-unit = { module = "androidx.compose.ui:ui-unit" }

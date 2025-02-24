@@ -9,10 +9,13 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import com.blank.bookverse.presentation.theme.FontTheme.fontTypeFlow
 
 private val Black = Color(0xFF000000)
 private val DarkGray = Color(0xFF121212)
@@ -56,6 +59,9 @@ fun BookVerseTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val fontType by context.fontTypeFlow.collectAsState(initial = FontType.NOTO_SANS)
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -73,8 +79,8 @@ fun BookVerseTheme(
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = Typography,
-            content = content
+            typography = getTypography(fontType.fontFamily),
+            content = content,
         )
     }
 }
