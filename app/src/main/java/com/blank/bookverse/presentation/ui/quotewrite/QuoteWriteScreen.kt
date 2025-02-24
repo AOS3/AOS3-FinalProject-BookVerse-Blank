@@ -1,6 +1,7 @@
 package com.blank.bookverse.presentation.ui.quotewrite
 
 import android.R.attr.key
+import android.R.attr.name
 import android.R.attr.onClick
 import android.R.attr.text
 import androidx.compose.ui.platform.LocalDensity
@@ -79,12 +80,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.blank.bookverse.R
+import com.blank.bookverse.data.api.OcrService
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.navigation.CameraNavItem
+import com.blank.bookverse.presentation.ui.takeBook.CameraState
 import com.kakao.sdk.friend.l.b
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalLayoutApi::class)
 @SuppressLint("UnrememberedMutableState")
@@ -128,7 +136,7 @@ fun QuoteWriteScreen(
                 actions = {
                     IconButton(
                         onClick = {
-
+                            navController.navigate(CameraNavItem.TakeBook.route)
                         }
                     ) {
                         Icon(

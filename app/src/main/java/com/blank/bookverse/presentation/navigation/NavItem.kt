@@ -61,10 +61,15 @@ sealed class MainNavItem(val route: String, val label: String) {
 }
 
 
+
 sealed class MyPageNavItem(val route: String, val label: String) {
     data object Profile : MyPageNavItem("profile", "프로필 설정")
     data object AccountSetting : MyPageNavItem("account_setting", "계정 설정")
     data object Terms : MyPageNavItem("terms", "이용약관")
+}
+
+sealed class CameraNavItem(val route: String, val label: String) {
+    data object TakeBook : CameraNavItem("camera", "촬영")
 }
 
 // sealed class MainNavItem(val route: String, val label: String) {

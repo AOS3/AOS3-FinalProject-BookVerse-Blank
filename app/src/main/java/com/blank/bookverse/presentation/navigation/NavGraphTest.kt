@@ -1,7 +1,10 @@
 package com.blank.bookverse.presentation.navigation
 
+import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,12 +27,15 @@ import com.blank.bookverse.presentation.ui.quote_detail.QuoteDetailScreen
 import com.blank.bookverse.presentation.ui.register.RegisterScreen
 import com.blank.bookverse.presentation.ui.search.SearchScreen
 import com.blank.bookverse.presentation.ui.splash.SplashScreen
+import com.blank.bookverse.presentation.ui.takeBook.CameraState
+import com.blank.bookverse.presentation.ui.takeBook.TakeBookScreen
+import com.blank.bookverse.presentation.util.Constant
 
 @Composable
 fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = MainNavItem.Splash.route,
+        startDestination = MainNavItem.QuoteWrite.route,
         modifier = modifier
     ) {
         // 홈 화면
@@ -102,7 +108,10 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(MainNavItem.Register.route) { RegisterScreen(navController) }
         // 아이디/비밀번호 찾기
         composable(MainNavItem.FindAccount.route) { FindAccountScreen(navController) }
-        // 아이디/비밀번호 찾기
+        // 글귀 작성 수정 화면
         composable(MainNavItem.QuoteWrite.route) { QuoteWriteScreen(navController) }
+
+        // 카메라 화면
+        composable(CameraNavItem.TakeBook.route) { TakeBookScreen(navController) }
     }
 }
