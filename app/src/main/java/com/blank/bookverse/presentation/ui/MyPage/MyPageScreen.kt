@@ -53,6 +53,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -69,6 +70,11 @@ import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
 import com.blank.bookverse.presentation.theme.FontTheme.fontTypeFlow
 import com.blank.bookverse.presentation.theme.FontTheme.saveFont
 import com.blank.bookverse.presentation.theme.FontType
+import com.blank.bookverse.presentation.theme.binggraeFamily
+import com.blank.bookverse.presentation.theme.binggraetogetherFamily
+import com.blank.bookverse.presentation.theme.kimjungchulFamily
+import com.blank.bookverse.presentation.theme.nanumMyeongjoFamily
+import com.blank.bookverse.presentation.theme.notoSansFamily
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -336,6 +342,15 @@ fun FontSettingsContent() {
     val scope = rememberCoroutineScope()
     val currentFontType by context.fontTypeFlow.collectAsState(initial = FontType.NOTO_SANS)
 
+    val fontMap = mapOf(
+        FontType.NOTO_SANS to notoSansFamily,
+        FontType.NANUM_MYEONGJO to nanumMyeongjoFamily,
+        FontType.BINGGRAE to binggraeFamily,
+        FontType.BINGGRAE_TOGETHER to binggraetogetherFamily,
+        FontType.KIMJUNGCHUL to kimjungchulFamily
+
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -345,12 +360,14 @@ fun FontSettingsContent() {
             Text(
                 text = "폰트 설정",
                 fontSize = 18.sp,
+                fontFamily = notoSansFamily,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             LazyColumn {
                 items(FontType.entries) { fontType ->
+                    val fontFamily = fontMap[fontType] ?: FontFamily.Default
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -365,6 +382,7 @@ fun FontSettingsContent() {
                     ) {
                         Text(
                             text = fontType.displayName(),
+                            fontFamily = fontFamily,
                             style = MaterialTheme.typography.bodyLarge
                         )
 
@@ -379,7 +397,6 @@ fun FontSettingsContent() {
                     }
                 }
             }
-
         }
     }
 }
