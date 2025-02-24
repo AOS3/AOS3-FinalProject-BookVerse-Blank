@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.add_comment
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ fun AddCommentScreen(
     navController: NavController,
     viewModel: AddCommentViewModel = hiltViewModel()
 ) {
+    val context = navController.context
     val state = viewModel.state.value
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
@@ -60,8 +62,8 @@ fun AddCommentScreen(
                     navController.popBackStack()
                 }
 
-                is AddCommentEffect.SaveError -> {
-                    // TODO: 에러 처리 (예: 스낵바 표시)
+                is AddCommentEffect.SaveFailure -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -195,7 +197,7 @@ fun CommentTextField(
             Box {
                 if (text.isEmpty()) {
                     Text(
-                        text = "글궤에 대한 나의 생각을 기록해요",
+                        text = "글귀에 대한 나의 생각을 기록해요",
                         color = Color.Gray
                     )
                 }

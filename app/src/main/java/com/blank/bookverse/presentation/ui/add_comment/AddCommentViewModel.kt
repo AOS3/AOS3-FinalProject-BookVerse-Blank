@@ -2,8 +2,11 @@ package com.blank.bookverse.presentation.ui.add_comment
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.blank.bookverse.data.repository.CommentRepository
+import com.blank.bookverse.data.repository.CommentResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -12,7 +15,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddCommentViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val commentRepository: CommentRepository,
 ) : ViewModel() {
+    private val quoteDocId: String = checkNotNull(savedStateHandle["quoteDocId"])
+
     private val _state = mutableStateOf(AddCommentState())
     val state: State<AddCommentState> = _state
 
@@ -34,17 +41,24 @@ class AddCommentViewModel @Inject constructor(
         }
     }
 
-    fun submitComment() {
-        val currentText = _state.value.text
-        if (currentText.isBlank()) return
+    fun submitComment() = viewModelScope.launch {
+        commentRepository.addComment(quoteDocId, state.value.text).collect { result ->
+            when (result) {
+                is CommentResult.Loading -> _state.value = _state.value.copy(isLoading = true)
+                is CommentResult.Success -> {
+                    _state.value = _state.value.copy(isLoading = false, text = "")
+                    _effect.emit(AddCommentEffect.SaveSuccess)
+                }
 
-        viewModelScope.launch {
-            _state.value = _state.value.copy(
-                isLoading = true
-            )
-
-            // TODO: 실제 저장 로직 구현
-            _effect.emit(AddCommentEffect.SaveSuccess)
+                is CommentResult.Error -> {
+                    _state.value = _state.value.copy(isLoading = false)
+                    _effect.emit(
+                        AddCommentEffect.SaveFailure(
+                            result.exception.message ?: "알 수 없는 오류가 발생했습니다."
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -62,5 +76,5 @@ sealed class AddCommentEffect {
     data object ShowKeyboard : AddCommentEffect()
     data object FocusTextField : AddCommentEffect()
     data object SaveSuccess : AddCommentEffect()
-    data class SaveError(val message: String) : AddCommentEffect()
+    data class SaveFailure(val message: String) : AddCommentEffect()
 }

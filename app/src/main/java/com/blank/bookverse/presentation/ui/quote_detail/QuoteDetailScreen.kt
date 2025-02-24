@@ -66,6 +66,10 @@ fun QuoteDetailScreen(
         }
     }
 
+    LaunchedEffect(navController.currentBackStackEntry) {
+        viewModel.loadQuoteDetail()
+    }
+
     Scaffold(
         topBar = {
             BookVerseToolbar(

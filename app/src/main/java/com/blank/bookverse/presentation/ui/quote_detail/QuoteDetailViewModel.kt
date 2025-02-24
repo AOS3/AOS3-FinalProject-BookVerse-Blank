@@ -33,7 +33,7 @@ class QuoteDetailViewModel @Inject constructor(
         loadQuoteDetail()
     }
 
-    private fun loadQuoteDetail() = viewModelScope.launch {
+    fun loadQuoteDetail() = viewModelScope.launch {
         _quoteDetailUiState.value = _quoteDetailUiState.value.copy(isLoading = true)
 
         val result = runCatching {
