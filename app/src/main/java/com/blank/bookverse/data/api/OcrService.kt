@@ -1,21 +1,33 @@
 package com.blank.bookverse.data.api
 
+import android.net.Uri
+import com.blank.bookverse.data.api.ocr.HeaderImageObject
 import com.blank.bookverse.data.api.ocr.OcrCLOVA
 import com.blank.bookverse.data.repository.OcrRepository
 import retrofit2.Response
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object OcrService {
+@Singleton
+class OcrService @Inject constructor(
+    private val ocrRepository: OcrRepository
+) {
     suspend fun getOpenApiData(
         format: String,
         name: String,
-        data: String,
+        url: String,
     ) : Response<OcrCLOVA> {
-        val imageSource =
-            listOf(
-                mapOf("format" to format),
-                mapOf("name" to name),
-                mapOf("data" to data),
+        val imageSource = listOf(
+            HeaderImageObject(
+                format = format,
+                name = name,
+                url = url,
+            )
         )
-        return OcrRepository.getOpenApiData(imageSource)
+
+
+        return ocrRepository.getOpenApiData(imageSource)
     }
+    suspend fun uploadCaptureImage(imageUri: Uri)
+    = ocrRepository.uploadCaptureImage(imageUri).toString()
 }

@@ -1,7 +1,9 @@
 package com.blank.bookverse.data.api.ocr
 
 import androidx.compose.foundation.layout.Arrangement
+import com.google.gson.annotations.SerializedName
 import retrofit2.Call
+import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -13,17 +15,24 @@ interface OcrRetrofitHeader {
     fun getOpenApiData(
         @Header("X-OCR-SECRET") serviceKey:String,
         @Header("Content-Type") contentType:String,
-        @Query("version") version: String,
-        @Query("requestId") requestId: String,
-        @Query("timestamp") timestamp: String,
-        @Query("lang") lang: String,
-        @Query("images") images: List<Map<String, String>>,
-        @Query("enableTableDetection") enable: Boolean,
+        @Body body: RequestBody,
     ) : Call<OcrCLOVA>
     // 반환 타입 : Call<데이터를 담을 클래스>
 }
 
-//@Query("version") ver:String,
-//@Query("requestId") requestId:String,
-//@Query("timestamp") timestamp:Int,
-//@Query("lang") numOfRows:String,
+data class RequestBody(
+    @SerializedName("version") val version: String,
+    @SerializedName("requestId") val requestId: String,
+    @SerializedName("timestamp") val timestamp: Long,
+    @SerializedName("lang") val lang: String,
+    @SerializedName("images") val images: List<HeaderImageObject>,
+)
+
+data class HeaderImageObject(
+    @SerializedName("format")
+    var format: String, //jpg, png
+    @SerializedName("name")
+    var name: String, //예 demo_2
+    @SerializedName("url")
+    var url: String, // url 이미지
+)
