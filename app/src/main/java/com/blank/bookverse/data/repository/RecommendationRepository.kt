@@ -1,6 +1,5 @@
 package com.blank.bookverse.data.repository
 
-import com.blank.bookverse.data.mapper.toRecommendationContent
 import com.blank.bookverse.data.model.RecommendationContent
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -12,14 +11,16 @@ class RecommendationRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
 ) {
 
-    suspend fun getRecommendationContent(): RecommendationContent {
-        val snapshot = firestore.collection("RecommedationContent")
+    // 오늘의 추천 내용을 가져오는 함수
+    suspend fun getTodayRecommendationContent(): RecommendationContent {
+        val todayRecommendation = firestore.collection("TodayRecommendation")
+            .document("todayRecommendation")
             .get()
             .await()
 
-            val randomIndex = (0 until snapshot.size()).random()
-            val randomDoc = snapshot.documents[randomIndex]
-            return randomDoc.toRecommendationContent()
+        return RecommendationContent(
+            quote = todayRecommendation.getString("quote") ?: "",
+            bookTitle = todayRecommendation.getString("book_title") ?: ""
+        )
     }
-
 }

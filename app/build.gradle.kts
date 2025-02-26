@@ -125,6 +125,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.messaging.ktx)
 
     implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
