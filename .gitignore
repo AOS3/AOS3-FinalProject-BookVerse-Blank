@@ -9,3 +9,4 @@
 .cxx
 /app/google-services.json
 local.properties
+firebase-fcm-project
