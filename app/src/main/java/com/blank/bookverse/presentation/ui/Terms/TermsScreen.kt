@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.theme.notoSansFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +95,8 @@ fun TermsScreen(navController: NavController) {
                     text = title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                    fontFamily = notoSansFamily
                 )
 
                 // 제목과 본문 사이에 줄 바꿈 역할
@@ -103,7 +105,8 @@ fun TermsScreen(navController: NavController) {
                 Text(
                     text = content,
                     style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Start,
+                    fontFamily = notoSansFamily
                 )
 
                 // 조항 간 간격을 추가하여 가독성 향상

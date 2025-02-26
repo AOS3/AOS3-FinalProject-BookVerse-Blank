@@ -14,6 +14,7 @@ import com.blank.bookverse.data.repository.MyPageRepository
 import com.blank.bookverse.data.repository.QuoteRepository
 import com.blank.bookverse.presentation.theme.notoSansFamily
 import com.google.firebase.auth.FirebaseAuth
+import com.kakao.sdk.user.UserApiClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,13 +63,44 @@ class MyPageViewModel @Inject constructor(
     fun checkLoginType() {
         val auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
-        when {
-            currentUser == null -> _loginType.value = LoginType.NORMAL
-            currentUser.providerData.any { it.providerId == "google.com" } -> _loginType.value = LoginType.GOOGLE
-            currentUser.providerData.any { it.providerId == "kakao.com" } -> _loginType.value = LoginType.KAKAO
-            else -> _loginType.value = LoginType.NORMAL
+        val providerData = currentUser?.providerData ?: emptyList()
+
+        Log.d("AuthCheck", "Provider Data: ${providerData.map { it.providerId }}")
+
+        var detectedLoginType = when {
+            providerData.any { it.providerId == "google.com" } -> LoginType.GOOGLE
+            providerData.any { it.providerId == "password" } -> LoginType.NORMAL
+            else -> LoginType.NORMAL
+        }
+
+        // 카카오 로그인인지 추가 확인
+        UserApiClient.instance.accessTokenInfo { token, error ->
+            if (error == null && token != null) {
+                Log.d("AuthCheck", "카카오 토큰 감지됨: $token")
+
+                // Firebase에 카카오 로그인 정보가 없더라도, 현재 로그인한 계정과 같은 경우 KAKAO로 설정
+                UserApiClient.instance.me { user, error ->
+                    if (error == null && user != null) {
+                        val kakaoEmail = user.kakaoAccount?.email
+                        val firebaseEmail = currentUser?.email
+
+                        if (kakaoEmail != null && kakaoEmail == firebaseEmail) {
+                            detectedLoginType = LoginType.KAKAO
+                            Log.d("AuthCheck", "Final Login Type: KAKAO (Confirmed by Email Match)")
+                        } else {
+                            Log.d("AuthCheck", "카카오 계정과 Firebase 계정이 일치하지 않음")
+                        }
+                    }
+                    _loginType.value = detectedLoginType
+                    Log.d("AuthCheck", "Final Login Type: ${_loginType.value} (After Firebase & Kakao Check)")
+                }
+            } else {
+                _loginType.value = detectedLoginType
+                Log.d("AuthCheck", "Final Login Type: ${_loginType.value} (No Kakao Token Detected)")
+            }
         }
     }
+
 
     fun copyToClipboard(content: String) {
         val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

@@ -106,7 +106,7 @@ fun ProfileScreen(
                         )
                     } else {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_profile),
+                            painter = painterResource(id = R.drawable.ic_profile_null),
                             contentDescription = "기본 프로필 아이콘",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier

@@ -400,4 +400,3 @@ fun FontSettingsContent() {
         }
     }
 }
-
