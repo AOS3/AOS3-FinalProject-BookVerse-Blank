@@ -1,6 +1,7 @@
 package com.blank.bookverse.presentation.ui.add_comment
 
 import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,12 +116,14 @@ fun AddCommentContent(
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(start = 42.dp)
+                    .border(0.5.dp, Color.LightGray)
             )
             VerticalDivider(
                 modifier = Modifier
                     .fillMaxHeight()
                     .align(Alignment.TopEnd)
                     .padding(end = 42.dp)
+                    .border(0.5.dp, Color.LightGray)
             )
         }
 
@@ -132,8 +135,11 @@ fun AddCommentContent(
             Column {
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(0.5.dp, Color.LightGray)
                 )
+
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 42.dp)
@@ -147,8 +153,11 @@ fun AddCommentContent(
                     )
                 }
                 HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(0.5.dp, Color.LightGray)
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "${text.length}/100",

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
@@ -67,6 +68,8 @@ import com.blank.bookverse.data.model.MemberModel
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseCustomDialog
 import com.blank.bookverse.presentation.common.BookVerseLoadingDialog
+import com.blank.bookverse.presentation.navigation.MyPageNavItem
+import com.blank.bookverse.presentation.navigation.NavGraphTest
 import com.blank.bookverse.presentation.theme.FontTheme.fontTypeFlow
 import com.blank.bookverse.presentation.theme.FontTheme.saveFont
 import com.blank.bookverse.presentation.theme.FontType
@@ -291,6 +294,7 @@ fun SettingsMenu(
     val menuItems = mutableListOf(
         Pair(Icons.Default.Person, "프로필 설정"),
         Pair(Icons.Default.Edit, "폰트 설정"),
+        Pair(Icons.Default.Notifications, "알림 설정"),
         Pair(Icons.Default.Email, "소개하기"),
         Pair(Icons.Default.ExitToApp, "로그아웃"),
         Pair(Icons.Default.Info, "이용약관")
@@ -318,6 +322,7 @@ fun SettingsMenu(
                         "탈퇴하기" -> onDeleteAccountClicked() // 탈퇴하기 클릭 시 동작
                         "이용약관" -> navController.navigate("terms")
                         "폰트 설정" -> customBottomSheetVisible.value = true
+                        "알림 설정" -> navController.navigate(MyPageNavItem.NotificationSetting.route)
                         "로그아웃" -> onLogoutClicked()
                         "소개하기" -> onShareClicked()
                     }

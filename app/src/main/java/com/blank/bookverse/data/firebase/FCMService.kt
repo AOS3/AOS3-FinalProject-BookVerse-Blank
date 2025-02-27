@@ -43,7 +43,6 @@ class FCMService : FirebaseMessagingService() {
 
         // 데이터 메시지 처리 (백그라운드에서도 작동)
         message.data.isNotEmpty().let {
-            // 데이터 처리
             val title = message.data["title"] ?: ""
             val body = message.data["body"] ?: ""
             if (title.isNotEmpty() && body.isNotEmpty()) {

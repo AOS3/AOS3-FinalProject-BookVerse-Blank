@@ -1,6 +1,5 @@
 package com.blank.bookverse.data.repository
 
-import com.blank.bookverse.data.model.Comment
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -20,10 +19,12 @@ class CommentRepository @Inject constructor(
             emit(CommentResult.Loading)
             val commentDocId = firestore.collection("Comments").document().id
 
-            val comment = Comment(
-                commentDocId = commentDocId,
-                quoteDocId = quoteDocId,
-                commentContent = commentContent,
+            val comment = hashMapOf(
+                "comment_doc_id" to commentDocId,
+                "quote_doc_id" to quoteDocId,
+                "comment_content" to commentContent,
+                "is_delete" to false,
+                "created_at" to System.currentTimeMillis()
             )
 
             firestore.collection("Comments")

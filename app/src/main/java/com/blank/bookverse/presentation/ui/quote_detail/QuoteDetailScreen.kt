@@ -21,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -134,7 +135,10 @@ fun QuoteDetailContent(
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item {
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .border(0.5.dp, Color.LightGray)
+                    )
                     CoilImage(
                         modifier = Modifier
                             .padding(horizontal = 42.dp)
@@ -150,11 +154,16 @@ fun QuoteDetailContent(
                     Spacer(modifier = Modifier.height(18.dp))
                     Text(
                         text = uiState.quoteDetail?.quoteContent ?: "",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .padding(horizontal = 54.dp)
                     )
                     Spacer(modifier = Modifier.height(18.dp))
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .border(0.5.dp, Color.LightGray)
+                    )
 
                     Row(
                         modifier = Modifier
@@ -174,7 +183,10 @@ fun QuoteDetailContent(
                         )
                     }
 
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .border(0.5.dp, Color.LightGray)
+                    )
                 }
 
                 items(uiState.quoteDetail?.comments ?: emptyList()) { comment ->
@@ -189,12 +201,14 @@ fun QuoteDetailContent(
                 modifier = Modifier
                     .padding(start = 42.dp)
                     .fillMaxHeight()
+                    .border(0.5.dp, Color.LightGray)
             )
             VerticalDivider(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 42.dp)
                     .fillMaxHeight()
+                    .border(0.5.dp, Color.LightGray)
             )
         }
     }
@@ -223,6 +237,7 @@ fun QuoteCommentItem(
             Text(
                 text = comment.commentContent,
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -233,6 +248,7 @@ fun QuoteCommentItem(
             Text(
                 text = comment.createdAt.toFormattedDateString(),
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -240,7 +256,10 @@ fun QuoteCommentItem(
             )
             Spacer(modifier = Modifier.height(22.dp))
 
-            HorizontalDivider()
+            HorizontalDivider(
+                modifier = Modifier
+                    .border(0.5.dp, Color.LightGray)
+            )
         }
     }
 }

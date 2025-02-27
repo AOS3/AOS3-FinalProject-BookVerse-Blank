@@ -1,12 +1,11 @@
 package com.blank.bookverse.presentation.ui.home
 
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +31,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.blank.bookverse.R
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.model.HomeBookUiModel
 import com.blank.bookverse.presentation.navigation.MainNavItem
@@ -114,15 +111,36 @@ fun HomeContent(
                 Column {
                     RecommendationCard(uiState)
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        text = "내 글귀",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Medium,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "내 글귀",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .alignByBaseline()
                         )
-                    )
+                        if(uiState.books.isNotEmpty()) {
+                            Text(
+                                text = "전체보기 >",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                modifier = Modifier
+                                    .clickable { onNavigateToMore() }
+                                    .padding(start = 8.dp)
+                                    .alignByBaseline()
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(12.dp))
                     LazyRow(
                         modifier = Modifier.fillMaxWidth()
@@ -135,20 +153,6 @@ fun HomeContent(
                                 book = book,
                                 onNavigateToDetail = { onNavigateToDetail(book.bookDocId) }
                             )
-                        }
-                        if (uiState.hasMore) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .height(420.dp)
-                                        .padding(end = 16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    MoreButton(
-                                        onNavigateToMore = onNavigateToMore
-                                    )
-                                }
-                            }
                         }
                     }
                 }
@@ -202,7 +206,6 @@ fun HomeBookItem(
     modifier: Modifier = Modifier,
     onNavigateToDetail: () -> Unit = {}
 ) {
-    Log.d("HomeBookItem", "book: $book")
     Column(
         modifier = modifier
             .padding(start = 16.dp, end = 16.dp)
@@ -250,26 +253,6 @@ fun HomeBookItem(
     }
 }
 
-@Composable
-fun MoreButton(
-    onNavigateToMore: () -> Unit = {},
-) {
-    Box {
-        Image(
-            painter = painterResource(R.drawable.ic_more),
-            contentDescription = null,
-            modifier = Modifier
-                .clip(RoundedCornerShape(percent = 50))
-                .background(
-                    color = Color.White,
-                )
-                .border(0.5.dp, Color.LightGray, RoundedCornerShape(percent = 50))
-                .clickable { onNavigateToMore() }
-                .padding(12.dp)
-        )
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
@@ -290,11 +273,4 @@ fun HomeBookItemPreview() {
             quoteCount = 3
         )
     )
-}
-
-
-@Preview
-@Composable
-fun MoreButtonPreview() {
-    MoreButton()
 }

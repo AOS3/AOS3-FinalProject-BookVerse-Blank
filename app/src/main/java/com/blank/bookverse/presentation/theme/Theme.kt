@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.theme
 
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,12 +10,15 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.core.view.WindowCompat
 import com.blank.bookverse.presentation.theme.FontTheme.fontTypeFlow
 
 private val Black = Color(0xFF000000)
@@ -60,6 +64,7 @@ fun BookVerseTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val fontType by context.fontTypeFlow.collectAsState(initial = FontType.NOTO_SANS)
 
     val colorScheme = when {
@@ -69,6 +74,13 @@ fun BookVerseTheme(
         }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+
+    SideEffect {
+        activity?.window?.let { window ->
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !darkTheme
+        }
     }
 
     CompositionLocalProvider(

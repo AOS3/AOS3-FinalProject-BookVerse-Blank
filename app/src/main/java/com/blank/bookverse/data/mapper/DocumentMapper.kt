@@ -34,5 +34,6 @@ fun DocumentSnapshot.toComment() = Comment(
     commentDocId = id,
     quoteDocId = getString("quote_doc_id") ?: "",
     commentContent = getString("comment_content") ?: "",
+    isDelete = getBoolean("is_delete") ?: false,
     createdAt = getLong("created_at") ?: System.currentTimeMillis(),
 )
