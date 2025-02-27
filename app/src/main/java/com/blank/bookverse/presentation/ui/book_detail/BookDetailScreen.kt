@@ -225,6 +225,7 @@ fun BookDetailQuoteItem(
             Text(
                 text = quote.quoteContent,
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -235,6 +236,7 @@ fun BookDetailQuoteItem(
             Text(
                 text = quote.createdAt.toFormattedDateString(),
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)

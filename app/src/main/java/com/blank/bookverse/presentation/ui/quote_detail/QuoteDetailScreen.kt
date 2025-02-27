@@ -21,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -153,6 +154,8 @@ fun QuoteDetailContent(
                     Spacer(modifier = Modifier.height(18.dp))
                     Text(
                         text = uiState.quoteDetail?.quoteContent ?: "",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .padding(horizontal = 54.dp)
                     )
@@ -234,6 +237,7 @@ fun QuoteCommentItem(
             Text(
                 text = comment.commentContent,
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -244,6 +248,7 @@ fun QuoteCommentItem(
             Text(
                 text = comment.createdAt.toFormattedDateString(),
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)

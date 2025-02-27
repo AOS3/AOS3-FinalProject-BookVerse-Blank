@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -151,6 +152,7 @@ fun BookMarkQuoteItem(
             Text(
                 text = quote.quoteContent,
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -161,6 +163,7 @@ fun BookMarkQuoteItem(
             Text(
                 text = quote.createdAt,
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
