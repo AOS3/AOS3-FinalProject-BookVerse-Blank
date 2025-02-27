@@ -22,6 +22,7 @@ import com.blank.bookverse.presentation.ui.findAccount.FindAccountScreen
 import com.blank.bookverse.presentation.ui.home.HomeScreen
 import com.blank.bookverse.presentation.ui.login.LoginScreen
 import com.blank.bookverse.presentation.ui.more_qoute.MoreQuoteScreen
+import com.blank.bookverse.presentation.ui.notification_setting.NotificationSettingsScreen
 import com.blank.bookverse.presentation.ui.quotewrite.QuoteWriteScreen
 import com.blank.bookverse.presentation.ui.quote_detail.QuoteDetailScreen
 import com.blank.bookverse.presentation.ui.register.RegisterScreen
@@ -58,6 +59,9 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         composable(MyPageNavItem.AccountSetting.route) { AccountSettingsScreen(navController) }
         // 이용약관 화면
         composable(MyPageNavItem.Terms.route) { TermsScreen(navController) }
+
+        // 알림 설정 화면
+        composable(MyPageNavItem.NotificationSetting.route) { NotificationSettingsScreen(navController) }
 
         composable(route = MainNavItem.MoreQuote.route) {
             MoreQuoteScreen(navController = navController)
