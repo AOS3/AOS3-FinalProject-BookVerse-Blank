@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -35,7 +36,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         modifier = Modifier
             .navigationBarsPadding()
             .height(64.dp),
-        containerColor = Color.White,
+        containerColor = colorScheme.background,
     ) {
         items.forEach { item ->
             NavigationBarItem(
@@ -57,11 +58,11 @@ fun BottomNavigationBar(navController: NavHostController) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Black,
-                    selectedTextColor = Color.Black,
+                    selectedIconColor = colorScheme.primary,
+                    selectedTextColor = colorScheme.onSurface,
                     indicatorColor = Color.Transparent,
-                    unselectedIconColor = Color.LightGray,
-                    unselectedTextColor = Color.LightGray,
+                    unselectedIconColor = Color.Gray,
+                    unselectedTextColor = Color.Gray,
                 ),
                 interactionSource = remember { NoRippleInteractionSource() }
             )
