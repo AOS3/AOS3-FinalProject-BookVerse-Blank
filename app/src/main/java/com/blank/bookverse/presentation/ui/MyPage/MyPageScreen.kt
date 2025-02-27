@@ -115,10 +115,11 @@ fun MyPageScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = if (memberProfile == null) Arrangement.Center else Arrangement.Top // 여기가 핵심!
         ) {
             if (memberProfile == null) {
-                CircularProgressIndicator() // 로딩 중 표시
+                CircularProgressIndicator() // 로딩 중 표시 (화면 중앙에 위치)
             } else {
                 val memberData = memberProfile ?: MemberModel()
 
@@ -130,7 +131,6 @@ fun MyPageScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 가장 많이 읽은 책 정보 카드
                 topBook?.let {
                     ReadingInfoCard(
                         memberData = memberData,
@@ -140,20 +140,20 @@ fun MyPageScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 설정 메뉴
                 SettingsMenu(
                     navController = navController,
                     onLogoutClicked = { showLogoutDialog.value = true },
                     onShareClicked = {
-                        myPageViewModel.copyToClipboard("북버스를 소개합니다.")
-                        Toast.makeText(context, "북버스 소개가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                        myPageViewModel.copyToClipboard("나만의 글귀를 저장할 수 있는 공간, 북버스를 소개합니다.")
+                        Toast.makeText(context, "북버스 소개가 복사되었습니다. 다른 사람에게 보내 보세요!", Toast.LENGTH_SHORT).show()
                     },
-                    isAccountSettingVisible = loginType == MyPageViewModel.LoginType.NORMAL, // 일반 로그인 여부
-                    onDeleteAccountClicked = { showDeleteAccountDialog.value = true } // 탈퇴하기 클릭 시
+                    isAccountSettingVisible = loginType == MyPageViewModel.LoginType.NORMAL,
+                    onDeleteAccountClicked = { showDeleteAccountDialog.value = true }
                 )
             }
         }
     }
+
 
     // 로그아웃 다이얼로그
     BookVerseCustomDialog(
@@ -255,11 +255,11 @@ fun ReadingInfoCard(memberData: MemberModel, book: Book) {
             Column {
                 Text(
                     text = buildAnnotatedString {
-                        append("${memberData.memberNickName} 님은 ")
+                        append("${memberData.memberNickName} 님께서 인상 깊게 읽으신 책은")
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append(book.bookTitle)
                         }
-                        append("을(를) 인상 깊게 읽으셨군요")
+                        append("이군요")
                     },
                     fontSize = 15.sp
                 )
