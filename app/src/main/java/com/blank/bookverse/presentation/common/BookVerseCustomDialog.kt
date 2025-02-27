@@ -8,7 +8,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.blank.bookverse.presentation.theme.notoSansFamily
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.unit.dp
+
 
 // 사용법
 // val showDialog = remember { mutableStateOf(false) }
@@ -55,14 +60,16 @@ fun BookVerseCustomDialog(
             confirmButton = {
                 // 확인 버튼 설정
                 TextButton(onClick = { confirmButtonOnClick() }) {
-                    Text(text = confirmButtonTitle)
+                    Text(text = confirmButtonTitle,
+                        fontFamily = notoSansFamily)
                 }
             },
             dismissButton = dismissButtonTitle?.let {
                 // 취소 버튼이 있을 경우 설정
                 {
                     TextButton(onClick = { dismissButtonOnClick() }) {
-                        Text(text = dismissButtonTitle)
+                        Text(text = dismissButtonTitle,
+                            fontFamily = notoSansFamily)
                     }
                 }
             },
@@ -72,6 +79,7 @@ fun BookVerseCustomDialog(
                     Icon(
                         imageVector = it,
                         contentDescription = null,
+                        modifier = Modifier.scale(1.5f)
                     )
                 }
             },
@@ -80,15 +88,20 @@ fun BookVerseCustomDialog(
                 {
                     Text(
                         text = it,
+                        fontFamily = notoSansFamily
                     )
                 }
             },
             text = text?.let {
                 // 본문 텍스트가 있을 경우 설정
                 {
-                    Text(text = it)
+                    Text(
+                        text = it,
+                        fontFamily = notoSansFamily
+                        )
                 }
-            }
+            },
+            containerColor = Color(0xFFE8E8E8)
         )
     }
 }
