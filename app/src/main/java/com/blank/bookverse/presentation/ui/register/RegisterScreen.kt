@@ -395,6 +395,7 @@ fun RegisterScreen(
         // bottomSheet
         BookVerseBottomSheet(
             visible = registerBottomSheetState,
+            containerColor = Color.White
         ) {
             Column(
                 modifier = Modifier
