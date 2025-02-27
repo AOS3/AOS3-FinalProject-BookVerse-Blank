@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.book_detail
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -109,7 +111,11 @@ fun BookDetailContent(
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item {
                     Spacer(modifier = Modifier.height(22.dp))
-                    HorizontalDivider()
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .border(0.5.dp, Color.LightGray)
+                    )
 
                     CoilImage(
                         modifier = Modifier
@@ -119,7 +125,10 @@ fun BookDetailContent(
                         imageModel = { uiState.bookDetail?.bookInfo?.bookCover },
                     )
 
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .border(0.5.dp, Color.LightGray)
+                    )
 
                     Row(
                         modifier = Modifier
@@ -146,7 +155,12 @@ fun BookDetailContent(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
-                    HorizontalDivider()
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .border(0.5.dp, Color.LightGray)
+                    )
+
                 }
 
                 items(
@@ -168,12 +182,14 @@ fun BookDetailContent(
             VerticalDivider(
                 modifier = Modifier
                     .padding(start = 42.dp)
+                    .border(0.5.dp, Color.LightGray)
                     .fillMaxHeight()
             )
             VerticalDivider(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 42.dp)
+                    .border(0.5.dp, Color.LightGray)
                     .fillMaxHeight()
             )
         }

@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.bookmark
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -79,9 +81,10 @@ fun BookmarkContent(
             )
         }
     ) { paddingValues ->
-        Box(modifier = modifier
-            .fillMaxSize()
-            .padding(paddingValues)
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             if (uiState.isLoading) {
                 Box(
@@ -104,12 +107,14 @@ fun BookmarkContent(
                 VerticalDivider(
                     modifier = Modifier
                         .padding(start = 42.dp)
+                        .border(0.5.dp, Color.LightGray)
                         .fillMaxHeight()
                 )
                 VerticalDivider(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(end = 42.dp)
+                        .border(0.5.dp, Color.LightGray)
                         .fillMaxHeight()
                 )
             }
@@ -163,7 +168,11 @@ fun BookMarkQuoteItem(
             )
             Spacer(modifier = Modifier.height(22.dp))
 
-            HorizontalDivider()
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(0.5.dp, Color.LightGray)
+            )
         }
     }
 }
