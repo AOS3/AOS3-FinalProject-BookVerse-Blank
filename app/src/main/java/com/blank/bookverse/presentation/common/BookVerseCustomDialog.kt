@@ -102,6 +102,6 @@ fun BookVerseCustomDialog(
                 }
             },
             containerColor = Color(0xFFE8E8E8)
-        )
+        ) 
     }
 }
