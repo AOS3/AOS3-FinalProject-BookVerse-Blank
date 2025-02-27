@@ -271,14 +271,6 @@ class RegisterViewModel @Inject constructor(
         val userPwCheck: String = "",
         val userName: String = "",
         val userPhoneNumber: String = "",
-        val userNickName: String = generateNickname()
-    ) {
-        companion object {
-            fun generateNickname(): String {
-                val animals = listOf("토끼", "고양이", "강아지", "곰", "새", "호랑이", "사자", "거북이", "여우", "사슴")
-                val adjectives = listOf("행복한", "사랑스러운", "귀여운", "용감한", "파란", "따뜻한", "조용한", "반짝이는")
-                return "${adjectives.random()} ${animals.random()}"
-            }
-        }
-    }
+        val userNickName: String = ""
+    )
 }

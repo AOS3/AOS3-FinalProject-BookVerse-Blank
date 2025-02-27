@@ -49,8 +49,27 @@ class LoginViewModel @Inject constructor(
         _userPw.value = ""
     }
 
-    // 카카오 로그인 처리 (웹 로그인만 진행)
     fun loginWithKakao(context: Context) {
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
+            // 앱 로그인 시도
+            UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
+                if (error != null) {
+                    Timber.e("카카오톡 로그인 실패: ${error.localizedMessage}")
+                    // 앱 로그인 실패 시 웹 로그인 시도
+                    loginWithKakaoWeb(context)
+                } else if (token != null) {
+                    Timber.i("카카오톡 로그인 성공: ${token.accessToken}")
+                    getKakaoUserInfo(context)
+                }
+            }
+        } else {
+            // 카카오톡 앱이 없으면 웹 로그인 시도
+            loginWithKakaoWeb(context)
+        }
+    }
+
+    // 웹 로그인 처리 (앱 로그인 실패 시 실행)
+    private fun loginWithKakaoWeb(context: Context) {
         UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
             viewModelScope.launch {
                 when {
