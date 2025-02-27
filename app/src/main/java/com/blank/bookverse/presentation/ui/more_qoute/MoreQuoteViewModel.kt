@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.more_qoute
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.blank.bookverse.data.repository.QuoteRepository
@@ -37,6 +38,7 @@ class MoreQuoteViewModel @Inject constructor(
             )
         }.onFailure { error ->
             _moreQuoteUiState.value = _moreQuoteUiState.value.copy(isLoading = false)
+            Log.e("MoreQuoteViewModel", "loadAllBooks: $error")
         }
     }
 

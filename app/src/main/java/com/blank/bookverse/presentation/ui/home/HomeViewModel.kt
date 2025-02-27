@@ -57,7 +57,6 @@ class HomeViewModel @Inject constructor(
             _homeUiState.value = _homeUiState.value.copy(
                 books = bookUiModels,
                 isLoading = false,
-                hasMore = books.size >= BOOKS_PAGE_SIZE
             )
         }.onFailure { error ->
             _homeUiState.value = _homeUiState.value.copy(isLoading = false)
@@ -66,10 +65,6 @@ class HomeViewModel @Inject constructor(
 
     fun navigateToBookDetail(bookDocId: String) = viewModelScope.launch {
         _homeEffect.emit(HomeEffect.NavigateToBookDetail(bookDocId))
-    }
-
-    companion object {
-        private const val BOOKS_PAGE_SIZE = 8
     }
 }
 
@@ -80,7 +75,6 @@ data class HomeUiState(
         bookTitle = "북버스"
     ),
     val books: List<HomeBookUiModel> = emptyList(),
-    val hasMore: Boolean = false
 )
 
 sealed class HomeEffect {

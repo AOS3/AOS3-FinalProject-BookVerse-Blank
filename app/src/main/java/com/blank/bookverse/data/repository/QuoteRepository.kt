@@ -79,7 +79,7 @@ class QuoteRepository @Inject constructor(
         return firestore.collection("Books")
             .whereEqualTo("member_id", firestoreAuth.uid)
             .whereEqualTo("is_delete", false)
-            .orderBy("quoteCount", Query.Direction.DESCENDING)
+            .orderBy("quote_count", Query.Direction.DESCENDING)
             .get()
             .await()
             .documents
@@ -110,8 +110,8 @@ class QuoteRepository @Inject constructor(
                 transaction.set(bookRef, book)
             } else {
                 transaction.update(
-                    bookRef, "quoteCount",
-                    (existingBook.getLong("quoteCount") ?: 0) + 1
+                    bookRef, "quote_count",
+                    (existingBook.getLong("quote_count") ?: 0) + 1
                 )
             }
 
@@ -129,9 +129,9 @@ class QuoteRepository @Inject constructor(
             val book = transaction.get(bookRef)
 
             if (book.exists()) {
-                val currentCount = book.getLong("quoteCount") ?: 0
+                val currentCount = book.getLong("quote_count") ?: 0
                 if (currentCount > 0) {
-                    transaction.update(bookRef, "quoteCount", currentCount - 1)
+                    transaction.update(bookRef, "quote_count", currentCount - 1)
                 }
 
                 if (currentCount <= 1) {
