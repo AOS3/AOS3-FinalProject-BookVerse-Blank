@@ -126,17 +126,19 @@ fun HomeContent(
                                 .weight(1f)
                                 .alignByBaseline()
                         )
-                        Text(
-                            text = "전체보기 >",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary
-                            ),
-                            modifier = Modifier
-                                .clickable { onNavigateToMore() }
-                                .padding(start = 8.dp)
-                                .alignByBaseline()
-                        )
+                        if(uiState.books.isNotEmpty()) {
+                            Text(
+                                text = "전체보기 >",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                modifier = Modifier
+                                    .clickable { onNavigateToMore() }
+                                    .padding(start = 8.dp)
+                                    .alignByBaseline()
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
