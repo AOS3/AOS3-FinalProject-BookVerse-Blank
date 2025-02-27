@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.blank.bookverse.presentation.theme.notoSansFamily
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.unit.dp
+
 
 
 // 사용법

@@ -156,11 +156,11 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // 닉네임 (수정 가능)
+                // 닉네임 (수정 가능)
                 if (isEditing) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().offset(110.dp)
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -170,7 +170,7 @@ fun ProfileScreen(
                                 value = tempNickName,
                                 onValueChange = { tempNickName = it },
                                 modifier = Modifier
-                                    .width(200.dp)
+                                    .width(150.dp)
                                     .padding(8.dp),
                                 singleLine = true,
                                 enabled = !isLoading, // 로딩 중이면 비활성화
@@ -180,9 +180,17 @@ fun ProfileScreen(
                             // 밑줄 추가
                             Box(
                                 modifier = Modifier
-                                    .width(200.dp)
+                                    .width(150.dp)
                                     .height(1.dp)
                                     .background(Color.Black) // 밑줄 색상
+                            )
+
+                            // 텍스트 필드 아래에 안내 문구 추가
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "한글 9자 이내로 작성해 주세요",
+                                color = Color.Gray,
+                                fontSize = 10.sp
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
@@ -202,8 +210,7 @@ fun ProfileScreen(
                 } else {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().offset(110.dp)
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(userName, fontWeight = FontWeight.Bold, fontSize = 20.sp)
