@@ -168,11 +168,8 @@ fun ProfileScreen(
                             BasicTextField(
                                 value = tempNickName,
                                 onValueChange = { input ->
-                                    // 한글 정규식 (완성형 한글만 허용)
-                                    val koreanRegex = "^[가-힣]*$".toRegex()
-
-                                    // 한글만 + 9자 이내
-                                    if (input.length <= 9 && input.matches(koreanRegex)) {
+                                    val koreanRegex = "^[가-힣ㄱ-ㅎㅏ-ㅣ]*$".toRegex()
+                                    if (input.length <= 8 && input.matches(koreanRegex)) {
                                         tempNickName = input
                                     }
                                 },
@@ -195,7 +192,7 @@ fun ProfileScreen(
                             // 텍스트 필드 아래에 안내 문구 추가
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "한글 9자 이내로 작성해 주세요",
+                                text = "한글 8자 이내로 작성해 주세요",
                                 color = Color.Gray,
                                 fontSize = 10.sp
                             )
