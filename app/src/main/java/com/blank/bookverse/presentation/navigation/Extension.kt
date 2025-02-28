@@ -39,11 +39,13 @@ fun NavController.shouldShowBottomBar(): Boolean {
     }
 }
 
+// 현재 화면 제거시 이전 화면에 값을 전달
 fun NavController.popBackStackSavedString(key: String,value: String){
     previousBackStackEntry?.savedStateHandle?.set(key, value)
     popBackStack()
 }
 
+// 현재 화면에 전달된 값이 있는지 확인
 @Composable
 fun NavController.currentSavedStateHandle(key: String) =
     currentBackStackEntry?.savedStateHandle?.getLiveData<String>(key)?.observeAsState()
