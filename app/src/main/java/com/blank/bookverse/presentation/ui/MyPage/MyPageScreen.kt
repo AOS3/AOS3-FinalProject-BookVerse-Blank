@@ -257,6 +257,7 @@ fun ReadingInfoCard(memberData: MemberModel, book: Book) {
                     text = buildAnnotatedString {
                         append("${memberData.memberNickName} 님께서 인상 깊게 읽으신 책은")
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(" ")
                             append(book.bookTitle)
                         }
                         append("이군요")
