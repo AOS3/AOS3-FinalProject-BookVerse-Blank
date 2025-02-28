@@ -20,6 +20,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -65,16 +66,16 @@ class OcrRepository @Inject constructor(
     // 프로필 이미지 업로드 및 URL 반환
     suspend fun uploadCaptureImage(imageUri: Uri): Uri?
         = withContext(Dispatchers.IO) {
-            try {
-                val storageRef = firebaseStorage.reference.child("capture_image/").child(onlyName)
-                val metadata = storageMetadata{
-                    contentType = "image/png"
-                }
-                storageRef.putFile(imageUri,metadata)
-                storageRef.downloadUrl.await()
-            } catch (e: Exception) {
-                null
+        try {
+            val storageRef = firebaseStorage.reference.child("capture_image/").child(onlyName)
+            val metadata = storageMetadata{
+                contentType = "image/png"
             }
+            storageRef.putFile(imageUri,metadata).await()
+            storageRef.downloadUrl.await()
+        } catch (e: Exception) {
+            null
         }
+    }
 
 }

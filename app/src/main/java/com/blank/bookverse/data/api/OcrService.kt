@@ -15,13 +15,13 @@ class OcrService @Inject constructor(
     suspend fun getOpenApiData(
         format: String,
         name: String,
-        url: String,
+        data: String,
     ) : Response<OcrCLOVA> {
         val imageSource = listOf(
             HeaderImageObject(
                 format = format,
                 name = name,
-                url = url,
+                data = data,
             )
         )
 

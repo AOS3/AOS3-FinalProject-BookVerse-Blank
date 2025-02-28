@@ -103,7 +103,7 @@ data class BoundingPoly(
 
 data class Location(
     @SerializedName("x")
-    var x: String,
+    var x: Float,
     @SerializedName("y")
-    var y: String,
+    var y: Float,
 )

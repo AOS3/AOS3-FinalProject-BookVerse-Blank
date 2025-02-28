@@ -1,10 +1,12 @@
 package com.blank.bookverse.presentation.navigation
 
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -109,7 +111,23 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         // 아이디/비밀번호 찾기
         composable(MainNavItem.FindAccount.route) { FindAccountScreen(navController) }
         // 글귀 작성 수정 화면
-        composable(MainNavItem.QuoteWrite.route) { QuoteWriteScreen(navController) }
+        composable(
+            route = MainNavItem.QuoteWrite.route,
+            arguments = listOf(
+                navArgument(MainNavItem.QuoteWrite.BOOK_TITLE) {
+                    type = NavType.StringType
+                    nullable = true // null 가능
+                },
+                navArgument(MainNavItem.QuoteWrite.BOOK_IMAGE) {
+                    type = NavType.StringType
+                    nullable = true // null 가능
+                }
+            )
+        ) {
+            val bookTitle = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_TITLE)
+            val bookImage = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_IMAGE)
+            QuoteWriteScreen(navController,bookTitle, bookImage)
+        }
 
         // 카메라 화면
         composable(CameraNavItem.TakeBook.route) { TakeBookScreen(navController) }

@@ -1,17 +1,14 @@
 package com.blank.bookverse.presentation.common
 
-import android.R.attr.text
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -20,10 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -42,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
@@ -56,7 +50,6 @@ import timber.log.Timber
 fun SearchBar(
     searchValue:MutableState<String>,
     placeholder:String = "검색어를 입력해주세요",
-    trailingList:List<Pair<ImageVector?,()->Unit>> = listOf(),
     trailingIcon: ImageVector?,
     trailingIconOnClick:(Boolean)-> Unit,
     moreIcon: @Composable ((Boolean) -> ImageVector)?,
@@ -65,6 +58,8 @@ fun SearchBar(
     contentComposable: @Composable () -> Unit,
     composableContent: @Composable (List<String>) -> Unit, // 최근 검색어 전달
     onSearch: () -> Unit = {}, // 엔터키 입력 시 호출할 콜백 추가
+    onQueryChange : ()->Unit = {}, // 검색 값 입력 시 호출할 콜백 추가
+    contentComposableNotEnabled: Boolean,
     alignment: Alignment = Alignment.TopCenter,
 ) {
     var expandedValue by rememberSaveable {
@@ -98,7 +93,8 @@ fun SearchBar(
                 .align(alignment),
             inputField = {
                 SearchBarDefaults.InputField(
-                    modifier = Modifier.fillMaxWidth(0.9f).offset {
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                        .offset {
                         textFieldOffset
                     },
                     placeholder = {
@@ -116,6 +112,7 @@ fun SearchBar(
                     query = searchValue.value,
                     onQueryChange = {
                         searchValue.value = it
+                        onQueryChange()
                     },
                     leadingIcon = {
                         Crossfade(
@@ -159,6 +156,7 @@ fun SearchBar(
                                     expandedValue = it,
                                     expandedOnClick = {
                                         searchValue.value = ""
+                                        onQueryChange()
                                     },
                                     trailingIcon = trailingIcon,
                                     trailingIconOnClick = {
@@ -172,7 +170,7 @@ fun SearchBar(
                                         expandedValue = it,
                                         expandedIcon = moreExpandedIcon,
                                         expandedOnClick = {
-                                            searchValue.value = ""
+                                            moreIconOnClick(expandedValue)
                                         },
                                         trailingIcon = moreNotExpandedIcon,
                                         trailingIconOnClick = {
@@ -195,9 +193,10 @@ fun SearchBar(
             colors = SearchBarDefaults.colors(
 
             ),
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(20.dp),
+            windowInsets = WindowInsets(top = 50.dp)
         ) {
-            if (searchValue.value.isNotBlank()) {
+            if (contentComposableNotEnabled) {
                 // 검색 결과를 구성해주는 부분
                 searchResultComposable()
             } else {

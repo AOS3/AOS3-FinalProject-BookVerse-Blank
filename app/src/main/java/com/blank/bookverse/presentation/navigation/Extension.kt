@@ -3,6 +3,7 @@ package com.blank.bookverse.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -37,3 +38,12 @@ fun NavController.shouldShowBottomBar(): Boolean {
         else -> false
     }
 }
+
+fun NavController.popBackStackSavedString(key: String,value: String){
+    previousBackStackEntry?.savedStateHandle?.set(key, value)
+    popBackStack()
+}
+
+@Composable
+fun NavController.currentSavedStateHandle(key: String) =
+    currentBackStackEntry?.savedStateHandle?.getLiveData<String>(key)?.observeAsState()
