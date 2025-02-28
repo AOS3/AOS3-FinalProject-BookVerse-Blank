@@ -156,7 +156,6 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // 닉네임 (수정 가능)
-                // 닉네임 (수정 가능)
                 if (isEditing) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -168,7 +167,15 @@ fun ProfileScreen(
                             // 텍스트 수정 (BasicTextField 사용)
                             BasicTextField(
                                 value = tempNickName,
-                                onValueChange = { tempNickName = it },
+                                onValueChange = { input ->
+                                    // 한글 정규식 (완성형 한글만 허용)
+                                    val koreanRegex = "^[가-힣]*$".toRegex()
+
+                                    // 한글만 + 9자 이내
+                                    if (input.length <= 9 && input.matches(koreanRegex)) {
+                                        tempNickName = input
+                                    }
+                                },
                                 modifier = Modifier
                                     .width(150.dp)
                                     .padding(8.dp),
