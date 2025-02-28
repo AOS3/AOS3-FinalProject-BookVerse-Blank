@@ -356,7 +356,7 @@ fun RegisterScreen(
                         shape = RoundedCornerShape(8.dp)
                     ),
                 checkList = listOf(
-                    Pair("2~12자", Regex("^.{2,12}\$"))
+                    Pair("2~8자", Regex("^.{2,8}\$"))
                 ),
                 isError = registerViewModel.isUserNicknameError,
                 inputType = LikeLionOutlinedTextFieldInputType.TEXT,

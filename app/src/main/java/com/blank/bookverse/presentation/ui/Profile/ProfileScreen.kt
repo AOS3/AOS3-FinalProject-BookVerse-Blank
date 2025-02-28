@@ -156,7 +156,6 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // 닉네임 (수정 가능)
-                // 닉네임 (수정 가능)
                 if (isEditing) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -168,7 +167,12 @@ fun ProfileScreen(
                             // 텍스트 수정 (BasicTextField 사용)
                             BasicTextField(
                                 value = tempNickName,
-                                onValueChange = { tempNickName = it },
+                                onValueChange = { input ->
+                                    val koreanRegex = "^[가-힣ㄱ-ㅎㅏ-ㅣ]*$".toRegex()
+                                    if (input.length <= 8 && input.matches(koreanRegex)) {
+                                        tempNickName = input
+                                    }
+                                },
                                 modifier = Modifier
                                     .width(150.dp)
                                     .padding(8.dp),
@@ -188,7 +192,7 @@ fun ProfileScreen(
                             // 텍스트 필드 아래에 안내 문구 추가
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "한글 9자 이내로 작성해 주세요",
+                                text = "한글 8자 이내로 작성해 주세요",
                                 color = Color.Gray,
                                 fontSize = 10.sp
                             )
