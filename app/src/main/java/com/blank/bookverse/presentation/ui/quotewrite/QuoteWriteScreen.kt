@@ -1,5 +1,6 @@
 package com.blank.bookverse.presentation.ui.quotewrite
 
+import android.R.attr.contentDescription
 import android.R.attr.key
 import android.R.attr.name
 import android.R.attr.onClick
@@ -50,14 +51,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,23 +73,33 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkAnnotation.Url
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.util.CoilUtils.result
 import com.blank.bookverse.R
 import com.blank.bookverse.data.api.OcrService
+import com.blank.bookverse.data.model.Book
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.navigation.CameraNavItem
+import com.blank.bookverse.presentation.navigation.currentSavedStateHandle
+import com.blank.bookverse.presentation.navigation.navigateSingleTop
 import com.blank.bookverse.presentation.ui.takeBook.CameraState
 import com.kakao.sdk.friend.l.b
 import kotlinx.coroutines.CoroutineScope
@@ -93,14 +107,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.net.URLDecoder
 
 @OptIn(ExperimentalLayoutApi::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun QuoteWriteScreen(
     navController:NavHostController,
+    bookTitle: String?,
+    bookImage: String?,
     viewModel: QuoteWriteViewModel = hiltViewModel()
 ) {
+
     val density = LocalDensity.current
     // FocusManager 가져오기
     val focusManager = LocalFocusManager.current
@@ -110,6 +128,20 @@ fun QuoteWriteScreen(
     val screenWidth = with(density) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
+    val savedStateHandle = navController.currentSavedStateHandle("quote")
+    LaunchedEffect(bookTitle,bookImage) {
+        if(bookTitle != null){
+            viewModel.bookTitleUpdate(bookTitle)
+        }
+        if(bookImage != null){
+            viewModel.bookCoverUpdate(URLDecoder.decode(bookImage,"UTF-8"))
+        }
+        val quote = savedStateHandle?.value
+        if (quote != null) {
+            viewModel.quoteUpdate(quote)
+        }
+    }
+
     Scaffold(
         modifier = Modifier.clickable(
             indication = null,
@@ -136,7 +168,7 @@ fun QuoteWriteScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            navController.navigate(CameraNavItem.TakeBook.route)
+                            navController.navigateSingleTop(CameraNavItem.TakeBook.route)
                         }
                     ) {
                         Icon(
@@ -159,9 +191,14 @@ fun QuoteWriteScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .background(Color.LightGray)
+                        .background(Color.LightGray),
                 ) {
-
+                    AsyncImage(
+                        viewModel.bookCover.value,
+                        contentDescription = null,
+                        modifier = Modifier.padding(10.dp)
+                            .height(180.dp).fillMaxWidth()
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically)
                 {
@@ -438,13 +475,6 @@ fun QuoteWriteTextField(
                                     hasSize = it.height
                                 }
                             }
-//                            Timber.tag("st").d(placeholder)
-//                            Timber.tag("st").d("hasFocus")
-//                            Timber.tag("st").d(" $hasFocus")
-//                            Timber.tag("st").d("isCovered")
-//                            Timber.tag("st").d(" $isCovered")
-//                            Timber.tag("st").d("textFieldYBottom")
-//                            Timber.tag("st").d(" $textFieldYBottom")
                         }
                     }
                     .onGloballyPositioned { coordinates ->
@@ -462,7 +492,8 @@ fun QuoteWriteTextField(
                 placeHolder = placeholder,
                 isError = input,
                 focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent
+                unfocusedBorderColor = Color.Transparent,
+                maxLines = Int.MAX_VALUE
             )
         }
         Box(
@@ -533,6 +564,8 @@ fun ChipCard(
     elevation: Dp = 5.dp,
     onClickable: (()-> Unit)? = null,
     clear: (()-> Unit)? = null,
+    containerColor: Color = Color.White,
+    fontSize:Int? = null
 ){
     Card (
         modifier = Modifier
@@ -540,7 +573,7 @@ fun ChipCard(
             .height(30.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = containerColor
         ),
         elevation = CardDefaults.elevatedCardElevation(
             elevation
@@ -561,7 +594,9 @@ fun ChipCard(
         ) {
 
             Text(modifier = Modifier.padding(end = 3.dp),
-                text = "#${think}"
+                text = "#${think}",
+                fontSize = if (fontSize == null)TextUnit.Unspecified
+                else fontSize.sp
             )
             if (clear != null) {
                 Card(

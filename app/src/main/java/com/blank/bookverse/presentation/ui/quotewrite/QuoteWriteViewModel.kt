@@ -8,14 +8,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.blank.bookverse.data.repository.QuoteRepository
+import com.blank.bookverse.presentation.navigation.MainNavItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class QuoteWriteViewModel@Inject constructor(
-
+    private val quoteRepository: QuoteRepository
 ):ViewModel() {
-
+    val bookTitle = mutableStateOf("")
+    val bookCover = mutableStateOf("")
     val quoteText = mutableStateOf("")
     val thinkText = mutableStateOf("")
     val thinkSingleText = mutableStateOf("")
@@ -63,5 +67,20 @@ class QuoteWriteViewModel@Inject constructor(
             thinkList.removeAt(it)
         }
 
+    }
+
+    fun bookCoverUpdate(bookCover: String){
+        Log.d("st","bookCover $bookCover")
+        this.bookCover.value = bookCover
+    }
+
+    fun bookTitleUpdate(bookTitle: String){
+        Log.d("st","bookTitle $bookTitle")
+        this.bookTitle.value = bookTitle
+    }
+
+    fun quoteUpdate(quote: String){
+        Log.d("st","bookTitle $quote")
+        this.quoteText.value = quote
     }
 }

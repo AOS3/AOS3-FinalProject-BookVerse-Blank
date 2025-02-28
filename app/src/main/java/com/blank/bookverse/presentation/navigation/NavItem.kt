@@ -57,7 +57,11 @@ sealed class MainNavItem(val route: String, val label: String) {
     }
 
     data object MoreQuote : MainNavItem("more_quote", "더보기")
-    data object QuoteWrite: MainNavItem("write_quote", "글귀 작성")
+    data object QuoteWrite: MainNavItem("write_quote/{bookTitle}/{bookImage}", "글귀 작성"){
+        const val BOOK_TITLE = "bookTitle"
+        const val BOOK_IMAGE = "bookImage"
+        fun createRoute(bookTitle: String?,bookImage: String?) = "write_quote/$bookTitle/$bookImage"
+    }
 }
 
 
