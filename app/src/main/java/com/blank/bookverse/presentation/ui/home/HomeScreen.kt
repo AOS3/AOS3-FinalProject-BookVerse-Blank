@@ -3,6 +3,7 @@ package com.blank.bookverse.presentation.ui.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -117,42 +119,71 @@ fun HomeContent(
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "내 글귀",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier
-                                .weight(1f)
-                                .alignByBaseline()
-                        )
-                        if(uiState.books.isNotEmpty()) {
+                        if (uiState.books.isNotEmpty()) {
+                            Text(
+                                text = "내 글귀",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .alignByBaseline()
+                            )
+
                             Text(
                                 text = "전체보기 >",
-                                style = MaterialTheme.typography.bodyLarge.copy(
+                                style = MaterialTheme.typography.bodySmall.copy(
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.primary
                                 ),
                                 modifier = Modifier
-                                    .clickable { onNavigateToMore() }
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                    ) { onNavigateToMore() }
                                     .padding(start = 8.dp)
                                     .alignByBaseline()
                             )
+
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(
-                            items = uiState.books,
-                            key = { it.bookDocId }
-                        ) { book ->
-                            HomeBookItem(
-                                book = book,
-                                onNavigateToDetail = { onNavigateToDetail(book.bookDocId) }
-                            )
+
+                    if (uiState.books.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(
+                                items = uiState.books,
+                                key = { it.bookDocId }
+                            ) { book ->
+                                HomeBookItem(
+                                    book = book,
+                                    onNavigateToDetail = { onNavigateToDetail(book.bookDocId) }
+                                )
+                            }
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "추가한 글귀가 없습니다.",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "마음에 드는 글귀를 찾아 기록 해보세요",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }
