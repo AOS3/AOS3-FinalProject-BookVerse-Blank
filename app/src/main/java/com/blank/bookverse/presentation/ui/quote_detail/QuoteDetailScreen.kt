@@ -138,17 +138,6 @@ fun QuoteDetailContent(
                         modifier = Modifier
                             .border(0.5.dp, Color.LightGray)
                     )
-                    CoilImage(
-                        modifier = Modifier
-                            .padding(horizontal = 42.dp)
-                            .fillMaxWidth()
-                            .height(220.dp)
-                            .background(Color.Gray),
-                        imageModel = { uiState.quoteDetail?.photoUrl },
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.Crop,
-                        )
-                    )
 
                     Spacer(modifier = Modifier.height(18.dp))
                     Text(
