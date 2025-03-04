@@ -1,7 +1,11 @@
 package com.blank.bookverse.presentation.model
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.blank.bookverse.data.model.Comment
 import com.blank.bookverse.data.model.Quote
+import kotlinx.parcelize.Parcelize
+
 
 data class QuoteDetailUiModel(
     val quoteDocId: String,
@@ -11,7 +15,8 @@ data class QuoteDetailUiModel(
     val comments: List<CommentItem>,
     val isBookmark: Boolean = false,
     val tags: List<String> = emptyList(),
-) {
+){
+
     data class CommentItem(
         val commentDocId: String,
         val commentContent: String,

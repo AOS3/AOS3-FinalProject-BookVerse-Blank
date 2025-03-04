@@ -8,6 +8,7 @@ import com.blank.bookverse.data.mapper.toQuote
 import com.blank.bookverse.data.model.Book
 import com.blank.bookverse.data.model.Comment
 import com.blank.bookverse.data.model.Quote
+import com.blank.bookverse.presentation.model.QuoteDetailUiModel
 import com.blank.bookverse.presentation.util.Constant.captureName
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -166,12 +167,12 @@ class QuoteRepository @Inject constructor(
     }
 
     // 기존 글귀 업데이트
-    fun updateQuote(quote: Quote, tagList: List<String>) {
+    fun updateQuote(quote: Quote) {
         firestore.runTransaction { transaction ->
             val quoteCollection = firestore.collection("Quotes")
-            val tag = tagList.toString()
             val bookRef = firestore.collection("Books").document(quote.bookDocId)
             val existingBook = transaction.get(bookRef)
+            val memberUid = firestoreAuth.uid.toString()
             val quoteCount = if (!existingBook.exists()) {
                 1
             } else {
@@ -181,13 +182,13 @@ class QuoteRepository @Inject constructor(
                 hashMapOf(
                     "quote_doc_id" to quoteDocId,
                     "book_doc_id" to bookDocId,
-                    "member_id" to memberId,
-                    "photo_uri" to photoUrl,//
-                    "tag" to tag,
-                    "quote_content" to quoteContent,//
+                    "member_id" to memberUid,
+                    "photo_uri" to photoUrl,// 들어오기 전에 검사
+                    "tag" to tags,// 들어오기 전에 검사
+                    "quote_content" to quoteContent,// 들어오기 전에 검사
                     "is_bookmark" to isBookmark,
                     "quote_count" to quoteCount,
-                    "create_at" to createdAt,
+                    "create_at" to System.currentTimeMillis(),
                     "is_delete" to false
                 )
             }

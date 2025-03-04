@@ -1,12 +1,11 @@
 package com.blank.bookverse.presentation.ui.quotewrite
 
-import android.R.attr.contentDescription
-import android.R.attr.key
-import android.R.attr.name
-import android.R.attr.onClick
+import android.R.attr.enabled
 import android.R.attr.text
+import android.R.id.input
 import androidx.compose.ui.platform.LocalDensity
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.util.Log
 import android.widget.GridView
 import androidx.compose.foundation.background
@@ -39,8 +38,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -76,42 +73,28 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.LinkAnnotation.Url
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.room.util.query
 import coil.compose.AsyncImage
-import coil.util.CoilUtils.result
 import com.blank.bookverse.R
-import com.blank.bookverse.data.api.OcrService
-import com.blank.bookverse.data.model.Book
 import com.blank.bookverse.data.model.Quote
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
+import com.blank.bookverse.presentation.model.QuoteDetailUiModel
 import com.blank.bookverse.presentation.navigation.CameraNavItem
 import com.blank.bookverse.presentation.navigation.currentSavedStateHandle
-import com.blank.bookverse.presentation.navigation.currentSavedStateHandleQuote
-import com.blank.bookverse.presentation.navigation.navigateSingleTop
 import com.blank.bookverse.presentation.util.Constant.captureName
-import com.kakao.sdk.friend.l.b
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
-import timber.log.Timber
-import java.io.File
-import java.io.FileInputStream
 import java.net.URLDecoder
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -122,6 +105,7 @@ fun QuoteWriteScreen(
     bookDocId: String?,
     bookTitle: String?,
     bookImage: String?,
+    quote: String? = null,
     viewModel: QuoteWriteViewModel = hiltViewModel()
 ) {
 
@@ -136,9 +120,8 @@ fun QuoteWriteScreen(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     val savedStateHandle = navController.currentSavedStateHandle("content")
-    val savedStateHandleQuote = navController.currentSavedStateHandleQuote("quote")
     LaunchedEffect(bookDocId,bookTitle,bookImage) {
-        if (savedStateHandleQuote?.value == null) {
+        if (quote == null) {
             if (bookDocId != null) {
                 viewModel.bookDocIdUpdate(bookDocId)
             }
@@ -148,26 +131,23 @@ fun QuoteWriteScreen(
             if (bookImage != null) {
                 viewModel.bookCoverUpdate(URLDecoder.decode(bookImage, "UTF-8"))
             }
-            val content = savedStateHandle?.value
+            val content = savedStateHandle.value
             if (content != null) {
                 viewModel.quoteUpdate(content)
             }
         }else {
-            val quote = savedStateHandleQuote.value
-            val quoteDocId = quote?.quoteDocId!!
-            val quoteBookDocId = quote.bookDocId
-            val quoteBookImage = quote.photoUrl
+            viewModel.quote.value = Gson().fromJson(Uri.decode(quote), Quote::class.java)
+            val quote = viewModel.quote.value!!
             val quoteContent = quote.quoteContent
-            if (quoteDocId != "") {
-                viewModel.quoteDocId.value = quoteDocId
+            val tagList = quote.tags
+            if (tagList.isNotEmpty()) {
+                viewModel.thinkListAddAll(tagList)
             }
-            if (quoteBookDocId != "") {
-                viewModel.bookDocIdUpdate(quoteBookDocId)
-            }
-            if (quoteBookImage != "") {
-                viewModel.bookCoverUpdate(quoteBookImage)
-            }
-            val content = savedStateHandle?.value
+
+            // 책 값 추출
+            viewModel.getBookData()
+
+            val content = savedStateHandle.value
             if (content != null) {
                 viewModel.quoteUpdate(content)
             }
@@ -177,8 +157,8 @@ fun QuoteWriteScreen(
         }
     }
 
-    val title = "글귀 ${if (viewModel.quoteDocId.value == null) "작성" else "수정"}"
-    val textComplete = "${if (viewModel.quoteDocId.value == null) "작성" else "수정"}하기"
+    val title = "글귀 ${if (viewModel.getQuoteNull()) "작성" else "수정"}"
+    val textComplete = "${if (viewModel.getQuoteNull()) "작성" else "수정"}하기"
     Scaffold(
         modifier = Modifier.clickable(
             indication = null,
@@ -193,7 +173,7 @@ fun QuoteWriteScreen(
                     IconButton(
                         onClick = {
                             navController.popBackStack()
-                        }
+                        },
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_reply_24px),
@@ -206,7 +186,8 @@ fun QuoteWriteScreen(
                     IconButton(
                         onClick = {
                             navController.navigate(CameraNavItem.TakeBook.route)
-                        }
+                        },
+                        enabled = viewModel.loadingNotEnabled.value
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_photo_camera_24px),
@@ -261,7 +242,8 @@ fun QuoteWriteScreen(
                         modifier = Modifier.padding(3.dp),
                         onClick = {
                             viewModel.bottomSheetOpen()
-                        }
+                        },
+                        enabled = viewModel.loadingNotEnabled.value
                     ) {
 
                         Icon(
@@ -288,7 +270,8 @@ fun QuoteWriteScreen(
                                 value = 380,
                             )
                         }.onJoin
-                    }
+                    },
+                    enabled = viewModel.loadingNotEnabled.value
                 )
                 // 위쪽 그림자 효과
                 Box(
@@ -328,7 +311,8 @@ fun QuoteWriteScreen(
                                     value = scrollState.maxValue,
                                 )
                             }.onJoin
-                        }
+                        },
+                        enabled = viewModel.loadingNotEnabled.value
                     )
 
                     BookVerseButton(
@@ -339,10 +323,7 @@ fun QuoteWriteScreen(
                         onClick = {
                             // 작성 완료
                             // 작성 경고
-                            val quote =
-                                if (savedStateHandleQuote?.value != null) savedStateHandleQuote.value!! else Quote()
-                            viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController,
-                                argQuote = quote)
+                            viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController)
                             Log.d("st","${viewModel.completeEnable.value}")
                         },
                         backgroundColor = Color.Black,
@@ -458,6 +439,7 @@ fun QuoteWriteScreen(
                                 cornerRadius = 10f,
                                 text = "확인",
                                 onClick = {
+
                                     viewModel.completeScreen(false,context,navController)
                                 }
                             )
@@ -480,7 +462,8 @@ fun QuoteWriteTextField(
     screenHeight: Float? = null,
     imeHeight: Int? = null,
     density: Density? = null,
-    scrollMethod:()-> Unit = {}
+    scrollMethod:()-> Unit = {},
+    enabled:Boolean = true
 ){
     val errorPx = if (density != null)
      with(density) { 11.dp.toPx() }
@@ -536,7 +519,8 @@ fun QuoteWriteTextField(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
                 maxLines = Int.MAX_VALUE,
-                inputCondition = "[/↑←→↓]"
+                inputCondition = "[/↑←→↓]",
+                isEnabled = enabled
             )
         }
         Box(

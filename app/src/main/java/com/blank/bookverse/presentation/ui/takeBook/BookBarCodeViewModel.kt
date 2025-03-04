@@ -8,14 +8,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.blank.bookverse.data.api.ocr.OcrCLOVA
 import com.blank.bookverse.data.api.search.DocumentsObject
 import com.blank.bookverse.data.repository.SearchRepository
+import com.blank.bookverse.presentation.navigation.CameraNavItem
+import com.blank.bookverse.presentation.navigation.MainNavItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.net.URLEncoder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,6 +28,7 @@ class BookBarCodeViewModel @Inject constructor(
 ) : ViewModel() {
     private val searchNotEnabled = mutableStateOf(true)
     private val searchApi = MutableLiveData<DocumentsObject?>(null)
+    private val searchEnabled = mutableStateOf(true)
 
     var observer = Observer<DocumentsObject?>{}
 
@@ -51,16 +56,46 @@ class BookBarCodeViewModel @Inject constructor(
         searchNotEnabled.value
 
 
-    fun onSearch(isbn: String){
+    fun onSearch(isbn: String,navController: NavController){
         viewModelScope.launch{
+            if (isbn != "" && searchEnabled.value){
+                searchEnabled.value = false
+                Timber.tag("st").d("isbn $isbn")
             val response = viewModelScope.async(Dispatchers.IO){
-                searchRepository.getSearchApi(isbn,true)
+                searchRepository.getSearchApi(isbn,true).body()!!
             }.await()
-            Timber.tag("test5").d("resultList")
-            Timber.tag("test5").d("${response.body()!!.documents}")
-            searchApi.value = viewModelScope.async{
-                response.body()!!.documents.first()
-            }.await()
+                if (response.documents.isNotEmpty()) {
+                    Timber.tag("st").d("resultList")
+                    Timber.tag("st").d("${response.documents.first()}")
+                    searchApi.postValue(
+                        viewModelScope.async(Dispatchers.IO) {
+                            response.documents.first()
+                        }.await()
+                    )
+
+                    Timber.tag("st").d("searchApi ${searchApi.value}")
+                    if (searchApi.value != null) {
+                        val book = searchApi.value!!
+                        navController.navigate(
+                            MainNavItem.QuoteWrite.createRoute(
+                                book.isbn,
+                                book.title,
+                                URLEncoder.encode(book.thumbnail, "UTF-8"),
+                                null
+                            )
+                        ){
+                            popUpTo(CameraNavItem.BookBarCode.route) {
+                                inclusive = true
+                            }
+                        }
+
+                    }
+                }
+                searchEnabled.value = true
+
+            }else{
+
+            }
 
         }.onJoin
     }

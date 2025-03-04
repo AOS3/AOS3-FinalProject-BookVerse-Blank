@@ -17,6 +17,7 @@ import coil.compose.AsyncImagePainter
 import com.blank.bookverse.data.model.Book
 import com.blank.bookverse.data.model.Quote
 import com.blank.bookverse.data.repository.QuoteRepository
+import com.blank.bookverse.presentation.model.QuoteDetailUiModel
 import com.blank.bookverse.presentation.navigation.BottomNavItem
 import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.blank.bookverse.presentation.navigation.navigateSingleTop
@@ -29,13 +30,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.FileInputStream
+import java.net.URLDecoder
 import javax.inject.Inject
 
 @HiltViewModel
 class QuoteWriteViewModel@Inject constructor(
     private val quoteRepository: QuoteRepository
 ):ViewModel() {
-    val quoteDocId = mutableStateOf<String?>(null)
+    var quote = MutableLiveData<Quote?>(null)
     val bookDocId = mutableStateOf("")
     val bookTitle = mutableStateOf("")
     val bookCover = mutableStateOf("")
@@ -53,6 +55,8 @@ class QuoteWriteViewModel@Inject constructor(
     val thinkAddEnabled = mutableStateOf(false)
     val completeEnable = mutableStateOf<Boolean>(false)
 
+    fun getQuoteNull() = quote.value == null
+
     fun bottomSheetOpen(){
         bottomSheetVisible.value = true
     }
@@ -63,8 +67,8 @@ class QuoteWriteViewModel@Inject constructor(
         }
     }
 
-    fun completeScreen(change: Boolean, context: Context, navController: NavController,
-                       argQuote: Quote = Quote(),photoEnabled: Boolean = false){
+    fun completeScreen(change: Boolean, context: Context, navController: NavController
+                       , photoEnabled: Boolean = false){
         Log.d("st","${bookDocId.value}")
         Log.d("st","${bookTitle.value}")
         Log.d("st","${bookCover.value}")
@@ -76,7 +80,8 @@ class QuoteWriteViewModel@Inject constructor(
         if (addChange.value){
             viewModelScope.launch{
                 loadingNotEnabled.value = false
-                if (quoteDocId.value == null) {
+                val quote = quote.value
+                if (quote == null) {
                     val content = quoteText.value
 
                     val book = Book(
@@ -100,21 +105,30 @@ class QuoteWriteViewModel@Inject constructor(
                     viewModelScope.async {
                         quoteRepository.saveQuote(quote, book, thinkList)
                     }.await()
-                    navController.navigateSingleTop(BottomNavItem.Home.route)
-                }else{
 
+                }else{
                     val file = context.openFileInput(captureName)
                     val photoUrl = viewModelScope.async {
-                        quoteRepository.uploadCaptureImage(file, quoteDocId.value!!)
+                        quoteRepository.uploadCaptureImage(file, quote.quoteDocId)
                     }.await()
 
                     val update =
-                    argQuote.run {
+                        quote.run {
                         val url = if(photoEnabled) photoUrl.toString() else this.photoUrl
-                        argQuote.copy(
+                        val tagEqual = tags.fold(false){init,it->
+                            val tag = it
+                            val not = thinkList.fold(false){init,it->
+                                if (tag == it) return@fold true
+                                else false
+                            }
+                            if(!not) return@fold false
+                            else true
+                        }
+                        quote.copy(
                             photoUrl = url,
                             quoteContent = if (quoteContent==quoteText.value)quoteContent
                             else quoteText.value,
+                            tags = if(tagEqual)tags else thinkList
                         )
                     }
 
@@ -123,6 +137,7 @@ class QuoteWriteViewModel@Inject constructor(
                         quoteRepository.updateQuote(update)
                     }.await()
                 }
+                navController.navigateSingleTop(BottomNavItem.Home.route)
             }
 
         }
@@ -138,6 +153,11 @@ class QuoteWriteViewModel@Inject constructor(
             !(idx== 0 && char == '#')
         }
         thinkList.add(addThink)
+    }
+
+    fun thinkListAddAll(think: List<String>){
+        thinkList.clear()
+        thinkList.addAll(think)
     }
 
     fun thinkListRemoveAt(it:Int){
@@ -166,5 +186,24 @@ class QuoteWriteViewModel@Inject constructor(
         Log.d("st","- quote")
         Log.d("st"," $quote")
         this.quoteText.value = quote
+    }
+
+    fun getBookData(){
+        viewModelScope.launch{
+            if (quote.value != null){
+                val quote = quote.value!!
+                val book = quoteRepository.getBookDetail(quote.bookDocId)
+                if (book.bookDocId != "") {
+                    bookDocIdUpdate(book.bookDocId)
+                }
+                if (book.bookTitle != "") {
+                    bookTitleUpdate(book.bookTitle)
+                }
+                if (book.bookCover != "") {
+                    bookCoverUpdate(book.bookCover)
+                }
+            }
+        }
+
     }
 }

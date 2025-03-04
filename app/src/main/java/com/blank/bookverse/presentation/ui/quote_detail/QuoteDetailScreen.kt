@@ -44,11 +44,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
+import com.blank.bookverse.data.model.Quote
 import com.blank.bookverse.presentation.common.BookVerseCustomDialog
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.BookmarkButton
 import com.blank.bookverse.presentation.model.QuoteDetailUiModel
+import com.blank.bookverse.presentation.navigation.CameraNavItem
 import com.blank.bookverse.presentation.navigation.MainNavItem
+import com.blank.bookverse.presentation.navigation.navigateQuoteSingle
 import com.blank.bookverse.presentation.util.toFormattedDateString
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
@@ -89,8 +92,19 @@ fun QuoteDetailScreen(
                 },
                 actions = {
                     DeleteQuoteButton { viewModel.deleteQuote() }
-
-                    IconButton(onClick = { /* 수정 동작 */ }) {
+                    /* 수정 동작 */
+                    IconButton(onClick = {
+                        val quote = viewModel.quoteDetailUiState.value.quoteDetail!!.run {
+                            Quote(
+                                quoteDocId,
+                                bookDocId,
+                                "",
+                                photoUrl,
+                                quoteContent,
+                                isBookmark,
+                            )
+                        }
+                        navController.navigateQuoteSingle(quote) }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_edit),
                             contentDescription = "수정"

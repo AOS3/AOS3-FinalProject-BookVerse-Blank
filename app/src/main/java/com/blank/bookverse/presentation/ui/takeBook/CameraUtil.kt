@@ -100,7 +100,6 @@ class CameraUtil (
                 )
 
                 scanner.process(image).addOnSuccessListener { list ->
-                    Log.d("st","${callBacks.entries}")
                     if (list.size != 1) {
                         callBacks[CallBackType.ON_FAIL]?.invoke("바코드 스캔에 실패하였습니다.")
                         return@addOnSuccessListener

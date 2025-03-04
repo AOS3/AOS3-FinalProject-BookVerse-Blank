@@ -1,8 +1,10 @@
 package com.blank.bookverse.presentation.common
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
@@ -83,6 +86,12 @@ fun SearchBar(
             IntOffset(50, 0)
         },
         label = "textFieldOffset"
+    )
+    val dividerColor = Color.LightGray
+
+    val textFieldContainColor by animateColorAsState(
+        targetValue = if (expandedValue) Color.White else Color(0xC1F8F5F5),
+        animationSpec = tween(durationMillis = 1260) // 1초 이상 동안 변경
     )
     Box(
         modifier = Modifier.fillMaxSize()
@@ -132,7 +141,7 @@ fun SearchBar(
                                         modifier = Modifier.clickable {
                                             expandedValue = false
                                             searchValue.value = ""
-                                        }
+                                        }.background(Color.White)
                                     )
                                 }
                             } else null
@@ -191,7 +200,8 @@ fun SearchBar(
                 expandedValue = it
             },
             colors = SearchBarDefaults.colors(
-
+                containerColor = textFieldContainColor,
+                dividerColor = dividerColor
             ),
             shape = RoundedCornerShape(20.dp),
             windowInsets = WindowInsets(top = 50.dp)
