@@ -246,14 +246,14 @@ fun TakeBookScreen(
                                 //ocr viewModel IO로 요청
                                 viewModel.setOcrEnabledRequest {
                                     // 컴플리트 후 행동할 함수
-                                    val quote = viewModel.getField().fold(""){init,it->
+                                    val content = viewModel.getField().fold(""){init,it->
                                         val text = it.inferText
                                         if(it.lineBreak)"$init $text"
                                         else "$init\n$text"
                                     }.replace(Regex("[/↑←→↓]"),"")
                                     Log.d("st","quoteValue")
-                                    Log.d("st","$quote")
-                                    navController.popBackStackSavedString("quote",quote)
+                                    Log.d("st","$content")
+                                    navController.popBackStackSavedString("content",content)
                                 }
                             },
                             isEnable = viewModel.getOcrNotEnabled()

@@ -1,5 +1,6 @@
 package com.blank.bookverse.data.repository
 
+import android.net.Uri
 import android.util.Log
 import com.blank.bookverse.data.mapper.toBook
 import com.blank.bookverse.data.mapper.toComment
@@ -7,10 +8,16 @@ import com.blank.bookverse.data.mapper.toQuote
 import com.blank.bookverse.data.model.Book
 import com.blank.bookverse.data.model.Comment
 import com.blank.bookverse.data.model.Quote
+import com.blank.bookverse.presentation.util.Constant.captureName
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.storageMetadata
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.io.FileInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,6 +25,7 @@ import javax.inject.Singleton
 class QuoteRepository @Inject constructor(
     private val firestoreAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
+    private val firebaseStorage: FirebaseStorage
 ) {
     // 홈 화면 - 사용자가 작성한 글귀가 있는 책 목록
     suspend fun getHomeBookList(): List<Book> {
@@ -102,23 +110,91 @@ class QuoteRepository @Inject constructor(
     }
 
     // 새 글귀 저장 (책 정보가 없으면 책도 함께 생성)
-    suspend fun saveQuote(quote: Quote, book: Book) {
+    suspend fun saveQuote(quote: Quote, book: Book,tagList: List<String>) {
         firestore.runTransaction { transaction ->
+            val memberUid = firestoreAuth.uid.toString()
+            val saveBook = book.run {
+                 hashMapOf(
+                    "book_doc_id" to bookDocId,
+                     "member_id" to memberUid,
+                     "book_title" to bookTitle,
+                     "book_cover" to bookCover,
+                     "quote_count" to quoteCount,
+                     "create_at" to createdAt,
+                     "is_delete" to false
+                )
+            }
+            val quoteCollection = firestore.collection("Quotes")
+            val quoteRef = quoteCollection.document(quote.quoteDocId)
+            val existingQuote = transaction.get(quoteRef)
+
             val bookRef = firestore.collection("Books").document(book.bookDocId)
             val existingBook = transaction.get(bookRef)
 
-            if (!existingBook.exists()) {
-                transaction.set(bookRef, book)
+
+                val quoteCount = if (!existingBook.exists()) {
+                    saveBook["quote_count"] = 1
+                    transaction.set(bookRef, saveBook)
+                    saveBook["quote_count"]
+                } else {
+                    val countInit = (existingBook.getLong("quote_count") ?: 0) + 1
+                    transaction.update(
+                        bookRef, "quote_count",
+                        countInit
+                    )
+                    countInit
+                }
+
+                val saveQuote = quote.run {
+                    hashMapOf(
+                        "quote_doc_id" to quoteDocId,
+                        "book_doc_id" to bookDocId,
+                        "member_id" to memberUid,
+                        "photo_url" to photoUrl,
+                        "tag" to tagList,
+                        "quote_content" to quoteContent,
+                        "is_bookmark" to isBookmark,
+                        "quote_count" to quoteCount,
+                        "created_at" to createdAt,
+                        "is_delete" to false
+                    )
+                }
+
+
+                transaction.set(quoteRef, saveQuote)
+        }.await()
+    }
+
+    // 기존 글귀 업데이트
+    fun updateQuote(quote: Quote, tagList: List<String>) {
+        firestore.runTransaction { transaction ->
+            val quoteCollection = firestore.collection("Quotes")
+            val tag = tagList.toString()
+            val bookRef = firestore.collection("Books").document(quote.bookDocId)
+            val existingBook = transaction.get(bookRef)
+            val quoteCount = if (!existingBook.exists()) {
+                1
             } else {
-                transaction.update(
-                    bookRef, "quote_count",
-                    (existingBook.getLong("quote_count") ?: 0) + 1
+                (existingBook.getLong("quote_count") ?: 1)
+            }
+            val saveQuote = quote.run {
+                hashMapOf(
+                    "quote_doc_id" to quoteDocId,
+                    "book_doc_id" to bookDocId,
+                    "member_id" to memberId,
+                    "photo_uri" to photoUrl,//
+                    "tag" to tag,
+                    "quote_content" to quoteContent,//
+                    "is_bookmark" to isBookmark,
+                    "quote_count" to quoteCount,
+                    "create_at" to createdAt,
+                    "is_delete" to false
                 )
             }
+            val quoteRef = quoteCollection.document(quote.quoteDocId)
+            transaction.set(quoteRef,saveQuote)
 
-            val quoteRef = firestore.collection("Quotes").document(quote.quoteDocId)
-            transaction.set(quoteRef, quote)
-        }.await()
+        }
     }
 
     // 책 글귀 삭제 (soft delete)
@@ -170,5 +246,31 @@ class QuoteRepository @Inject constructor(
         firestore.collection("Comments")
             .document(commentDocId)
             .update("is_delete", true)
+    }
+
+    // 프로필 이미지 업로드 및 URL 반환
+    suspend fun uploadCaptureImage(imageFile: FileInputStream,imageName: String): Uri?
+            = withContext(Dispatchers.IO) {
+        try {
+            val storageRef = firebaseStorage.reference.child("capture_image/").child(imageName)
+            val metadata = storageMetadata{
+                contentType = "image/png"
+            }
+            storageRef.putStream(imageFile,metadata).await()
+            storageRef.downloadUrl.await()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // 프로필 이미지 업로드 및 URL 반환
+    suspend fun deleteCaptureImage(imageName: String)
+            = withContext(Dispatchers.IO) {
+        try {
+            val storageRef = firebaseStorage.reference.child("capture_image/").child(imageName)
+            storageRef.delete().await()
+        } catch (e: Exception) {
+            null
+        }
     }
 }

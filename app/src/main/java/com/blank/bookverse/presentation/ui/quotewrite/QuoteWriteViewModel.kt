@@ -1,25 +1,41 @@
 package com.blank.bookverse.presentation.ui.quotewrite
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImagePainter
+import com.blank.bookverse.data.model.Book
 import com.blank.bookverse.data.model.Quote
 import com.blank.bookverse.data.repository.QuoteRepository
+import com.blank.bookverse.presentation.navigation.BottomNavItem
 import com.blank.bookverse.presentation.navigation.MainNavItem
+import com.blank.bookverse.presentation.navigation.navigateSingleTop
+import com.blank.bookverse.presentation.util.Constant.captureName
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.kakao.sdk.common.KakaoSdk.init
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import java.io.FileInputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class QuoteWriteViewModel@Inject constructor(
     private val quoteRepository: QuoteRepository
 ):ViewModel() {
+    val quoteDocId = mutableStateOf<String?>(null)
     val bookDocId = mutableStateOf("")
     val bookTitle = mutableStateOf("")
     val bookCover = mutableStateOf("")
@@ -33,6 +49,7 @@ class QuoteWriteViewModel@Inject constructor(
 
     val writeEnabled = mutableStateOf(false)
     val addChange = mutableStateOf(true)
+    val loadingNotEnabled = mutableStateOf(true)
     val thinkAddEnabled = mutableStateOf(false)
     val completeEnable = mutableStateOf<Boolean>(false)
 
@@ -46,7 +63,8 @@ class QuoteWriteViewModel@Inject constructor(
         }
     }
 
-    fun completeScreen(change: Boolean){
+    fun completeScreen(change: Boolean, context: Context, navController: NavController,
+                       argQuote: Quote = Quote(),photoEnabled: Boolean = false){
         Log.d("st","${bookDocId.value}")
         Log.d("st","${bookTitle.value}")
         Log.d("st","${bookCover.value}")
@@ -56,12 +74,57 @@ class QuoteWriteViewModel@Inject constructor(
 
         completeEnable.value = change
         if (addChange.value){
-            val content =
-                thinkList.fold(""){init,it->
-                    if (init == "") it else "$init→$it"
-                }+"↑${quoteText.value}"
+            viewModelScope.launch{
+                loadingNotEnabled.value = false
+                if (quoteDocId.value == null) {
+                    val content = quoteText.value
 
-            Quote()
+                    val book = Book(
+                        bookDocId = bookDocId.value,
+                        bookTitle = bookTitle.value,
+                        bookCover = bookCover.value,
+                    )
+                    val file = context.openFileInput(captureName)
+                    val quoteDocId = FirebaseFirestore.getInstance().collection("Quotes")
+                        .document().id
+                    val photoUrl = viewModelScope.async {
+                        quoteRepository.uploadCaptureImage(file, quoteDocId)
+                    }.await()
+
+                    val quote = Quote(
+                        quoteDocId = quoteDocId,
+                        bookDocId = book.bookDocId,
+                        photoUrl = photoUrl.toString(),
+                        quoteContent = content,
+                    )
+                    viewModelScope.async {
+                        quoteRepository.saveQuote(quote, book, thinkList)
+                    }.await()
+                    navController.navigateSingleTop(BottomNavItem.Home.route)
+                }else{
+
+                    val file = context.openFileInput(captureName)
+                    val photoUrl = viewModelScope.async {
+                        quoteRepository.uploadCaptureImage(file, quoteDocId.value!!)
+                    }.await()
+
+                    val update =
+                    argQuote.run {
+                        val url = if(photoEnabled) photoUrl.toString() else this.photoUrl
+                        argQuote.copy(
+                            photoUrl = url,
+                            quoteContent = if (quoteContent==quoteText.value)quoteContent
+                            else quoteText.value,
+                        )
+                    }
+
+
+                    viewModelScope.async {
+                        quoteRepository.updateQuote(update)
+                    }.await()
+                }
+            }
+
         }
     }
 
