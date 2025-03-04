@@ -34,7 +34,7 @@ class SearchRepository @Inject constructor(
 
     lateinit var localMemberDatabase: MemberDatabase
 
-    fun getSearchApi(query: String) : Response<SearchResponse> {
+    fun getSearchApi(query: String, barCode: Boolean = false) : Response<SearchResponse> {
         val builder = Retrofit.Builder()
         builder.baseUrl("https://dapi.kakao.com/")
         //"v3/search/book"
@@ -47,6 +47,7 @@ class SearchRepository @Inject constructor(
         val response = repository.getSearchApi(
             restKey = "KakaoAK $REST_API_KEY",
             query = query,
+            target = if (barCode) "isbn" else "title"
         ).execute()
 
         return response

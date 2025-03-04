@@ -9,8 +9,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.blank.bookverse.data.model.Quote
 import com.blank.bookverse.data.repository.QuoteRepository
 import com.blank.bookverse.presentation.navigation.MainNavItem
+import com.kakao.sdk.common.KakaoSdk.init
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -18,6 +20,7 @@ import javax.inject.Inject
 class QuoteWriteViewModel@Inject constructor(
     private val quoteRepository: QuoteRepository
 ):ViewModel() {
+    val bookDocId = mutableStateOf("")
     val bookTitle = mutableStateOf("")
     val bookCover = mutableStateOf("")
     val quoteText = mutableStateOf("")
@@ -44,9 +47,21 @@ class QuoteWriteViewModel@Inject constructor(
     }
 
     fun completeScreen(change: Boolean){
+        Log.d("st","${bookDocId.value}")
+        Log.d("st","${bookTitle.value}")
+        Log.d("st","${bookCover.value}")
+        Log.d("st","${quoteText.value}")
+        Log.d("st","${thinkList}")
+
+
         completeEnable.value = change
         if (addChange.value){
+            val content =
+                thinkList.fold(""){init,it->
+                    if (init == "") it else "$init→$it"
+                }+"↑${quoteText.value}"
 
+            Quote()
         }
     }
 
@@ -69,6 +84,11 @@ class QuoteWriteViewModel@Inject constructor(
 
     }
 
+    fun bookDocIdUpdate(bookDocId: String){
+        Log.d("st","bookDocId $bookDocId")
+        this.bookDocId.value = bookDocId
+    }
+
     fun bookCoverUpdate(bookCover: String){
         Log.d("st","bookCover $bookCover")
         this.bookCover.value = bookCover
@@ -80,7 +100,8 @@ class QuoteWriteViewModel@Inject constructor(
     }
 
     fun quoteUpdate(quote: String){
-        Log.d("st","bookTitle $quote")
+        Log.d("st","- quote")
+        Log.d("st"," $quote")
         this.quoteText.value = quote
     }
 }
