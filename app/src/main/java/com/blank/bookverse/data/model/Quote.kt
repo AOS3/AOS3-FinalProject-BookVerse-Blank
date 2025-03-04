@@ -7,5 +7,6 @@ data class Quote(
     val photoUrl: String = "",
     val quoteContent: String = "",
     val isBookmark: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val tags: List<String> = emptyList(),
 )

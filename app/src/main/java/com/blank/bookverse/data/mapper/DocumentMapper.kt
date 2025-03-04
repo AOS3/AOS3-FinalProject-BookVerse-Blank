@@ -28,6 +28,7 @@ fun DocumentSnapshot.toQuote() = Quote(
     quoteContent = getString("quote_content") ?: "",
     isBookmark = getBoolean("is_bookmark") ?: false,
     createdAt = getLong("created_at") ?: System.currentTimeMillis(),
+    tags = get("tag") as? List<String> ?: emptyList(),
 )
 
 fun DocumentSnapshot.toComment() = Comment(
