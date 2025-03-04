@@ -120,22 +120,27 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
             arguments = listOf(
                 navArgument(MainNavItem.QuoteWrite.BOOK_DOCUMENT) {
                     type = NavType.StringType
-                    nullable = false
+                    nullable = true
                 },
                 navArgument(MainNavItem.QuoteWrite.BOOK_TITLE) {
                     type = NavType.StringType
-                    nullable = false
+                    nullable = true
                 },
                 navArgument(MainNavItem.QuoteWrite.BOOK_IMAGE) {
                     type = NavType.StringType
-                    nullable = false
+                    nullable = true
+                },
+                navArgument(MainNavItem.QuoteWrite.QUOTE) {
+                    type = NavType.StringType
+                    nullable = true
                 }
             )
         ) {
             val bookDocId = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_DOCUMENT)
             val bookTitle = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_TITLE)
             val bookImage = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_IMAGE)
-            QuoteWriteScreen(navController,bookDocId,bookTitle, bookImage)
+            val quote = it.arguments?.getString(MainNavItem.QuoteWrite.QUOTE)
+            QuoteWriteScreen(navController,bookDocId,bookTitle, bookImage,quote)
         }
 
         // 카메라 화면

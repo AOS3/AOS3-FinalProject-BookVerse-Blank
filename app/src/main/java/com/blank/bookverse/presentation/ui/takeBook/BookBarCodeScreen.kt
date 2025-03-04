@@ -87,7 +87,7 @@ fun BookBarCodeScreen(
 
     val snackBarHostState = remember { SnackbarHostState() }
     val cameraUtil = remember { CameraUtil(context){
-        viewModel.onSearch(it)
+        viewModel.onSearch(it,navController)
     } }
     // 카메라 권한 가능 여부
     var launcherMultiplePermissions = rememberMultiplePermissionsState(
@@ -116,7 +116,8 @@ fun BookBarCodeScreen(
             navController.navigate(MainNavItem.QuoteWrite.createRoute(
                 field.isbn,
                 field.title,
-                URLEncoder.encode(field.thumbnail,"UTF-8")
+                URLEncoder.encode(field.thumbnail,"UTF-8"),
+                null
             ))
         }
     }

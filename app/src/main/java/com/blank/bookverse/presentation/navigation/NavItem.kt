@@ -8,6 +8,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import com.blank.bookverse.R
+import com.blank.bookverse.data.model.Quote
 
 sealed class BottomNavItem(
     val route: String,
@@ -57,12 +58,13 @@ sealed class MainNavItem(val route: String, val label: String) {
     }
 
     data object MoreQuote : MainNavItem("more_quote", "더보기")
-    data object QuoteWrite: MainNavItem("write_quote/{bookDocId}/{bookTitle}/{bookImage}", "글귀 작성"){
+    data object QuoteWrite: MainNavItem("write_quote/{bookDocId}/{bookTitle}/{bookImage}/{quote}", "글귀 작성"){
         const val BOOK_TITLE = "bookTitle"
         const val BOOK_IMAGE = "bookImage"
         const val BOOK_DOCUMENT = "bookDocId"
-        fun createRoute(bookDocId:String?,bookTitle: String?,bookImage: String?)
-            = "write_quote/$bookDocId/$bookTitle/$bookImage"
+        const val QUOTE = "quote"
+        fun createRoute(bookDocId:String?,bookTitle: String?,bookImage: String?,quote: String?)
+            = "write_quote/$bookDocId/$bookTitle/$bookImage/$quote"
     }
 }
 
