@@ -3,6 +3,7 @@ package com.blank.bookverse.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -37,3 +38,14 @@ fun NavController.shouldShowBottomBar(): Boolean {
         else -> false
     }
 }
+
+// 현재 화면 제거시 이전 화면에 값을 전달
+fun NavController.popBackStackSavedString(key: String,value: String){
+    previousBackStackEntry?.savedStateHandle?.set(key, value)
+    popBackStack()
+}
+
+// 현재 화면에 전달된 값이 있는지 확인
+@Composable
+fun NavController.currentSavedStateHandle(key: String) =
+    currentBackStackEntry?.savedStateHandle?.getLiveData<String>(key)?.observeAsState()

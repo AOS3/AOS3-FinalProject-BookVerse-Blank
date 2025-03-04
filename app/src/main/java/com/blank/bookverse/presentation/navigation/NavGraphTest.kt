@@ -1,10 +1,12 @@
 package com.blank.bookverse.presentation.navigation
 
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,7 +30,7 @@ import com.blank.bookverse.presentation.ui.quote_detail.QuoteDetailScreen
 import com.blank.bookverse.presentation.ui.register.RegisterScreen
 import com.blank.bookverse.presentation.ui.search.SearchScreen
 import com.blank.bookverse.presentation.ui.splash.SplashScreen
-import com.blank.bookverse.presentation.ui.takeBook.CameraState
+import com.blank.bookverse.presentation.ui.takeBook.BookBarCodeScreen
 import com.blank.bookverse.presentation.ui.takeBook.TakeBookScreen
 import com.blank.bookverse.presentation.util.Constant
 
@@ -113,9 +115,32 @@ fun NavGraphTest(navController: NavHostController, modifier: Modifier = Modifier
         // 아이디/비밀번호 찾기
         composable(MainNavItem.FindAccount.route) { FindAccountScreen(navController) }
         // 글귀 작성 수정 화면
-        composable(MainNavItem.QuoteWrite.route) { QuoteWriteScreen(navController) }
+        composable(
+            route = MainNavItem.QuoteWrite.route,
+            arguments = listOf(
+                navArgument(MainNavItem.QuoteWrite.BOOK_DOCUMENT) {
+                    type = NavType.StringType
+                    nullable = false
+                },
+                navArgument(MainNavItem.QuoteWrite.BOOK_TITLE) {
+                    type = NavType.StringType
+                    nullable = false
+                },
+                navArgument(MainNavItem.QuoteWrite.BOOK_IMAGE) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) {
+            val bookDocId = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_DOCUMENT)
+            val bookTitle = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_TITLE)
+            val bookImage = it.arguments?.getString(MainNavItem.QuoteWrite.BOOK_IMAGE)
+            QuoteWriteScreen(navController,bookDocId,bookTitle, bookImage)
+        }
 
         // 카메라 화면
         composable(CameraNavItem.TakeBook.route) { TakeBookScreen(navController) }
+        // 바코드 화면
+        composable(CameraNavItem.BookBarCode.route) { BookBarCodeScreen(navController) }
     }
 }

@@ -33,6 +33,6 @@ data class HeaderImageObject(
     var format: String, //jpg, png
     @SerializedName("name")
     var name: String, //예 demo_2
-    @SerializedName("url")
-    var url: String, // url 이미지
+    @SerializedName("data")
+    var data: String, // base64 문자열 이미지
 )

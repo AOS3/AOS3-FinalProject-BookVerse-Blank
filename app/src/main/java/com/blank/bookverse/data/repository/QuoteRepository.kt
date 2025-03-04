@@ -41,6 +41,7 @@ class QuoteRepository @Inject constructor(
             .toBook()
     }
 
+
     // 책 상세 화면 - 해당 책의 글귀 목록
     suspend fun getBookQuotes(bookDocId: String): List<Quote> {
         return firestore.collection("Quotes")
