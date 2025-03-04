@@ -100,7 +100,6 @@ import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.navigation.CameraNavItem
 import com.blank.bookverse.presentation.navigation.currentSavedStateHandle
 import com.blank.bookverse.presentation.navigation.navigateSingleTop
-import com.blank.bookverse.presentation.ui.takeBook.CameraState
 import com.kakao.sdk.friend.l.b
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -114,6 +113,7 @@ import java.net.URLDecoder
 @Composable
 fun QuoteWriteScreen(
     navController:NavHostController,
+    bookDocId: String?,
     bookTitle: String?,
     bookImage: String?,
     viewModel: QuoteWriteViewModel = hiltViewModel()
@@ -129,7 +129,10 @@ fun QuoteWriteScreen(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     val savedStateHandle = navController.currentSavedStateHandle("quote")
-    LaunchedEffect(bookTitle,bookImage) {
+    LaunchedEffect(bookDocId,bookTitle,bookImage) {
+        if (bookDocId != null){
+            viewModel.bookDocIdUpdate(bookDocId)
+        }
         if(bookTitle != null){
             viewModel.bookTitleUpdate(bookTitle)
         }
@@ -168,7 +171,7 @@ fun QuoteWriteScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            navController.navigateSingleTop(CameraNavItem.TakeBook.route)
+                            navController.navigate(CameraNavItem.TakeBook.route)
                         }
                     ) {
                         Icon(
@@ -489,11 +492,12 @@ fun QuoteWriteTextField(
                         }
                     },
                 textFieldValue = text,
-                placeHolder = placeholder,
+                placeHolder = "$placeholder\n /는 입력 안 됩니다.",
                 isError = input,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
-                maxLines = Int.MAX_VALUE
+                maxLines = Int.MAX_VALUE,
+                inputCondition = "[/↑←→↓]"
             )
         }
         Box(

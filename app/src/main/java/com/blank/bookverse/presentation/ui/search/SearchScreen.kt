@@ -3,6 +3,7 @@ package com.blank.bookverse.presentation.ui.search
 import android.R.attr.contentDescription
 import android.R.attr.moreIcon
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -155,7 +156,7 @@ fun SearchScreen(
                         ImageVector.vectorResource(R.drawable.ic_crop_free_24px)
                     },
                     moreIconOnClick = {it->
-                        //navController.navigate(CameraNavItem.TakeBook.route)
+                        navController.navigate(CameraNavItem.BookBarCode.route)
                     },
                     onSearch = {
                         viewModel.onSearch(context)
@@ -257,7 +258,7 @@ fun SearchCard(
         colors = CardDefaults.cardColors(
             Color(0xFFD9D9D9)
         ),
-        shape = RoundedCornerShape(50.dp)
+        shape = RoundedCornerShape(50.dp),
     ){
         Row(
             modifier = if (onClickable == null)
@@ -272,14 +273,14 @@ fun SearchCard(
             horizontalArrangement = Arrangement.Start
         ) {
 
-            Text(modifier = Modifier.padding(start = 5.dp, bottom = 4.dp, top = 4.dp, end = 3.dp),
+            Text(modifier = Modifier.padding(start = 8.dp, bottom = 4.dp, top = 4.dp, end = 5.dp),
                 text = think,
                 fontSize = if (fontSize == null)TextUnit.Unspecified
                 else fontSize.sp
             )
             if (clear != null) {
                 Card(
-                    modifier = Modifier.padding(end = 2.dp)
+                    modifier = Modifier.padding(end = 3.dp)
                         .clip(RoundedCornerShape(20.dp))
                         .clickable(
                             onClick = {
@@ -289,6 +290,7 @@ fun SearchCard(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.Transparent
                     ),
+                    border = BorderStroke(1.dp,Color.Gray)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Clear,

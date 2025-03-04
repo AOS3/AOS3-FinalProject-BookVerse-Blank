@@ -109,9 +109,10 @@ class SearchViewModel @Inject constructor(
     }
 
     fun writeScreen(idx: Int,navController: NavHostController){
+        val isbn = getResultList(idx).isbn
         val title =getResultList(idx).title
         val image = URLEncoder.encode(getResultList(idx).thumbnail,"UTF-8")
         Log.d("st","$image")
-        navController.navigate(MainNavItem.QuoteWrite.createRoute(title,image))
+        navController.navigate(MainNavItem.QuoteWrite.createRoute(isbn,title,image))
     }
 }

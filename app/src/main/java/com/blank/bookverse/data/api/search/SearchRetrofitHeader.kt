@@ -16,6 +16,8 @@ interface SearchRetrofitHeader {
     fun getSearchApi(
         @Header("Authorization") restKey:String,
         @Query("query") query: String,
+        @Query("target") target: String
+        // title(제목), isbn (ISBN), publisher(출판사), person(인명)
     ) : Call<SearchResponse>
     // 반환 타입 : Call<데이터를 담을 클래스>
 }
