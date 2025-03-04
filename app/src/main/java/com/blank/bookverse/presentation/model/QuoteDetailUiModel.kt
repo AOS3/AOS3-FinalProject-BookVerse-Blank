@@ -10,6 +10,7 @@ data class QuoteDetailUiModel(
     val quoteContent: String,
     val comments: List<CommentItem>,
     val isBookmark: Boolean = false,
+    val tags: List<String> = emptyList(),
 ) {
     data class CommentItem(
         val commentDocId: String,
@@ -32,6 +33,7 @@ data class QuoteDetailUiModel(
             photoUrl = quote.photoUrl,
             quoteContent = quote.quoteContent,
             isBookmark = quote.isBookmark,
+            tags = quote.tags,
             comments = comments.map { CommentItem.from(it) }
         )
     }

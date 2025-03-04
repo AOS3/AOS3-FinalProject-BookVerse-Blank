@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -159,6 +160,24 @@ fun QuoteDetailContent(
                         modifier = Modifier
                             .padding(horizontal = 54.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    uiState.quoteDetail?.tags?.let { tags ->
+                        if (tags.isNotEmpty()) {
+                            Text(
+                                text = tags.joinToString(" ") { "#$it" },
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontStyle = FontStyle.Italic,
+                                    color = Color.Gray,
+                                ),
+                                modifier = Modifier
+                                    .padding(horizontal = 54.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(18.dp))
                     HorizontalDivider(
                         modifier = Modifier
