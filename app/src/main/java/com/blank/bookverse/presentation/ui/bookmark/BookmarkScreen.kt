@@ -17,13 +17,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +39,7 @@ import com.blank.bookverse.presentation.model.BookDetailUiModel
 import com.blank.bookverse.presentation.model.BookmarkUiModel
 import com.blank.bookverse.presentation.navigation.MainNavItem
 import com.blank.bookverse.presentation.ui.book_detail.BookDetailEffect
+import com.blank.bookverse.presentation.ui.book_detail.BookDetailQuoteItem
 
 @Composable
 fun BookmarkScreen(
@@ -95,13 +99,36 @@ fun BookmarkContent(
                     CircularProgressIndicator()
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(uiState.bookmarkedQuotes) { quote ->
-                        BookMarkQuoteItem(
-                            quote,
-                            onNavigateToQuoteDetail = onNavigateToQuoteDetail,
-                            onBookmarkClick = onBookmarkClick
-                        )
+                if (uiState.bookmarkedQuotes.isNotEmpty()) {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(uiState.bookmarkedQuotes) { quote ->
+                            BookMarkQuoteItem(
+                                quote,
+                                onNavigateToQuoteDetail = onNavigateToQuoteDetail,
+                                onBookmarkClick = onBookmarkClick
+                            )
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = CenterHorizontally
+                        ) {
+                            Text(
+                                text = "북마크한 글귀가 없습니다.",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "마음에 드는 글귀를 찾아 북마크 해보세요",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
                 }
 
@@ -152,7 +179,7 @@ fun BookMarkQuoteItem(
             Text(
                 text = quote.quoteContent,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -183,7 +210,7 @@ fun BookMarkQuoteItem(
 @Preview(showBackground = true)
 @Composable
 fun BookDetailQuoteItemPreview() {
-    com.blank.bookverse.presentation.ui.book_detail.BookDetailQuoteItem(
+    BookDetailQuoteItem(
         quote = BookDetailUiModel.QuoteItem(
             quoteDocId = "",
             quoteContent = "아름답다는 건 그런 거지. 뭘 숨길 필요가 없는 거, 똑같이 해도 그냥 아름다운 거.",
@@ -192,3 +219,12 @@ fun BookDetailQuoteItemPreview() {
         )
     )
 }
+
+@Preview(showBackground = true)
+@Composable
+fun BookmarkScreenPreview() {
+    BookmarkContent(
+        uiState = BookmarkUiState()
+    )
+}
+

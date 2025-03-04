@@ -28,6 +28,8 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.blank.bookverse.R
+import com.blank.bookverse.presentation.common.BookVerseCustomDialog
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.common.BookmarkButton
 import com.blank.bookverse.presentation.model.QuoteDetailUiModel
@@ -84,12 +87,8 @@ fun QuoteDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.deleteQuote() }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_delete),
-                            contentDescription = "삭제"
-                        )
-                    }
+                    DeleteQuoteButton { viewModel.deleteQuote() }
+
                     IconButton(onClick = { /* 수정 동작 */ }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_edit),
@@ -193,7 +192,7 @@ fun QuoteDetailContent(
                     QuoteCommentItem(
                         comment = comment,
                         onCommentDelete = onCommentDelete,
-                        )
+                    )
                 }
             }
 
@@ -237,7 +236,7 @@ fun QuoteCommentItem(
             Text(
                 text = comment.commentContent,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
@@ -310,6 +309,33 @@ fun CommentAddButton(
             modifier = Modifier.padding(8.dp)
         )
     }
+}
+
+@Composable
+fun DeleteQuoteButton(onClick: () -> Unit) {
+    val showDeleteDialog = remember { mutableStateOf(false) }
+
+    IconButton(onClick = { showDeleteDialog.value = true }) {
+        Icon(
+            painter = painterResource(R.drawable.ic_delete),
+            contentDescription = "삭제"
+        )
+    }
+
+    BookVerseCustomDialog(
+        showDialogState = showDeleteDialog,
+        title = "삭제 확인",
+        text = "삭제하면 해당 글귀\n관련 기록이 모두 제거됩니다.",
+        confirmButtonTitle = "삭제",
+        confirmButtonOnClick = {
+            onClick()
+            showDeleteDialog.value = false
+        },
+        dismissButtonTitle = "취소",
+        dismissButtonOnClick = {
+            showDeleteDialog.value = false
+        },
+    )
 }
 
 @Composable
