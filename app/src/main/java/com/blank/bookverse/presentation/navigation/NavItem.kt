@@ -61,7 +61,7 @@ sealed class MainNavItem(val route: String, val label: String) {
         const val BOOK_TITLE = "bookTitle"
         const val BOOK_IMAGE = "bookImage"
         const val BOOK_DOCUMENT = "bookDocId"
-        fun createRoute(bookDocId:String,bookTitle: String,bookImage: String)
+        fun createRoute(bookDocId:String?,bookTitle: String?,bookImage: String?)
             = "write_quote/$bookDocId/$bookTitle/$bookImage"
     }
 }

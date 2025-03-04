@@ -7,6 +7,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.blank.bookverse.data.model.Quote
 
 // currentBackStackEntryAsState()를 사용하여 현재 활성화된 화면(Route)을 반환
 // 함수 내부에서 자동으로 변경 감지
@@ -45,7 +46,18 @@ fun NavController.popBackStackSavedString(key: String,value: String){
     popBackStack()
 }
 
+fun NavController.navigateBackStackSavedQuote(route: String,key: String,value: Quote){
+    currentBackStackEntry
+        ?.savedStateHandle
+        ?.set(key, value)
+    navigate(route)
+}
+
 // 현재 화면에 전달된 값이 있는지 확인
 @Composable
 fun NavController.currentSavedStateHandle(key: String) =
     currentBackStackEntry?.savedStateHandle?.getLiveData<String>(key)?.observeAsState()
+
+@Composable
+fun NavController.currentSavedStateHandleQuote(key: String) =
+    currentBackStackEntry?.savedStateHandle?.getLiveData<Quote>(key)?.observeAsState()

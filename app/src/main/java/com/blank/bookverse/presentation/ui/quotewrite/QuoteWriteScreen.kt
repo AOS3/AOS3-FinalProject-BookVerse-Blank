@@ -10,6 +10,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.GridView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -93,19 +94,24 @@ import coil.util.CoilUtils.result
 import com.blank.bookverse.R
 import com.blank.bookverse.data.api.OcrService
 import com.blank.bookverse.data.model.Book
+import com.blank.bookverse.data.model.Quote
 import com.blank.bookverse.presentation.common.BookVerseBottomSheet
 import com.blank.bookverse.presentation.common.BookVerseButton
 import com.blank.bookverse.presentation.common.BookVerseTextField
 import com.blank.bookverse.presentation.common.BookVerseToolbar
 import com.blank.bookverse.presentation.navigation.CameraNavItem
 import com.blank.bookverse.presentation.navigation.currentSavedStateHandle
+import com.blank.bookverse.presentation.navigation.currentSavedStateHandleQuote
 import com.blank.bookverse.presentation.navigation.navigateSingleTop
+import com.blank.bookverse.presentation.util.Constant.captureName
 import com.kakao.sdk.friend.l.b
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
+import java.io.FileInputStream
 import java.net.URLDecoder
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -120,6 +126,7 @@ fun QuoteWriteScreen(
 ) {
 
     val density = LocalDensity.current
+    val context = LocalContext.current
     // FocusManager 가져오기
     val focusManager = LocalFocusManager.current
     val imeHeight = WindowInsets.ime.getBottom(density) // 키보드 높이
@@ -128,23 +135,50 @@ fun QuoteWriteScreen(
     val screenWidth = with(density) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-    val savedStateHandle = navController.currentSavedStateHandle("quote")
+    val savedStateHandle = navController.currentSavedStateHandle("content")
+    val savedStateHandleQuote = navController.currentSavedStateHandleQuote("quote")
     LaunchedEffect(bookDocId,bookTitle,bookImage) {
-        if (bookDocId != null){
-            viewModel.bookDocIdUpdate(bookDocId)
-        }
-        if(bookTitle != null){
-            viewModel.bookTitleUpdate(bookTitle)
-        }
-        if(bookImage != null){
-            viewModel.bookCoverUpdate(URLDecoder.decode(bookImage,"UTF-8"))
-        }
-        val quote = savedStateHandle?.value
-        if (quote != null) {
-            viewModel.quoteUpdate(quote)
+        if (savedStateHandleQuote?.value == null) {
+            if (bookDocId != null) {
+                viewModel.bookDocIdUpdate(bookDocId)
+            }
+            if (bookTitle != null) {
+                viewModel.bookTitleUpdate(bookTitle)
+            }
+            if (bookImage != null) {
+                viewModel.bookCoverUpdate(URLDecoder.decode(bookImage, "UTF-8"))
+            }
+            val content = savedStateHandle?.value
+            if (content != null) {
+                viewModel.quoteUpdate(content)
+            }
+        }else {
+            val quote = savedStateHandleQuote.value
+            val quoteDocId = quote?.quoteDocId!!
+            val quoteBookDocId = quote.bookDocId
+            val quoteBookImage = quote.photoUrl
+            val quoteContent = quote.quoteContent
+            if (quoteDocId != "") {
+                viewModel.quoteDocId.value = quoteDocId
+            }
+            if (quoteBookDocId != "") {
+                viewModel.bookDocIdUpdate(quoteBookDocId)
+            }
+            if (quoteBookImage != "") {
+                viewModel.bookCoverUpdate(quoteBookImage)
+            }
+            val content = savedStateHandle?.value
+            if (content != null) {
+                viewModel.quoteUpdate(content)
+            }
+            else if (quoteContent != "") {
+                viewModel.quoteUpdate(quoteContent)
+            }
         }
     }
 
+    val title = "글귀 ${if (viewModel.quoteDocId.value == null) "작성" else "수정"}"
+    val textComplete = "${if (viewModel.quoteDocId.value == null) "작성" else "수정"}하기"
     Scaffold(
         modifier = Modifier.clickable(
             indication = null,
@@ -154,11 +188,11 @@ fun QuoteWriteScreen(
         topBar = {
             BookVerseToolbar(
 
-                title = "글귀 작성",
+                title = title,
                 navigationIcon = {
                     IconButton(
                         onClick = {
-
+                            navController.popBackStack()
                         }
                     ) {
                         Icon(
@@ -238,7 +272,7 @@ fun QuoteWriteScreen(
                     }
                 }
 
-
+                context.openFileInput(captureName)
                 HorizontalDivider()
                 QuoteWriteTextField(
                     text = viewModel.quoteText,
@@ -296,18 +330,23 @@ fun QuoteWriteScreen(
                             }.onJoin
                         }
                     )
+
                     BookVerseButton(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomStart),
-                        text = "작성하기",
+                        text = textComplete,
                         onClick = {
                             // 작성 완료
                             // 작성 경고
-                            viewModel.completeScreen(!viewModel.writeEnabled.value)
+                            val quote =
+                                if (savedStateHandleQuote?.value != null) savedStateHandleQuote.value!! else Quote()
+                            viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController,
+                                argQuote = quote)
                             Log.d("st","${viewModel.completeEnable.value}")
                         },
-                        backgroundColor = Color.Black
+                        backgroundColor = Color.Black,
+                        isEnable = viewModel.loadingNotEnabled.value
                     )
                 }
 
@@ -360,7 +399,7 @@ fun QuoteWriteScreen(
                             ) {
                                 QuoteWriteTextField(
                                     text = viewModel.thinkSingleText,
-                                    modifier = Modifier.height(70.dp),
+                                    modifier = Modifier.height(100.dp),
                                     placeholder = "태그를 입력하세요",
                                     input = viewModel.thinkAddEnabled,
                                     screenHeight = screenHeight,
@@ -396,7 +435,7 @@ fun QuoteWriteScreen(
                     AlertDialog(
                         modifier = Modifier.size(320.dp,270.dp),
                         onDismissRequest = {
-                            viewModel.completeScreen(false)
+                            viewModel.completeScreen(false,context,navController)
                         },
                         icon = {
                             Icon(
@@ -407,7 +446,7 @@ fun QuoteWriteScreen(
                         },
                         title = {
                             Text(modifier = Modifier.padding(bottom = 10.dp),
-                                text = "글귀 작성")
+                                text = title)
                         },
                         text = {
                             Text(text = "글귀를 작성해주세요.")
@@ -419,7 +458,7 @@ fun QuoteWriteScreen(
                                 cornerRadius = 10f,
                                 text = "확인",
                                 onClick = {
-                                    viewModel.completeScreen(false)
+                                    viewModel.completeScreen(false,context,navController)
                                 }
                             )
                         },
