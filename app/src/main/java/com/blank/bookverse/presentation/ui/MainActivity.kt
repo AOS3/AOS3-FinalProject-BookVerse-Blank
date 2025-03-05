@@ -3,6 +3,7 @@ package com.blank.bookverse.presentation.ui
 import com.blank.bookverse.R
 import android.Manifest
 import android.R.attr.bitmap
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -26,6 +27,8 @@ import com.blank.bookverse.presentation.util.Constant.captureName
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -162,18 +165,22 @@ class MainActivity : ComponentActivity() {
     }
 
     // 파일 존재하는 지 확인하는 함수
+    @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
     fun FileExists(){
         val context = LocalContext.current
-        val file = File(context.filesDir, captureName) // 내부 저장소 경로
-        val tempBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.temp_capture)
-        val exists = file.exists()
-        // 존재하지 않으면 경로에 생성하는 부분
-        if (!(exists)) {
-            FileOutputStream(file).use { outputStream ->
-                tempBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream) // PNG로 저장
+        CoroutineScope(Dispatchers.IO).launch{
+            val file = File(context.filesDir, captureName) // 내부 저장소 경로
+            val tempBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.temp_capture)
+            val exists = file.exists()
+            // 존재하지 않으면 경로에 생성하는 부분
+            if (!(exists)) {
+                FileOutputStream(file).use { outputStream ->
+                    tempBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream) // PNG로 저장
+                }
             }
         }
+
     }
 
 }
