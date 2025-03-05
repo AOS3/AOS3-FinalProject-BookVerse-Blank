@@ -75,37 +75,37 @@ class QuoteWriteViewModel@Inject constructor(
         Log.d("st","${quoteText.value}")
         Log.d("st","${thinkList}")
 
-
+        addChange.value = photoEnabled
         completeEnable.value = change
         if (addChange.value){
             viewModelScope.launch{
                 loadingNotEnabled.value = false
                 val quote = quote.value
                 if (quote == null) {
-                    val content = quoteText.value
+                    if (photoEnabled) {
+                        val content = quoteText.value
 
-                    val book = Book(
-                        bookDocId = bookDocId.value,
-                        bookTitle = bookTitle.value,
-                        bookCover = bookCover.value,
-                    )
-                    val file = context.openFileInput(captureName)
-                    val quoteDocId = FirebaseFirestore.getInstance().collection("Quotes")
-                        .document().id
-                    val photoUrl = viewModelScope.async {
-                        quoteRepository.uploadCaptureImage(file, quoteDocId)
-                    }.await()
-
-                    val quote = Quote(
-                        quoteDocId = quoteDocId,
-                        bookDocId = book.bookDocId,
-                        photoUrl = photoUrl.toString(),
-                        quoteContent = content,
-                    )
-                    viewModelScope.async {
-                        quoteRepository.saveQuote(quote, book, thinkList)
-                    }.await()
-
+                        val book = Book(
+                            bookDocId = bookDocId.value,
+                            bookTitle = bookTitle.value,
+                            bookCover = bookCover.value,
+                        )
+                        val file = context.openFileInput(captureName)
+                        val quoteDocId = FirebaseFirestore.getInstance().collection("Quotes")
+                            .document().id
+                        val photoUrl = viewModelScope.async {
+                            quoteRepository.uploadCaptureImage(file, quoteDocId)
+                        }.await()
+                        val quote = Quote(
+                            quoteDocId = quoteDocId,
+                            bookDocId = book.bookDocId,
+                            photoUrl = photoUrl.toString(),
+                            quoteContent = content,
+                        )
+                        viewModelScope.async {
+                            quoteRepository.saveQuote(quote, book, thinkList)
+                        }.await()
+                    }
                 }else{
                     val file = context.openFileInput(captureName)
                     val photoUrl = viewModelScope.async {

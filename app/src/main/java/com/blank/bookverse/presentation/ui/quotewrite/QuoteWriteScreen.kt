@@ -120,6 +120,7 @@ fun QuoteWriteScreen(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     val savedStateHandle = navController.currentSavedStateHandle("content")
+    val argContent = remember { mutableStateOf<String?>(savedStateHandle.value) }
     LaunchedEffect(bookDocId,bookTitle,bookImage) {
         if (quote == null) {
             if (bookDocId != null) {
@@ -147,7 +148,7 @@ fun QuoteWriteScreen(
             // 책 값 추출
             viewModel.getBookData()
 
-            val content = savedStateHandle.value
+            val content = argContent.value
             if (content != null) {
                 viewModel.quoteUpdate(content)
             }
@@ -306,7 +307,8 @@ fun QuoteWriteScreen(
                     onClick = {
                         // 작성 완료
                         // 작성 경고
-                        viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController)
+                        val enabled = argContent.value != null
+                        viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController,enabled)
                         Log.d("st","${viewModel.completeEnable.value}")
                     },
                     backgroundColor = Color.Black,
@@ -410,10 +412,12 @@ fun QuoteWriteScreen(
                         },
                         title = {
                             Text(modifier = Modifier.padding(bottom = 10.dp),
-                                text = title)
+                                text = if (savedStateHandle.value == null)"이미지 촬영"
+                            else title)
                         },
                         text = {
-                            Text(text = "글귀를 작성해주세요.")
+                            Text(text = if (savedStateHandle.value == null) "이미지를 촬영해주세요."
+                            else "글귀를 작성해주세요.")
                         },
                         confirmButton = {
                             BookVerseButton(

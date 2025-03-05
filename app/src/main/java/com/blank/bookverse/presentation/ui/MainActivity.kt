@@ -1,8 +1,12 @@
 package com.blank.bookverse.presentation.ui
 
+import com.blank.bookverse.R
 import android.Manifest
+import android.R.attr.bitmap
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -11,15 +15,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.blank.bookverse.data.repository.FCMTokenRepository
 import com.blank.bookverse.presentation.navigation.MainScreen
 import com.blank.bookverse.presentation.theme.BookVerseTheme
+import com.blank.bookverse.presentation.util.Constant.captureName
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 private const val TAG = "MainActivity"
@@ -53,6 +62,8 @@ class MainActivity : ComponentActivity() {
         // 알림 권한 확인 및 요청
         checkNotificationPermission()
         setContent {
+            // 파일 존재하는 지 확인하는 함수
+            FileExists()
             BookVerseTheme {
                 MainScreen()
             }
@@ -148,6 +159,20 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+    }
+
+    // 파일 존재하는 지 확인하는 함수
+    @Composable
+    fun FileExists(){
+        val context = LocalContext.current
+        val file = File(context.filesDir, captureName) // 내부 저장소 경로
+        val tempBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.temp_capture)
+        val exists = file.exists()
+        if (!(exists)) {
+            FileOutputStream(file).use { outputStream ->
+                tempBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream) // PNG로 저장
+            }
+        }
     }
 
 }
