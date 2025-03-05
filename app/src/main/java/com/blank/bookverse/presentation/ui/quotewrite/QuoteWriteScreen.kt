@@ -208,7 +208,7 @@ fun QuoteWriteScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .weight(4f)
                         .background(Color.LightGray),
                 ) {
                     AsyncImage(
@@ -218,8 +218,10 @@ fun QuoteWriteScreen(
                             .height(180.dp).fillMaxWidth()
                     )
                 }
-                Row(verticalAlignment = Alignment.CenterVertically)
-                {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     LazyRow(
                         modifier = Modifier
                             .padding(top = 5.dp, bottom = 5.dp)
@@ -258,7 +260,7 @@ fun QuoteWriteScreen(
                 HorizontalDivider()
                 QuoteWriteTextField(
                     text = viewModel.quoteText,
-                    modifier = Modifier.height(280.dp),
+                    modifier = Modifier.weight(10f),
                     placeholder = "마음에 드는 글귀를 적어주세요. (필수)",
                     input = viewModel.writeEnabled,
                     screenHeight = screenHeight,
@@ -274,62 +276,40 @@ fun QuoteWriteScreen(
                     enabled = viewModel.loadingNotEnabled.value
                 )
                 // 위쪽 그림자 효과
-                Box(
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(8.dp) // 그림자 두께 조절
+//                        .background(
+//                            Brush.verticalGradient(
+//                                colors = listOf(
+//                                    Color.Transparent,
+//                                    Color.Black.copy(alpha = 0.04f),
+//                                    Color.Black.copy(alpha = 0.08f),
+//                                    Color.Black.copy(alpha = 0.14f)
+//                                )
+//                            )
+//                        )
+//                ){
+//                    HorizontalDivider(
+//                        modifier = Modifier.align(Alignment.BottomStart)
+//                    )
+//                }
+                BookVerseButton(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp) // 그림자 두께 조절
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.04f),
-                                    Color.Black.copy(alpha = 0.08f),
-                                    Color.Black.copy(alpha = 0.14f)
-                                )
-                            )
-                        )
-                ){
-                    HorizontalDivider(
-                        modifier = Modifier.align(Alignment.BottomStart)
-                    )
-                }
+                        .weight(1f),
+                    text = textComplete,
+                    onClick = {
+                        // 작성 완료
+                        // 작성 경고
+                        viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController)
+                        Log.d("st","${viewModel.completeEnable.value}")
+                    },
+                    backgroundColor = Color.Black,
+                    isEnable = viewModel.loadingNotEnabled.value
+                )
 
-                Box(
-                    Modifier.fillMaxHeight()
-                ) {
-                    QuoteWriteTextField(
-                        text = viewModel.thinkText,
-                        modifier = Modifier.height(220.dp),
-                        placeholder = "왜 인상 깊었는지 적어주세요. (선택)",
-                        input = null,
-                        screenHeight = screenHeight,
-                        imeHeight = imeHeight,
-                        density = density,
-                        scrollMethod = {
-                            coroutineScope.launch{
-                                scrollState.animateScrollTo(
-                                    value = scrollState.maxValue,
-                                )
-                            }.onJoin
-                        },
-                        enabled = viewModel.loadingNotEnabled.value
-                    )
-
-                    BookVerseButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomStart),
-                        text = textComplete,
-                        onClick = {
-                            // 작성 완료
-                            // 작성 경고
-                            viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController)
-                            Log.d("st","${viewModel.completeEnable.value}")
-                        },
-                        backgroundColor = Color.Black,
-                        isEnable = viewModel.loadingNotEnabled.value
-                    )
-                }
 
                 BookVerseBottomSheet(
                     visible = viewModel.bottomSheetVisible,
@@ -478,7 +458,7 @@ fun QuoteWriteTextField(
     Row (
         modifier = modifier
     ) {
-        Box(
+        Column (
             modifier = Modifier.weight(3f)
         ) {
 
