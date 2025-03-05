@@ -121,7 +121,7 @@ class QuoteRepository @Inject constructor(
                      "book_title" to bookTitle,
                      "book_cover" to bookCover,
                      "quote_count" to quoteCount,
-                     "create_at" to createdAt,
+                     "created_at" to createdAt,
                      "is_delete" to false
                 )
             }
@@ -183,12 +183,12 @@ class QuoteRepository @Inject constructor(
                     "quote_doc_id" to quoteDocId,
                     "book_doc_id" to bookDocId,
                     "member_id" to memberUid,
-                    "photo_uri" to photoUrl,// 들어오기 전에 검사
+                    "photo_url" to photoUrl,// 들어오기 전에 검사
                     "tag" to tags,// 들어오기 전에 검사
                     "quote_content" to quoteContent,// 들어오기 전에 검사
                     "is_bookmark" to isBookmark,
                     "quote_count" to quoteCount,
-                    "create_at" to System.currentTimeMillis(),
+                    "created_at" to System.currentTimeMillis(),
                     "is_delete" to false
                 )
             }

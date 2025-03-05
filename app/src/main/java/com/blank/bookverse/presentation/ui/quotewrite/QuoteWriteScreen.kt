@@ -208,18 +208,20 @@ fun QuoteWriteScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(4f)
+                        .height(200.dp)
                         .background(Color.LightGray),
                 ) {
                     AsyncImage(
                         viewModel.bookCover.value,
                         contentDescription = null,
-                        modifier = Modifier.padding(10.dp)
-                            .height(180.dp).fillMaxWidth()
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .height(180.dp)
+                            .fillMaxWidth()
                     )
                 }
                 Row(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     LazyRow(
@@ -258,9 +260,11 @@ fun QuoteWriteScreen(
 
                 context.openFileInput(captureName)
                 HorizontalDivider()
+                val textDp = with(density){screenHeight.toDp()}*0.558f
+                Log.d("st","${textDp}")
                 QuoteWriteTextField(
                     text = viewModel.quoteText,
-                    modifier = Modifier.weight(10f),
+                    modifier = Modifier.height(textDp),
                     placeholder = "마음에 드는 글귀를 적어주세요. (필수)",
                     input = viewModel.writeEnabled,
                     screenHeight = screenHeight,
@@ -297,8 +301,7 @@ fun QuoteWriteScreen(
 //                }
                 BookVerseButton(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                        .fillMaxWidth(),
                     text = textComplete,
                     onClick = {
                         // 작성 완료
