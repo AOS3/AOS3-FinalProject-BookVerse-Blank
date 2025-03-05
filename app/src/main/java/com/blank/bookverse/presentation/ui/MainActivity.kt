@@ -168,6 +168,7 @@ class MainActivity : ComponentActivity() {
         val file = File(context.filesDir, captureName) // 내부 저장소 경로
         val tempBitmap = BitmapFactory.decodeResource(context.resources,R.drawable.temp_capture)
         val exists = file.exists()
+        // 존재하지 않으면 경로에 생성하는 부분
         if (!(exists)) {
             FileOutputStream(file).use { outputStream ->
                 tempBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream) // PNG로 저장
