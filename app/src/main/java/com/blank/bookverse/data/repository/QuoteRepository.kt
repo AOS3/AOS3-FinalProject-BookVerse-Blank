@@ -235,6 +235,7 @@ class QuoteRepository @Inject constructor(
 
     suspend fun getUserBookmarkedQuotes(): List<Quote> {
         return firestore.collection("Quotes")
+            .whereEqualTo("member_id", firestoreAuth.uid)
             .whereEqualTo("is_bookmark", true)
             .whereEqualTo("is_delete", false)
             .get()
