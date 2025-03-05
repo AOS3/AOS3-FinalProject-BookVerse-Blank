@@ -75,9 +75,9 @@ class QuoteWriteViewModel@Inject constructor(
         Log.d("st","${quoteText.value}")
         Log.d("st","${thinkList}")
 
-        addChange.value = photoEnabled
         completeEnable.value = change
-        if (addChange.value){
+        Log.d("st","completeEnable ${completeEnable.value}")
+        if (writeEnabled.value && photoEnabled){
             viewModelScope.launch{
                 loadingNotEnabled.value = false
                 val quote = quote.value
@@ -103,6 +103,7 @@ class QuoteWriteViewModel@Inject constructor(
                             quoteContent = content,
                         )
                         viewModelScope.async {
+                            Log.d("st","저장")
                             quoteRepository.saveQuote(quote, book, thinkList)
                         }.await()
                     }
@@ -134,6 +135,7 @@ class QuoteWriteViewModel@Inject constructor(
 
 
                     viewModelScope.async {
+                        Log.d("st","업데이트")
                         quoteRepository.updateQuote(update)
                     }.await()
                 }

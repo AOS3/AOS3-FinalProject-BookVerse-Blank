@@ -308,7 +308,9 @@ fun QuoteWriteScreen(
                         // 작성 완료
                         // 작성 경고
                         val enabled = argContent.value != null
-                        viewModel.completeScreen(!viewModel.writeEnabled.value,context,navController,enabled)
+                        Log.d("st","!writeEnabled ${viewModel.writeEnabled.value}")
+                        val change = !(viewModel.writeEnabled.value && enabled)
+                        viewModel.completeScreen(change,context,navController,enabled)
                         Log.d("st","${viewModel.completeEnable.value}")
                     },
                     backgroundColor = Color.Black,

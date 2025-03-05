@@ -127,7 +127,6 @@ class QuoteRepository @Inject constructor(
             }
             val quoteCollection = firestore.collection("Quotes")
             val quoteRef = quoteCollection.document(quote.quoteDocId)
-            val existingQuote = transaction.get(quoteRef)
 
             val bookRef = firestore.collection("Books").document(book.bookDocId)
             val existingBook = transaction.get(bookRef)
