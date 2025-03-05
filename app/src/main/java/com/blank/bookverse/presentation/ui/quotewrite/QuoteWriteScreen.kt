@@ -214,8 +214,10 @@ fun QuoteWriteScreen(
                     AsyncImage(
                         viewModel.bookCover.value,
                         contentDescription = null,
-                        modifier = Modifier.padding(10.dp)
-                            .height(180.dp).fillMaxWidth()
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .height(180.dp)
+                            .fillMaxWidth()
                     )
                 }
                 Row(
@@ -258,8 +260,8 @@ fun QuoteWriteScreen(
 
                 context.openFileInput(captureName)
                 HorizontalDivider()
-                val textDp = with(density){screenHeight.toDp()}-367.dp
-                Log.d("st","$textDp")
+                val textDp = with(density){screenHeight.toDp()}*0.558f
+                Log.d("st","${textDp}")
                 QuoteWriteTextField(
                     text = viewModel.quoteText,
                     modifier = Modifier.height(textDp),
