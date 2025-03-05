@@ -142,6 +142,10 @@ class QuoteRepository @Inject constructor(
                         bookRef, "quote_count",
                         countInit
                     )
+                    transaction.update(
+                        bookRef, "is_delete",
+                        false
+                    )
                     countInit
                 }
 
