@@ -99,6 +99,8 @@ fun BookVerseTextField(
     unfocusedBorderColor: Color = Color.Gray,
     focusedContainerColor: Color = Color.White,
     unfocusedContainerColor: Color = Color.White,
+    disabledContainerColor: Color = Color.Unspecified,
+    errorContainerColor: Color = Color.Unspecified,
     cursorColor: Color = Color.DarkGray,
     maxLines:Int = 1
 ) {
@@ -240,6 +242,10 @@ fun BookVerseTextField(
                 unfocusedBorderColor = unfocusedBorderColor,
                 focusedContainerColor = focusedContainerColor,
                 unfocusedContainerColor = unfocusedContainerColor,
+                disabledContainerColor = disabledContainerColor,
+                errorContainerColor = errorContainerColor,
+                disabledBorderColor = disabledContainerColor,
+                errorBorderColor = errorContainerColor,
                 cursorColor = cursorColor
 
             ),

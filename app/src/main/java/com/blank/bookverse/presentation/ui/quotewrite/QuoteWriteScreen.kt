@@ -258,7 +258,7 @@ fun QuoteWriteScreen(
                     }
                 }
 
-                context.openFileInput(captureName)
+
                 HorizontalDivider()
                 val textDp = with(density){screenHeight.toDp()}*0.558f
                 Log.d("st","${textDp}")
@@ -501,6 +501,8 @@ fun QuoteWriteTextField(
                 isError = input,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent.copy(0f),
+                errorContainerColor = Color.Transparent.copy(0f),
                 maxLines = Int.MAX_VALUE,
                 inputCondition = "[/↑←→↓]",
                 isEnabled = enabled
